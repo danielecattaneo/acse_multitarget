@@ -1,0 +1,10 @@
+int a,b,shl,shr;
+
+read(a);
+read(b);
+
+shl = a << b;
+shr = a >> b;
+
+write(shl);
+write(shr);

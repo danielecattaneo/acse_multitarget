@@ -1,0 +1,12 @@
+*.pdf
+*~
+*.backup
+*.aux
+*.log
+*.d
+*.o
+*.tab.c
+*.tab.h
+*.yy.c
+*.synctex.gz
+acse_*/bin
