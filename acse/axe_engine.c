@@ -13,6 +13,7 @@
 #include "axe_engine.h"
 #include "symbol_table.h"
 #include "axe_errors.h"
+#include "axe_gencode.h"
 
 /* global variable errorcode */
 int errorcode;
@@ -434,6 +435,7 @@ t_program_infos * allocProgramInfos()
    /* initialize the new instance of `result' */
    result->variables = NULL;
    result->instructions = NULL;
+   result->instrInsPtrStack = addElement(NULL, NULL, -1);
    result->data = NULL;
    result->current_register = 1; /* we are excluding the register R0 */
    result->lmanager = initialize_label_manager();
@@ -482,7 +484,41 @@ void addInstruction(t_program_infos *program, t_axe_instruction *instr)
    prev_line_num = line_num;
 
    /* update the list of instructions */
-   program->instructions = addElement(program->instructions, instr, -1);
+   t_list *ip = LDATA(program->instrInsPtrStack);
+   if (!ip) {
+      program->instructions = addElement(program->instructions, instr, 0);
+      SET_DATA(program->instrInsPtrStack, program->instructions);
+   } else {
+      ip = addAfter(ip, instr);
+      SET_DATA(program->instrInsPtrStack, ip);
+   }
+}
+
+void pushInstrInsertionPoint(t_program_infos *p, t_list *ip)
+{
+   prev_line_num = -1;
+   p->instrInsPtrStack = addFirst(p->instrInsPtrStack, ip);
+}
+
+t_list *popInstrInsertionPoint(t_program_infos *p)
+{
+   prev_line_num = -1;
+   t_list *ip = LDATA(p->instrInsPtrStack);
+
+   /* affix the currently pending label, if needed */
+   t_axe_label *label = assign_label(p->lmanager);
+   if (label) {
+      t_list *labelPos = ip ? LNEXT(ip) : NULL;
+      t_axe_instruction *instrToLabel;
+      if (!labelPos)
+         instrToLabel = gen_nop_instruction(p);
+      else
+         instrToLabel = LDATA(labelPos);
+      instrToLabel->labelID = label;
+   }
+
+   p->instrInsPtrStack = removeFirst(p->instrInsPtrStack);
+   return ip;
 }
 
 /* reserve a new label identifier for future uses */

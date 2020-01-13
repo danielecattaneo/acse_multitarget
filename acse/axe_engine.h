@@ -19,6 +19,7 @@ typedef struct t_program_infos
 {
   t_list *variables;
   t_list *instructions;
+  t_list *instrInsPtrStack;
   t_list *data;
   t_axe_label_manager *lmanager;
   t_symbol_table *sy_table;
@@ -36,6 +37,15 @@ extern t_program_infos * allocProgramInfos();
 /* add a new instruction to the current program. This function is directly
  * called by all the functions defined in `axe_gencode.h' */
 extern void addInstruction(t_program_infos *program, t_axe_instruction *instr);
+
+/* Save the current insertion point in the instruction list, and replace it
+ * with `ip`. New instructions will be inserted after the `ip` instruction.
+ * To insert instructions at the beginning of the program, ip shall be NULL. */
+extern void pushInstrInsertionPoint(t_program_infos *p, t_list *ip);
+
+/* Restore the last insertion point in the instruction list. Returns the
+ * previous position of the instruction insertion point. */
+extern t_list *popInstrInsertionPoint(t_program_infos *p);
 
 /* reserve a new label identifier and return the identifier to the caller */
 extern t_axe_label * newLabel(t_program_infos *program);
