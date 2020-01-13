@@ -53,6 +53,14 @@ extern t_list * addLast(t_list *list, void * data);
 /* add an element at the beginning of the list */
 extern t_list * addFirst(t_list *list, void * data);
 
+/* Add an element before a given element already in the list.
+ * Returns the newly added element. */
+extern t_list *addBefore(t_list *listPos, void *data);
+
+/* Add an element after a given element already in the list.
+ * Returns the newly added element. */
+extern t_list *addAfter(t_list *listPos, void *data);
+
 /* remove an element at the beginning of the list */
 extern t_list * removeFirst(t_list *list);
 

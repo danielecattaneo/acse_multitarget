@@ -136,6 +136,32 @@ t_list * addLast(t_list *list, void * data)
 	return addElement(list, data, -1);
 }
 
+t_list *addBefore(t_list *listPos, void *data)
+{
+	t_list *elem = newElement(data);
+	if (!listPos)
+		return elem;
+	SET_NEXT(elem, listPos);
+	SET_PREV(elem, LPREV(listPos));
+	SET_PREV(listPos, elem);
+	if (LPREV(elem))
+		SET_NEXT(LPREV(elem), elem);
+	return elem;
+}
+
+t_list *addAfter(t_list *listPos, void *data)
+{
+	t_list *elem = newElement(data);
+	if (!listPos)
+		return elem;
+	SET_NEXT(elem, LNEXT(listPos));
+	SET_PREV(elem, listPos);
+	SET_NEXT(listPos, elem);
+	if (LNEXT(elem))
+		SET_PREV(LNEXT(elem), elem);
+	return elem;
+}
+
 /* remove an element from the list */
 t_list * removeElement(t_list *list, void * data)
 {
