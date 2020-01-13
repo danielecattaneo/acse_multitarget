@@ -14,7 +14,6 @@
 
 #define REG_INVALID -1
 #define REG_0 0
-#define NUM_REGISTERS 31
 
 /* opcodes pseudo-M68000 */
 #define ADD 0

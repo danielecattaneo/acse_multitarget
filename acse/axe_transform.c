@@ -11,6 +11,7 @@
 #include "symbol_table.h"
 #include "cflow_constants.h"
 #include "reg_alloc_constants.h"
+#include "axe_target_info.h"
 #include "axe_errors.h"
 #include "axe_debug.h"
 

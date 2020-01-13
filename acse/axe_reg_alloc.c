@@ -9,6 +9,7 @@
 
 #include "axe_reg_alloc.h"
 #include "reg_alloc_constants.h"
+#include "axe_target_info.h"
 #include "axe_debug.h"
 #include "axe_errors.h"
 
