@@ -89,7 +89,4 @@ extern int getNewRegister(t_program_infos *program);
 /* finalize all the data structures associated with `program' */
 extern void finalizeProgramInfos(t_program_infos *program);
 
-/* write the corresponding assembly for the given program */
-extern void writeAssembly(t_program_infos *program, char *output_file);
-
 #endif

@@ -20,6 +20,7 @@
 #include "axe_struct.h"
 #include "axe_engine.h"
 #include "symbol_table.h"
+#include "axe_target_asm_print.h"
 #include "axe_errors.h"
 #include "collections.h"
 #include "axe_expressions.h"
