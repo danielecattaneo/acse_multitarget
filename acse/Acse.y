@@ -648,7 +648,8 @@ int main (int argc, char **argv)
 #endif
    /* apply changes to the program informations by using the informations
    * of the register allocation process */
-   updateProgramInfos(program, graph, RA);
+   materializeRegisterAllocation(program, graph, RA);
+   updateProgramInfos(program, graph);
 
 #ifndef NDEBUG
    fprintf(stdout, "Writing the assembly file... \n");

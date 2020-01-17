@@ -342,8 +342,8 @@ void finalizeListOfTempLabels(t_list *tempLabels)
    freeList(tempLabels);
 }
 
-void updateProgramInfos(t_program_infos *program
-         , t_cflow_Graph *graph, t_reg_allocator *RA)
+void materializeRegisterAllocation(t_program_infos *program,
+  t_cflow_Graph *graph, t_reg_allocator *RA)
 {
    t_list *label_bindings;
 
@@ -352,19 +352,23 @@ void updateProgramInfos(t_program_infos *program
 
    /* update the content of the data segment */
    updateTheDataSegment(program, label_bindings);
-   
+
    /* update the control flow graph with the reg-alloc infos. */
    updatCflowInfos(program, graph, RA, label_bindings);
 
+   /* finalize the list of tempLabels */
+   finalizeListOfTempLabels(label_bindings);
+}
+
+void updateProgramInfos(t_program_infos *program,
+   t_cflow_Graph *graph)
+{  
    /* erase the old code segment */
    freeList(program->instructions);
    program->instructions = NULL;
 
    /* update the code segment informations */
    updateTheCodeSegment(program, graph);
-
-   /* finalize the list of tempLabels */
-   finalizeListOfTempLabels(label_bindings);
 }
 
 t_list * retrieveLabelBindings(t_program_infos *program, t_reg_allocator *RA)
