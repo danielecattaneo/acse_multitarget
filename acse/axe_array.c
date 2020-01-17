@@ -89,17 +89,8 @@ int loadArrayAddress(t_program_infos *program
    {
       if (index.value != 0)
       {
-         if (is_int16(index.value))
-         {
-            gen_addi_instruction (program, mova_register
+         gen_addi_instruction (program, mova_register
                      , mova_register, index.value);
-         }
-         else
-         {
-            int tmp_reg = gen_load_immediate (program, index.value);
-            gen_add_instruction (program, mova_register
-                     , mova_register, tmp_reg, CG_DIRECT_ALL);
-         }
       }
    }
    else

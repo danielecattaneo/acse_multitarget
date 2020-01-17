@@ -40,9 +40,9 @@ static void free_new_variables(t_list *variables)
 
    /* initialize the value of `current_element' */
    current_element = variables;
-   while(current_element != NULL)
+   while (current_element != NULL)
    {
-      current_decl = (t_axe_declaration *) LDATA(current_element);
+      current_decl = (t_axe_declaration *)LDATA(current_element);
       if (current_decl != NULL)
          _AXE_FREE_FUNCTION(current_decl);
 
@@ -53,33 +53,33 @@ static void free_new_variables(t_list *variables)
    freeList(variables);
 }
 
-void set_new_variables(t_program_infos *program
-            , int varType, t_list *variables)
+void set_new_variables(t_program_infos *program, int varType, t_list *variables)
 {
    t_list *current_element;
    t_axe_declaration *current_decl;
 
    /* preconditions */
-   if (program == NULL){
+   if (program == NULL)
+   {
       free_new_variables(variables);
       notifyError(AXE_PROGRAM_NOT_INITIALIZED);
    }
-   
+
    /* initialize `current_element' */
    current_element = variables;
 
    while (current_element != NULL)
    {
       /* retrieve the current declaration infos */
-      current_decl = (t_axe_declaration *) LDATA(current_element);
-      if (current_decl == NULL) {
+      current_decl = (t_axe_declaration *)LDATA(current_element);
+      if (current_decl == NULL)
+      {
          free_new_variables(variables);
          notifyError(AXE_NULL_DECLARATION);
       }
 
       /* create and assign a new variable to program */
-      createVariable(program, current_decl->ID, varType, current_decl->isArray
-            , current_decl->arraySize, current_decl->init_val);
+      createVariable(program, current_decl->ID, varType, current_decl->isArray, current_decl->arraySize, current_decl->init_val);
 
       /* update the value of `current_element' */
       current_element = LNEXT(current_element);
@@ -92,7 +92,7 @@ void set_new_variables(t_program_infos *program
    while (current_element != NULL)
    {
       /* retrieve the current declaration infos */
-      current_decl = (t_axe_declaration *) LDATA(current_element);
+      current_decl = (t_axe_declaration *)LDATA(current_element);
 
       /* assertion -- must always be verified */
       assert(current_decl != NULL);
@@ -174,29 +174,9 @@ int get_symbol_location(t_program_infos *program, char *ID, int genLoad)
    return location;
 }
 
-int is_int16(int immediate) {
-  return immediate < (1 << 15) && immediate >= -(1 << 15);
-}
-
 void gen_move_immediate(t_program_infos *program, int dest, int immediate)
 {
-   int imm0 = immediate;
-   int imm1 = 0;
-   if (!is_int16(imm0)) {
-      /* cast to int16_t to perform sign-extension */
-      imm0 = (int16_t)(immediate & 0xFFFF); 
-      imm1 = (immediate - imm0) >> 16;
-   }
-
-   int basereg = REG_0;
-   if (imm1) {
-      gen_addi_instruction(program, dest, basereg, imm1);
-      gen_shli_instruction(program, dest, dest, 16);
-      basereg = dest;
-   }
-   if (imm0 || basereg == REG_0) {
-      gen_addi_instruction(program, dest, basereg, imm0);
-   }
+   gen_addi_instruction(program, dest, REG_0, immediate);
 }
 
 int gen_load_immediate(t_program_infos *program, int immediate)
@@ -268,11 +248,24 @@ int isJumpInstruction(t_axe_instruction *instr)
    }
 }
 
+int isImmediateArgumentInstrOpcode(int opcode)
+{
+   return ADDI <= opcode && opcode <= ROTRI;
+}
+
+int switchOpcodeImmediateForm(int orig)
+{
+   if (!(ADD <= orig && orig <= ROTR) &&
+       !(ADDI <= orig && orig <= ROTRI))
+      return orig;
+   return orig ^ 0x10;
+}
+
 void set_end_Program(t_program_infos *program)
 {
    if (program == NULL)
       notifyError(AXE_PROGRAM_NOT_INITIALIZED);
-      
+
    if (isAssignedLabel(program->lmanager))
    {
       gen_halt_instruction(program);
@@ -289,7 +282,7 @@ void set_end_Program(t_program_infos *program)
       assert(last_element != NULL);
 
       /* retrieve the last instruction */
-      last_instr = (t_axe_instruction *) LDATA(last_element);
+      last_instr = (t_axe_instruction *)LDATA(last_element);
       assert(last_instr != NULL);
 
       if (last_instr->opcode == HALT)
@@ -305,7 +298,7 @@ void shutdownCompiler(int exitStatus)
 #ifndef NDEBUG
    fprintf(stdout, "Finalizing the compiler data structures.. \n");
 #endif
-   
+
    /* shutdown the asm engine */
    finalizeProgramInfos(program);
    /* finalize the control flow graph informations */
@@ -314,11 +307,11 @@ void shutdownCompiler(int exitStatus)
    finalizeRegAlloc(RA);
    /* close all the files used by the compiler */
    finalizeOutputInfos(file_infos);
-   
+
 #ifndef NDEBUG
    fprintf(stdout, "Done. \n");
 #endif
-   
+
    exit(exitStatus);
 }
 
@@ -343,7 +336,7 @@ void init_compiler(int argc, char **argv)
 #ifndef NDEBUG
    fprintf(stdout, "Initialize the compiler internal data structures. \n");
 #endif
-   
+
    /* initialize all the files used by the compiler */
    file_infos = initializeOutputInfos(argc, argv);
    if (file_infos == NULL)
@@ -351,7 +344,7 @@ void init_compiler(int argc, char **argv)
 
    /* initialize the translation infos */
    program = allocProgramInfos(&errorcode);
-   
+
    /* initialize the line number */
    line_num = 1;
 

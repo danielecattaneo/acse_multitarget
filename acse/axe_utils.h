@@ -60,6 +60,15 @@ extern int isHaltInstruction(t_axe_instruction *instr);
 /* Returns 1 if `instr` is the LOAD instruction. */
 extern int isLoadInstruction(t_axe_instruction *instr);
 
+/* Returns 1 if the opcode corresponds to an instruction with an immediate argument
+ * (i.e. if the instruction mnemonic ends with `I`). */
+extern int isImmediateArgumentInstrOpcode(int opcode);
+
+/* Switches the immediate form of an opcode. For example, ADDI is transformed
+ * to ADD, and ADD is transformed to ADDI. Returns the original opcode in case
+ * there is no immediate or non-immediate available. */
+extern int switchOpcodeImmediateForm(int orig);
+
 /* Notify the end of the program. This function is directly called
  * from the parser when the parsing process is ended */
 extern void set_end_Program(t_program_infos *program);
@@ -76,11 +85,5 @@ extern void shutdownCompiler();
  * is typically automatically called at the beginning of the main
  * and should NEVER be called from the user code */
 extern void init_compiler(int argc, char **argv);
-
-/* Check whether an immediate is representable as a 16-bit signed integer. */
-extern int is_int16(int immediate);
-
-/* Check whether an immediate is representable as a 20-bit signed integer. */
-extern int is_int20(int immediate);
 
 #endif
