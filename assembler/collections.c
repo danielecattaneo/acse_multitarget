@@ -179,39 +179,7 @@ t_list * removeElement(t_list *list, void * data)
 		current_elem = LNEXT(current_elem);
 	}
 	
-	/* the value hasn't been found */
-	if (current_elem == NULL)
-		return list;
-	
-	/* the value is found */
-	if (LPREV(current_elem) != NULL)
-	{
-		SET_NEXT(LPREV(current_elem), LNEXT(current_elem));
-		if (LNEXT(current_elem) != NULL)
-			SET_PREV(LNEXT(current_elem), LPREV(current_elem));
-		
-		_FREE_FUNCTION(current_elem);
-	}
-	else
-	{
-		/* check the preconditions */
-		assert(list == current_elem);
-		
-		if (LNEXT(current_elem) != NULL)
-      {
-			SET_PREV(LNEXT(current_elem), NULL);
-			
-         /* update the new head of the list */
-		   list = LNEXT(current_elem);
-      }
-      else
-         list = NULL;
-		
-		_FREE_FUNCTION(current_elem);
-	}
-	
-	/* postconditions: return the new head of the list */
-	return list;
+	return removeElementLink(list, current_elem);
 }
 
 /* remove all the elements of a list */
@@ -267,59 +235,40 @@ t_list * getLastElement(t_list *list)
 
 /* remove a link from the list `list' */
 extern t_list * removeElementLink(t_list *list, t_list *element)
-{
-	t_list *current_elem;
-	
-	/* preconditions */
-	if (list == NULL || element == NULL)
-		return list;
-	
-	if ((LPREV(element) == NULL) && (element != list))
-		return list;
-	
-	/* intialize the value of `current_elem' */
-	current_elem = list;
-	while(	(LDATA(current_elem) != LDATA(element))
-			|| (LPREV(current_elem) != LPREV(element))
-			|| (LNEXT(current_elem) != LNEXT(element)) )
-	{
-		/* retrieve the next element from the list */
-		current_elem = LNEXT(current_elem);
-		
-		/* test if we reached the end of the list */
-		if (current_elem == NULL)
-			return list;
-	}
+{  
+   /* preconditions */
+   if (list == NULL || element == NULL)
+      return list;
+   assert(LPREV(list) == NULL && "prev link of head of list not NULL");
+   if ((LPREV(element) == NULL) && (element != list))
+      return list;
 
-   if (LPREV(element) == NULL)
-   {
-      assert(list == element);
-      
-      if (LNEXT(element) != NULL)
+   /* the value is found */
+	if (LPREV(element) != NULL)
+	{
+		SET_NEXT(LPREV(element), LNEXT(element));
+		if (LNEXT(element) != NULL)
+			SET_PREV(LNEXT(element), LPREV(element));
+		
+		_FREE_FUNCTION(element);
+	}
+	else
+	{
+		/* check the preconditions */
+		assert(list == element);
+		
+		if (LNEXT(element) != NULL)
       {
-         list = LNEXT(element);
-         SET_PREV(LNEXT(element), NULL);
+			SET_PREV(LNEXT(element), NULL);
+			
+         /* update the new head of the list */
+		   list = LNEXT(element);
       }
       else
          list = NULL;
-
-      /* remove the allocated memory of element */
-      _FREE_FUNCTION(element);
-      return list;
-   }
-   
-	/* we found the element */
-	if (LPREV(element) != NULL)
-	{
-		/* we found the element, and it is the top of the list */
-		SET_NEXT(LPREV(element), LNEXT(element));
+		
+		_FREE_FUNCTION(element);
 	}
-	
-	if (LNEXT(element) != NULL)
-		SET_PREV(LNEXT(element), LPREV(element));
-	
-	/* remove the allocated memory of element */
-	_FREE_FUNCTION(element);
 	
 	/* return the new top of the list */
 	return list;
