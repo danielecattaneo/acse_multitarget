@@ -38,6 +38,10 @@ extern t_program_infos * allocProgramInfos();
  * called by all the functions defined in `axe_gencode.h' */
 extern void addInstruction(t_program_infos *program, t_axe_instruction *instr);
 
+/* remove an instruction from the program, given its link in the instruction
+ * list. */
+extern void removeInstructionLink(t_program_infos *program, t_list *instrLi);
+
 /* Save the current insertion point in the instruction list, and replace it
  * with `ip`. New instructions will be inserted after the `ip` instruction.
  * To insert instructions at the beginning of the program, ip shall be NULL. */

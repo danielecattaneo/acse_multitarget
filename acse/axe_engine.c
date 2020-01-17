@@ -459,8 +459,7 @@ t_program_infos * allocProgramInfos()
    return result;
 }
 
-/* add an instruction at the tail of the list `program->instructions'.
- * Returns an error code. */
+/* add an instruction at the tail of the list `program->instructions'. */
 void addInstruction(t_program_infos *program, t_axe_instruction *instr)
 {
    /* test the preconditions */
@@ -492,6 +491,51 @@ void addInstruction(t_program_infos *program, t_axe_instruction *instr)
       ip = addAfter(ip, instr);
       SET_DATA(program->instrInsPtrStack, ip);
    }
+}
+
+void removeInstructionLink(t_program_infos *program, t_list *instrLi)
+{
+   t_axe_instruction *instrToRemove = (t_axe_instruction *)LDATA(instrLi);
+
+   /* move the label and/or the comment to the next instruction */
+   if (instrToRemove->labelID || instrToRemove->user_comment) {
+      /* find the next instruction, if it exists */
+      t_list *nextPos = LNEXT(instrLi);
+      t_axe_instruction *nextInst = NULL;
+      if (nextPos)
+         nextInst = LDATA(nextPos);
+         
+      /* move the label */
+      if (instrToRemove->labelID) {
+         /* generate a nop if there was no next instruction or if the next instruction
+          * is already labeled */
+         if (!nextInst || (nextInst->labelID)) {
+            pushInstrInsertionPoint(program, instrLi);
+            nextInst = gen_nop_instruction(program);
+            popInstrInsertionPoint(program);
+         }
+         nextInst->labelID = instrToRemove->labelID;
+         instrToRemove->labelID = NULL;
+      }
+      
+      /* move the comment, if possible; otherwise it will be discarded */
+      if (nextInst && instrToRemove->user_comment && !nextInst->user_comment) {
+         nextInst->user_comment = instrToRemove->user_comment;
+         instrToRemove->user_comment = NULL;
+      }
+   }
+
+   /* fixup the insertion pointer stack */
+   t_list *ipi = program->instrInsPtrStack;
+   while (ipi) {
+      if (LDATA(ipi) && LDATA(ipi) == instrLi)
+         SET_DATA(ipi, LPREV(instrLi));
+      ipi = LNEXT(ipi);
+   }
+
+   /* remove the instruction */
+   program->instructions = removeElementLink(program->instructions, instrLi);
+   free_Instruction(instrToRemove);
 }
 
 void pushInstrInsertionPoint(t_program_infos *p, t_list *ip)
