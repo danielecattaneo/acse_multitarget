@@ -1,4 +1,5 @@
 #include "axe_target_asm_print.h"
+#include "axe_target_info.h"
 
 extern int errorcode;
 
@@ -57,9 +58,9 @@ void writeAssembly(t_program_infos *program, char *output_file)
 const char *translateAMD64_regName(int rid)
 {
    const char *registerNames[] = {
-      "0", "eax", "ebx", "ecx", "edx", "esi", "edi", "r8", "r9", "r10",
-      "r11", "r12", "r13", "r14", "r15"};
-   assert(rid >= 0 && rid < 16);
+      "0", "eax", "ebx", "ecx", "edx", "esi", "edi", "r8d", "r9d", "r10d",
+      "r11d", "r12d", "r13d", "r14d", "r15d"};
+   assert(rid >= 0 && rid < NUM_REGISTERS);
    return registerNames[rid];
 }
 
@@ -94,7 +95,7 @@ int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *ins
    } else {
       snprintf(address, 80, "dword ptr [L%d]", instr->address->labelID->labelID);
    }
-   char *reg = translateAMD64_regName(instr->reg_1->ID);
+   const char *reg = translateAMD64_regName(instr->reg_1->ID);
 
    if (instr->opcode == STORE) {
       fprintf(fp, "\tmov %s, %s\n", address, reg);
@@ -107,6 +108,9 @@ int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *ins
 
 int translateInstruction(t_program_infos *program, t_axe_instruction *current_instruction, FILE *fp)
 {
+   if (current_instruction->mcFlags & MCFLAG_DUMMY)
+      return 0;
+
    if (current_instruction->labelID != NULL) {
       fprintf(fp, "L%d:\n", (current_instruction->labelID)->labelID);
    }
@@ -159,6 +163,12 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case HALT:
          fprintf(fp, "\tret\n");
          break;
+      case AXE_READ:
+         fprintf(fp, "\tcall __axe_read\n");
+         break;
+      case AXE_WRITE:
+         fprintf(fp, "\tcall __axe_write\n");
+         break;
       case ANDL:
       case ORL:
       case EORL:
@@ -202,8 +212,6 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case BLT:
       case BGT:
       case BLE:
-      case AXE_READ:
-      case AXE_WRITE:
          fprintf(fp, "; FIXME unimpl opcode %d\n", current_instruction->opcode);
          break;
    }
