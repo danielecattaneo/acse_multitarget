@@ -63,6 +63,7 @@ t_axe_instruction * alloc_instruction(int opcode)
    result->labelID = NULL;
    result->address = NULL;
    result->user_comment = NULL;
+   result->mcFlags = 0;
 
    /* return `result' */
    return result;
