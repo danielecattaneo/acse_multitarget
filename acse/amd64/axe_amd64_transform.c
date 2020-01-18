@@ -64,7 +64,7 @@ void fixLoadStore(t_program_infos *program)
          if (inst->opcode == AXE_WRITE) {
             int srcReg = inst->reg_1->ID;
             inst->reg_1->ID = getNewRegister(program);
-            inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EDX, 0);
+            inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EDI, 0);
             pushInstrInsertionPoint(program, LPREV(cur));
             gen_add_instruction(program, inst->reg_1->ID, srcReg, REG_0, CG_DIRECT_ALL);
             popInstrInsertionPoint(program);

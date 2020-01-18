@@ -43,6 +43,14 @@ void writeAssembly(t_program_infos *program, char *output_file)
    if (fp == NULL)
       notifyError(AXE_FOPEN_ERROR);
 
+   fputs(
+      "bits 64\n"
+      "default rel\n"
+      "global __lance_start\n"
+      "extern __axe_read\n"
+      "extern __axe_write\n",
+      fp);
+
    /* print the data segment */
    translateDataSegment(program, fp);
 
@@ -53,6 +61,34 @@ void writeAssembly(t_program_infos *program, char *output_file)
    _error = fclose(fp);
    if (_error == EOF)
       notifyError(AXE_FCLOSE_ERROR);
+}
+
+void emitFunctionPrologue(t_program_infos *program, FILE *fp)
+{
+   fputs(
+      "\tpush rbp\n"
+      "\tmov rbp, rsp\n"
+      "\tpush rbx\n"
+      "\tpush r12\n"
+      "\tpush r13\n"
+      "\tpush r14\n"
+      "\tpush r15\n"
+      "\tsub rsp, 8\n", // keep stack aligned to 16-byte boundary
+      fp);
+}
+
+void emitFunctionEpilogue(t_program_infos *program, FILE *fp)
+{
+   fputs(
+      "\tadd rsp, 8\n"
+      "\tpop r15\n"
+      "\tpop r14\n"
+      "\tpop r13\n"
+      "\tpop r12\n"
+      "\tpop rbx\n"
+      "\tmov rsp, rbp\n"
+      "\tpop rbp\n",
+      fp);
 }
 
 const char *translateAMD64_regName(int rid)
@@ -82,7 +118,7 @@ int translateAMD64_acseMOVA(t_program_infos *p, t_axe_instruction *instr, FILE *
    if (instr->address->type == ADDRESS_TYPE) {
       fprintf(fp, "\tmov %s, %d\n", translateAMD64_regName(rdest), instr->address->addr);
    } else {
-      fprintf(fp, "\tlea %s, dword ptr [L%d]\n", translateAMD64_regName(rdest), instr->address->labelID->labelID);
+      fprintf(fp, "\tlea %s, dword [L%d]\n", translateAMD64_regName(rdest), instr->address->labelID->labelID);
    }
    return 0;
 }
@@ -93,7 +129,7 @@ int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *ins
    if (instr->address->type == ADDRESS_TYPE) {
       snprintf(address, 80, "%d", instr->address->addr);
    } else {
-      snprintf(address, 80, "dword ptr [L%d]", instr->address->labelID->labelID);
+      snprintf(address, 80, "dword [L%d]", instr->address->labelID->labelID);
    }
    const char *reg = translateAMD64_regName(instr->reg_1->ID);
 
@@ -119,7 +155,7 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       return 0;
 
    int rdest = current_instruction->reg_1 ? current_instruction->reg_1->ID : -1;
-   int rsrc1 = current_instruction->reg_2 ? current_instruction->reg_2->ID : -1;
+   int rsrc1 = current_instruction->reg_3 ? current_instruction->reg_3->ID : -1;
    switch (current_instruction->opcode) {
       case NOP:
          fprintf(fp, "\tnop\n");
@@ -161,6 +197,7 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
          return translateAMD64_acseLOAD_acseSTORE(program, current_instruction, fp);
       case RET:
       case HALT:
+         emitFunctionEpilogue(program, fp);
          fprintf(fp, "\tret\n");
          break;
       case AXE_READ:
@@ -219,7 +256,7 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
    return 0;
 }
 
-/* translate each instruction in its assembler symbolic representation */
+/* translate each instruction in his assembler symbolic representation */
 void translateCodeSegment(t_program_infos *program, FILE *fp)
 {
    t_list *current_element;
@@ -244,13 +281,11 @@ void translateCodeSegment(t_program_infos *program, FILE *fp)
    /* write the .text directive */
    if (current_element != NULL)
    {
-      if (fprintf(fp, "\t.text\n") < 0)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
+      fputs(
+         "section .text\n"
+         "__lance_start:\n",
+         fp);
+      emitFunctionPrologue(program, fp);
    }
 
    while (current_element != NULL)
@@ -301,13 +336,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    /* write the .data directive */
    if (current_element != NULL)
    {
-      if (fprintf(fp, "\t.data\n") < 0)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
+      fprintf(fp, "section .bss\n");
    }
 
    /* iterate all the elements inside the data segment */
@@ -323,7 +352,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       if ( (current_data->labelID != NULL)
             && ((current_data->labelID)->labelID != LABEL_UNSPECIFIED) )
       {
-         fprintf_error = fprintf(fp, "L%d : \t"
+         fprintf_error = fprintf(fp, "L%d:\t"
                   , (current_data->labelID)->labelID);
       }
       else
@@ -343,7 +372,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       /* print the directive identifier */
       if (current_data->directiveType == DIR_WORD)
       {
-         if (fprintf(fp, ".WORD ") < 0)
+         if (fprintf(fp, "dd ") < 0)
          {
             _error = fclose(fp);
             if (_error == EOF)
@@ -354,7 +383,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       
       else if (current_data->directiveType == DIR_SPACE)
       {
-         if (fprintf(fp, ".SPACE ") < 0)
+         if (fprintf(fp, "resb ") < 0)
          {
             _error = fclose(fp);
             if (_error == EOF)
