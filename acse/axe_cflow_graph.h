@@ -22,8 +22,9 @@ extern int cflow_errorcode;
 /* a variable of the intermediate code */
 typedef struct t_cflow_var
 {
-   int ID;   /* Variable identifier. Negative IDs are reserved for artificial 
+   int ID;   /* Variable identifier. Negative IDs are reserved for artificial
               * variables which are not part of the code */
+   t_list *mcRegWhitelist;
 } t_cflow_var;
 
 /* A Node exists only in a basic block. It defines a list of

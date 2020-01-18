@@ -86,8 +86,19 @@ void printLiveIntervals(t_list *intervals, FILE *fout)
    {
       interval = (t_live_interval *) LDATA(current_element);
 
-      fprintf(fout, "\tLIVE_INTERVAL of T%d : [%d, %d] \n"
+      fprintf(fout, "\tLIVE_INTERVAL of T%d : [%d, %d]"
             , interval->varID, interval->startPoint, interval->endPoint);
+
+      if (interval->mcRegConstraints) {
+         t_list *i = interval->mcRegConstraints;
+         fprintf(fout, " CONSTRAINED TO R%d", LINTDATA(i));
+         i = LNEXT(i);
+         for (; i; i = LNEXT(i)) {
+             fprintf(fout, ", R%d", LINTDATA(i));
+         }
+      }
+
+      fprintf(fout, "\n");
       
       /* retrieve the next element in the list of intervals */
       current_element = LNEXT(current_element);

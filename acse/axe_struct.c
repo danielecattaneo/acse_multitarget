@@ -35,6 +35,7 @@ t_axe_register * alloc_register(int ID, int indirect)
 
    /* initialize the new label */
    result->ID = ID;
+   result->mcRegWhitelist = NULL;
    result->indirect = indirect;
 
    /* return the label */
@@ -186,14 +187,21 @@ void free_Instruction(t_axe_instruction *inst)
       return;
    
    /* free memory */
-   if (inst->reg_1 != NULL)
+   if (inst->reg_1 != NULL) {
+      freeList(inst->reg_1->mcRegWhitelist);
       free(inst->reg_1);
-   if (inst->reg_2 != NULL)
+   }
+   if (inst->reg_2 != NULL) {
+      freeList(inst->reg_2->mcRegWhitelist);
       free(inst->reg_2);
-   if (inst->reg_3 != NULL)
+   }
+   if (inst->reg_3 != NULL) {
+      freeList(inst->reg_3->mcRegWhitelist);
       free(inst->reg_3);
-   if (inst->address != NULL)
+   }
+   if (inst->address != NULL) {
       free(inst->address);
+   }
    if (inst->user_comment != NULL) {
       free(inst->user_comment);
    }

@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "axe_constants.h"
+#include "collections.h"
 
 typedef struct t_axe_label
 {
@@ -27,6 +28,9 @@ typedef struct t_axe_register
 {
    int ID;        /* an identifier of the register */
    int indirect;  /* a boolean value: 1 if the register value is a pointer */
+   t_list *mcRegWhitelist;  /* the list of machine registers where this 
+                             * variable can be allocated. NULL if any register 
+                             * is allowed. */
 }t_axe_register;
 
 typedef struct t_axe_address

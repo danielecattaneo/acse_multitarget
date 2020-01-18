@@ -18,7 +18,7 @@
 int cflow_errorcode;
 
 
-static t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier);
+static t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcRegs);
 static int isEndingNode(t_axe_instruction *instr);
 static int isStartingNode(t_axe_instruction *instr);
 static void updateFlowGraph(t_cflow_Graph *graph);
@@ -376,8 +376,10 @@ int performLivenessIteration(t_cflow_Graph *graph)
    return modified;
 }
 
-/* alloc a variable identifier */
-t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
+/* Alloc a new control flow graph variable object. If a variable object
+ * referencing the same identifier already exists, returns the pre-existing
+ * object. */
+t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcRegs)
 {
    t_cflow_var * result;
    t_list *elementFound;
@@ -397,6 +399,7 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
 
    /* update the value of result */
    result->ID = identifier;
+   result->mcRegWhitelist = NULL;
    
    /* test if a variable with the same identifier was already present */
    elementFound = CustomfindElement
@@ -414,6 +417,24 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
       result = (t_cflow_var *) LDATA(elementFound);
       assert(result != NULL);
       assert(result->ID == identifier);
+   }
+
+   /* copy the machine register allocation constraint, or compute the
+    * intersection between the register allocation constraint sets */
+   if (mcRegs) {
+      if (result->mcRegWhitelist == NULL) {
+         result->mcRegWhitelist = cloneList(mcRegs);
+      } else {
+         t_list *thisReg = result->mcRegWhitelist;
+         while (thisReg) {
+            t_list *nextReg = LNEXT(thisReg);
+            if (!findElement(mcRegs, LDATA(thisReg))) {
+               result->mcRegWhitelist = removeElementLink(result->mcRegWhitelist, thisReg);
+            }
+            thisReg = nextReg;
+         }
+         assert(result->mcRegWhitelist);
+      }
    }
    
    /* return a new var identifier */
@@ -453,15 +474,15 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
    t_cflow_var *varDest = NULL;
    t_cflow_var *varSource1 = NULL;
    t_cflow_var *varSource2 = NULL;
-   t_cflow_var *varPSW = allocVariable(graph, VAR_PSW);
+   t_cflow_var *varPSW = allocVariable(graph, VAR_PSW, NULL);
    
    /* update the values of the variables */
    if (instr->reg_1 != NULL)
-      varDest = allocVariable(graph, (instr->reg_1)->ID);
+      varDest = allocVariable(graph, (instr->reg_1)->ID, instr->reg_1->mcRegWhitelist);
    if (instr->reg_2 != NULL)
-      varSource1 = allocVariable(graph, (instr->reg_2)->ID);
+      varSource1 = allocVariable(graph, (instr->reg_2)->ID, instr->reg_2->mcRegWhitelist);
    if (instr->reg_3 != NULL)
-      varSource2 = allocVariable(graph, (instr->reg_3)->ID);
+      varSource2 = allocVariable(graph, (instr->reg_3)->ID, instr->reg_3->mcRegWhitelist);
    
    /* set normal register defs/uses */
    switch(instr->opcode)
@@ -671,8 +692,10 @@ void finalizeGraph(t_cflow_Graph *graph)
       {
          current_variable = (t_cflow_var *) LDATA(current_element);
 
-         if (current_variable != NULL)
+         if (current_variable != NULL) {
+            freeList(current_variable->mcRegWhitelist);
             free(current_variable);
+         }
 
          /* retrieve the next variable in the list */
          current_element = LNEXT(current_element);

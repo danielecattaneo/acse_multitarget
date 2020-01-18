@@ -19,10 +19,12 @@
 typedef struct t_live_interval
 {
    int varID;     /* a variable identifier */
+   t_list *mcRegConstraints; /* list of all registers where this variable can
+                              * be allocated. */
    int startPoint;  /* the index of the first instruction
-                   * that make use of (or define) this variable */
+                     * that make use of (or define) this variable */
    int endPoint;   /* the index of the last instruction
-                   * that make use of (or define) this variable */
+                    * that make use of (or define) this variable */
 }t_live_interval;
 
 typedef struct t_reg_allocator
