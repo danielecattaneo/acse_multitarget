@@ -175,6 +175,14 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case EORB:
          fprintf(fp, "\txor %s, %s\n", translateAMD64_regName(rdest), translateAMD64_regName(rsrc1));
          break;
+      case SHL:
+         assert(rsrc1 == R_AMD64_ECX);
+         fprintf(fp, "\tsal %s, cl\n", translateAMD64_regName(rdest));
+         break;
+      case SHR:
+         assert(rsrc1 == R_AMD64_ECX);
+         fprintf(fp, "\tsar %s, cl\n", translateAMD64_regName(rdest));
+         break;
       case NEG:
          fprintf(fp, "\tneg %s\n", translateAMD64_regName(rdest));
          break;
@@ -187,10 +195,10 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
          fprintf(fp, "\tsub %s, %d\n", translateAMD64_regName(rdest), current_instruction->immediate);
          break;
       case SHLI:
-         fprintf(fp, "\tshl %s, %d\n", translateAMD64_regName(rdest), current_instruction->immediate);
+         fprintf(fp, "\tsal %s, %d\n", translateAMD64_regName(rdest), current_instruction->immediate);
          break;
       case SHRI:
-         fprintf(fp, "\tshr %s, %d\n", translateAMD64_regName(rdest), current_instruction->immediate);
+         fprintf(fp, "\tsar %s, %d\n", translateAMD64_regName(rdest), current_instruction->immediate);
          break;
       case LOAD:
       case STORE:

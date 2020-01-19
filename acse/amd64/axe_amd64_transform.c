@@ -75,8 +75,26 @@ void fixLoadStore(t_program_infos *program)
    }
 }
 
+void fixShiftAmtRegister(t_program_infos *program)
+{
+   t_list *cur = program->instructions;
+   while (cur) {
+      t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
+      if (inst->opcode == SHL || inst->opcode == SHR) {
+         pushInstrInsertionPoint(program, LPREV(cur));
+         int rShAmt = inst->reg_3->ID;
+         inst->reg_3->ID = getNewRegister(program);
+         inst->reg_3->mcRegWhitelist = addElement(inst->reg_3->mcRegWhitelist, (void *)R_AMD64_ECX, 0);
+         gen_add_instruction(program, inst->reg_3->ID, rShAmt, REG_0, CG_DIRECT_ALL);
+         popInstrInsertionPoint(program);
+      }
+      cur = LNEXT(cur);
+   }
+}
+
 void doTargetSpecificTransformations(t_program_infos *program)
 {
    fix_destination_register(program);
    fixLoadStore(program);
+   fixShiftAmtRegister(program);
 }
