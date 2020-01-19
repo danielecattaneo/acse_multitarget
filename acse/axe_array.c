@@ -12,6 +12,7 @@
 #include "symbol_table.h"
 #include "axe_utils.h"
 #include "axe_errors.h"
+#include "axe_target_info.h"
 
 void storeArrayElement(t_program_infos *program, char *ID
             , t_axe_expression index, t_axe_expression data)
@@ -85,22 +86,30 @@ int loadArrayAddress(t_program_infos *program
    /* generate the MOVA instruction */
    gen_mova_instruction(program, mova_register, label, 0);
 
+   /* We are making the following assumption:
+    * the type can only be an INTEGER_TYPE */
+   int sizeofElem = 4 / TARGET_PTR_GRANULARITY;
+
    if (index.expression_type == IMMEDIATE)
    {
       if (index.value != 0)
       {
          gen_addi_instruction (program, mova_register
-                     , mova_register, index.value);
+                     , mova_register, index.value * sizeofElem);
       }
    }
    else
    {
       assert(index.expression_type == REGISTER);
 
-      /* We are making the following assumption:
-      * the type can only be an INTEGER_TYPE */
+      int idxReg = index.value;
+      if (sizeofElem != 1) {
+         idxReg = getNewRegister(program);
+         gen_muli_instruction(program, idxReg, index.value, sizeofElem);
+      }
+      
       gen_add_instruction(program, mova_register, mova_register
-               , index.value, CG_DIRECT_ALL);
+               , idxReg, CG_DIRECT_ALL);
    }
 
    /* return the identifier of the register that contains
