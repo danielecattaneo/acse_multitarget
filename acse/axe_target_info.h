@@ -14,6 +14,9 @@
 /* Number of registers for this target (excluding REG_0) */
 #define NUM_REGISTERS 31
 
+/* number of bytes for each memory address */
+#define TARGET_PTR_GRANULARITY 4
+
 #endif
 
 
