@@ -279,6 +279,49 @@ void setMCRegisterWhitelist(t_axe_register *regObj, ...)
    regObj->mcRegWhitelist = res;
 }
 
+int isMoveInstruction(t_axe_instruction *instr, t_axe_register **outDest,
+      t_axe_register **outSrcReg, t_axe_address **outSrcAddr, int *outSrcImm)
+{
+   if (outSrcReg) *outSrcReg = NULL;
+   if (outSrcAddr) *outSrcAddr = NULL;
+
+   if (instr->opcode == MOVA) {
+      if (outSrcAddr)
+         *outSrcAddr = instr->address;
+      if (outDest)
+         *outDest = instr->reg_1;
+      return 1;
+   }
+
+   if ((instr->opcode == ADD && 
+            (instr->reg_2->ID == REG_0 || instr->reg_3->ID == REG_0)) ||
+         (instr->opcode == SUB && instr->reg_3->ID == REG_0)) {
+      if (outSrcReg)
+         *outSrcReg = instr->reg_2->ID == REG_0 ? instr->reg_3 : instr->reg_2;
+      if (outDest)
+         *outDest = instr->reg_1;
+      return 1;
+   }
+
+   if (instr->opcode == ADDI && instr->reg_2->ID == REG_0) {
+      if (outSrcImm)
+         *outSrcImm = instr->immediate;
+      if (outDest)
+         *outDest = instr->reg_1;
+      return 1;
+   }
+
+   if (instr->opcode == SUBI && instr->reg_2->ID == REG_0) {
+      if (outSrcImm)
+         *outSrcImm = -(instr->immediate);
+      if (outDest)
+         *outDest = instr->reg_1;
+      return 1;
+   }
+
+   return 0;
+}
+
 void set_end_Program(t_program_infos *program)
 {
    if (program == NULL)
