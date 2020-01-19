@@ -92,6 +92,15 @@ void emitFunctionEpilogue(t_program_infos *program, FILE *fp)
       fp);
 }
 
+const char *translateAMD64_regName_64bit(int rid)
+{
+   const char *registerNames[] = {
+      "0", "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10",
+      "r11", "r12", "r13", "r14", "r15"};
+   assert(rid >= 0 && rid < NUM_REGISTERS);
+   return registerNames[rid];
+}
+
 const char *translateAMD64_regName(int rid)
 {
    const char *registerNames[] = {
@@ -104,7 +113,7 @@ const char *translateAMD64_regName(int rid)
 const char *translateAMD64_regName_8bit(int rid)
 {
    const char *registerNames[] = {
-      "0", "al", "bl", "cl", "dl", "sil", "dil", "r8b", "r9d", "r10d",
+      "0", "al", "bl", "cl", "dl", "sil", "dil", "r8b", "r9b", "r10b",
       "r11b", "r12b", "r13b", "r14b", "r15b"};
    assert(rid >= 0 && rid < NUM_REGISTERS);
    return registerNames[rid];
@@ -113,9 +122,12 @@ const char *translateAMD64_regName_8bit(int rid)
 char *translateAMD64_regValOrPtr(t_axe_register *reg, char *dest, int bufSize)
 {
    if (reg->indirect) {
-      snprintf(dest, bufSize, "dword [%s]", translateAMD64_regName(reg->ID));
+      snprintf(dest, bufSize, "dword [%s]", translateAMD64_regName_64bit(reg->ID));
    } else {
-      snprintf(dest, bufSize, "%s", translateAMD64_regName(reg->ID));
+      if (reg->type >= 0 && (reg->type & PTR_TYPE_FLAG))
+         snprintf(dest, bufSize, "%s", translateAMD64_regName_64bit(reg->ID));
+      else
+         snprintf(dest, bufSize, "%s", translateAMD64_regName(reg->ID));
    }
    return dest;
 }
@@ -145,9 +157,9 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
       char flabel[20];
       translateLabelOrAddress(instr->address, flabel, 20);
       if (instr->address->type == ADDRESS_TYPE) {
-         fprintf(fp, "\tmov %s, %s\n", translateAMD64_regName(dest->ID), flabel);
+         fprintf(fp, "\tmov %s, %s\n", translateAMD64_regName_64bit(dest->ID), flabel);
       } else {
-         fprintf(fp, "\tlea %s, dword [%s]\n", translateAMD64_regName(dest->ID), flabel);
+         fprintf(fp, "\tlea %s, [%s]\n", translateAMD64_regName_64bit(dest->ID), flabel);
       }
       return 0;
    }
@@ -168,7 +180,7 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 
 int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 {
-   char *address[20];
+   char address[20];
    translateLabelOrAddress(instr->address, address, 20);
    const char *reg = translateAMD64_regName(instr->reg_1->ID);
 
@@ -244,6 +256,14 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
          break;
       case SUB:
          fprintf(fp, "\tsub %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         break;
+      case MUL:
+         assert(!rdp->indirect);
+         fprintf(fp, "\timul %s, %s\n", translateAMD64_regName(rd), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         break;
+      case DIV:
+         assert(!rdp->indirect && rdp->ID == R_AMD64_EAX);
+         fprintf(fp, "\tidiv %s\n", translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case ANDB:
          fprintf(fp, "\tand %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
@@ -369,20 +389,19 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case ANDL:
       case ORL:
       case EORL:
-      case MUL:
-      case DIV:
       case SPCL:
       case ANDLI:
       case ORLI:
       case EORLI:
       case MULI:
-      case DIVI:
       case NOTL:
       case NOTB:
       case JSR:
       default:
          fprintf(fp, "; FIXME unimpl opcode %d\n", current_instruction->opcode);
          break;
+      case DIVI:
+         assert(0 && "DIVI cannot be encoded in x86_64; bug in axe_target_transform.c");
    }
    
    return 0;
