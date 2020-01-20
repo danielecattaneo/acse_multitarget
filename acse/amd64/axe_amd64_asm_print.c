@@ -190,6 +190,10 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
    translateAMD64_regValOrPtr(dest, rdest, 20);
 
    if (srcReg) {
+      if (srcReg->ID == dest->ID && 
+            srcReg->indirect == dest->indirect &&
+            srcReg->type == dest->type)
+         return 0;
       char rsrc[20];
       translateAMD64_regValOrPtr(srcReg, rsrc, 20);
       fprintf(fp, "\tmov %s, %s\n", rdest, rsrc);
