@@ -32,6 +32,12 @@ t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
          instr->reg_2->indirect == instr->reg_1->indirect)  
       return position;
 
+   /* For some strange reason, the IMUL x86_64 instruction DOES have a form
+    * with an immediate, a source and a destination. In fact, it's the only
+    * form it has with provisions for an immediate operand! */
+   if (instr->opcode == MULI)
+      return position;
+
    pushInstrInsertionPoint(program, LPREV(position));
    gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
          CG_DIRECT(RD_DIR(instr), 0));

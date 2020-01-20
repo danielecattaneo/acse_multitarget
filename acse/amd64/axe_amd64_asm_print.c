@@ -142,6 +142,28 @@ char *translateLabelOrAddress(t_axe_address *address, char *dest, int bufSize)
    return dest;
 }
 
+void emitCast(t_axe_register *reg, int newtype, FILE *fp)
+{
+   /* FIXME: handling casts in the backend is horrendously wrong for a
+    * plentitude of reasons, but at the moment it is unavoidable because
+    * there is no cast instruction in the IR. The problem is that we don't even
+    * want that instruction in the IR because adding casts would necessarily 
+    * snowball into changes of the API in axe_gencode, which we definitively do
+    * not want to do. Thus, we will try to live with this hack and hope that
+    * the assert won't trigger. */
+   if (reg->type == newtype)
+      return;
+   if (newtype < 0)
+      return;
+   assert(!reg->indirect);
+   if (reg->type == INTEGER_TYPE && newtype == INTEGER_PTR_TYPE) {
+      reg->type = INTEGER_PTR_TYPE;
+      fprintf(fp, "\tmovsx %s, %s\n", 
+         translateAMD64_regName_64bit(reg->ID), 
+         translateAMD64_regName(reg->ID)); 
+   }
+}
+
 int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 {
    t_axe_register *dest;
@@ -239,12 +261,18 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
    char rsb[20];
 
    t_axe_register *rdp = current_instruction->reg_1;
-   t_axe_register *rsp = current_instruction->reg_3;
+   t_axe_register *rsp = current_instruction->reg_3 ?: current_instruction->reg_2;
 
    int rd = rdp ? rdp->ID : -1;
+   if (rdp)
+      translateAMD64_regValOrPtr(rdp, rdb, 20);
    int rs = rsp ? rsp->ID : -1;
+   if (rsp)
+      translateAMD64_regValOrPtr(rsp, rsb, 20);
 
    t_axe_address *addr = current_instruction->address;
+   if (addr)
+      translateLabelOrAddress(addr, addrBuffer, 20);
 
    switch (current_instruction->opcode) {
       case BF:
@@ -252,73 +280,84 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
          fprintf(fp, "\tnop\n");
          break;
       case ADD:
-         fprintf(fp, "\tadd %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\tadd %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case SUB:
-         fprintf(fp, "\tsub %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\tsub %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case MUL:
          assert(!rdp->indirect);
-         fprintf(fp, "\timul %s, %s\n", translateAMD64_regName(rd), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\timul %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case DIV:
          assert(!rdp->indirect && rdp->ID == R_AMD64_EAX);
+         emitCast(rsp, rdp->type, fp);
          fprintf(fp, "\tidiv %s\n", translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case ANDB:
-         fprintf(fp, "\tand %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\tand %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case ORB:
-         fprintf(fp, "\tor %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\tor %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case EORB:
-         fprintf(fp, "\txor %s, %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20), translateAMD64_regValOrPtr(rsp, rsb, 20));
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\txor %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
          break;
       case SHL:
          assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tsal %s, cl\n", translateAMD64_regValOrPtr(rdp, rdb, 20));
+         fprintf(fp, "\tsal %s, cl\n", rdb);
          break;
       case SHR:
          assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tsar %s, cl\n", translateAMD64_regValOrPtr(rdp, rdb, 20));
+         fprintf(fp, "\tsar %s, cl\n", rdb);
          break;
       case ROTL:
          assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\trol %s, cl\n", translateAMD64_regValOrPtr(rdp, rdb, 20));
+         fprintf(fp, "\trol %s, cl\n", rdb);
          break;
       case ROTR:
          assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tror %s, cl\n", translateAMD64_regValOrPtr(rdp, rdb, 20));
+         fprintf(fp, "\tror %s, cl\n", rdb);
          break;
       case NEG:
-         fprintf(fp, "\tneg %s\n", translateAMD64_regValOrPtr(rdp, rdb, 20));
+         fprintf(fp, "\tneg %s\n", rdb);
          break;
       case ADDI:
-         fprintf(fp, "\tadd %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tadd %s, %d\n", rdb, current_instruction->immediate);
          break;
       case SUBI:
-         fprintf(fp, "\tsub %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tsub %s, %d\n", rdb, current_instruction->immediate);
+         break;
+      case MULI:
+         emitCast(rsp, rdp->type, fp);
+         fprintf(fp, "\timul %s, %s, %d\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20), current_instruction->immediate);
          break;
       case ANDBI:
-         fprintf(fp, "\tand %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tand %s, %d\n", rdb, current_instruction->immediate);
          break;
       case ORBI:
-         fprintf(fp, "\tor %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tor %s, %d\n", rdb, current_instruction->immediate);
          break;
       case EORBI:
-         fprintf(fp, "\txor %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\txor %s, %d\n", rdb, current_instruction->immediate);
          break;
       case SHLI:
-         fprintf(fp, "\tsal %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tsal %s, %d\n", rdb, current_instruction->immediate);
          break;
       case SHRI:
-         fprintf(fp, "\tsar %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tsar %s, %d\n", rdb, current_instruction->immediate);
          break;
       case ROTLI:
-         fprintf(fp, "\trol %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\trol %s, %d\n", rdb, current_instruction->immediate);
          break;
       case ROTRI:
-         fprintf(fp, "\tror %s, %d\n", translateAMD64_regValOrPtr(rdp, rdb, 20), current_instruction->immediate);
+         fprintf(fp, "\tror %s, %d\n", rdb, current_instruction->immediate);
          break;
       case SEQ:
       case SGE:
@@ -331,49 +370,49 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case STORE:
          return translateAMD64_acseLOAD_acseSTORE(program, current_instruction, fp);
       case BT:
-         fprintf(fp, "\tjmp %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjmp %s\n", addrBuffer);
          break;
       case BHI:
-         fprintf(fp, "\tja %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tja %s\n", addrBuffer);
          break;
       case BLS:
-         fprintf(fp, "\tjbe %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjbe %s\n", addrBuffer);
          break;
       case BCC:
-         fprintf(fp, "\tjnc %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjnc %s\n", addrBuffer);
          break;
       case BCS:
-         fprintf(fp, "\tjc %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjc %s\n", addrBuffer);
          break;
       case BNE:
-         fprintf(fp, "\tjne %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjne %s\n", addrBuffer);
          break;
       case BEQ:
-         fprintf(fp, "\tje %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tje %s\n", addrBuffer);
          break;
       case BVC:
-         fprintf(fp, "\tjno %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjno %s\n", addrBuffer);
          break;
       case BVS:
-         fprintf(fp, "\tjo %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjo %s\n", addrBuffer);
          break;
       case BPL:
-         fprintf(fp, "\tjns %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjns %s\n", addrBuffer);
          break;
       case BMI:
-         fprintf(fp, "\tjs %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjs %s\n", addrBuffer);
          break;
       case BGE:
-         fprintf(fp, "\tjge %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjge %s\n", addrBuffer);
          break;
       case BLT:
-         fprintf(fp, "\tjl %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjl %s\n", addrBuffer);
          break;
       case BGT:
-         fprintf(fp, "\tjg %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjg %s\n", addrBuffer);
          break;
       case BLE:
-         fprintf(fp, "\tjle %s\n", translateLabelOrAddress(addr, addrBuffer, 20));
+         fprintf(fp, "\tjle %s\n", addrBuffer);
          break;
       case RET:
       case HALT:
@@ -393,7 +432,6 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case ANDLI:
       case ORLI:
       case EORLI:
-      case MULI:
       case NOTL:
       case NOTB:
       case JSR:
