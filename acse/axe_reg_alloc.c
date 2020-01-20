@@ -219,6 +219,11 @@ t_list * addFreeRegister(t_list *registers, int regID, int position)
    return registers;
 }
 
+int _compareFreeRegLI(void *freeReg, void *constraintReg)
+{
+   return *(int *)constraintReg == *(int *)freeReg;
+}
+
 /*
  * Get a new register from the free list
  */
@@ -226,12 +231,13 @@ int assignRegister(t_reg_allocator *RA, t_list *constraints)
 {
    int regID;
 
-   t_list *i = RA->freeRegisters;
+   t_list *i = constraints;
    for (; i; i = LNEXT(i)) {
-      regID = (* ((int *) LDATA(i)));
-      if (findElement(constraints, (void *)regID)) {
-         free(LDATA(i));
-         RA->freeRegisters = removeElementLink(RA->freeRegisters, i);
+      regID = LINTDATA(i);
+      t_list *freeReg = CustomfindElement(RA->freeRegisters, &regID, _compareFreeRegLI);
+      if (freeReg) {
+         free(LDATA(freeReg));
+         RA->freeRegisters = removeElementLink(RA->freeRegisters, freeReg);
          return regID;
       }
    }
@@ -243,6 +249,20 @@ t_list *subtractRegisterSets(t_list *a, t_list *b)
 {
    for (; b; b = LNEXT(b)) {
       a = removeElement(a, LDATA(b));
+   }
+   return a;
+}
+
+/* Move the elements in list `a` which are also contained in list `b` to the
+ * front of the list. */
+t_list *optimizeRegisterSet(t_list *a, t_list *b)
+{
+   for (; b; b = LNEXT(b)) {
+      t_list *old;
+      if ((old = findElement(a, LDATA(b)))) {
+         a = removeElementLink(a, old);
+         a = addElement(a, LDATA(b), 0);
+      }
    }
    return a;
 }
@@ -269,8 +289,17 @@ void initializeRegisterConstraints(t_reg_allocator *ra)
             break;
          if (!overlappingIval->mcRegConstraints)
             continue;
-         interval->mcRegConstraints = subtractRegisterSets(
-            interval->mcRegConstraints, overlappingIval->mcRegConstraints);
+         if (overlappingIval->startPoint == interval->endPoint) {
+            /* an instruction is using interval as a source and overlappingIval
+             * as a destination. Optimize the constraint order to allow
+             * allocating source and destination to the same register
+             * if possible. */
+            interval->mcRegConstraints = optimizeRegisterSet(
+               interval->mcRegConstraints, overlappingIval->mcRegConstraints);
+         } else {
+            interval->mcRegConstraints = subtractRegisterSets(
+               interval->mcRegConstraints, overlappingIval->mcRegConstraints);
+         }
       }
       assert(interval->mcRegConstraints);
    }
@@ -652,9 +681,23 @@ t_list * expireOldIntervals(t_reg_allocator *RA, t_list *active_intervals
       /* If the considered interval ends before the beginning of 
        * the current live interval, we don't need to keep track of
        * it anymore; otherwise, this is the first interval we must
-       * still take into account when assigning registers */
-      if (current_interval->endPoint >= interval->startPoint)
+       * still take into account when assigning registers. */
+      if (current_interval->endPoint > interval->startPoint)
          return active_intervals;
+
+      /* when current_interval->endPoint == interval->startPoint, 
+       * the variable associated to current_interval is being used by the
+       * instruction that defines interval. As a result, we can allocate
+       * interval to the same reg as current_interval. */
+      if (current_interval->endPoint == interval->startPoint) {
+         int curIntReg = RA->bindings[current_interval->varID];
+         if (curIntReg >= 0) {
+            t_list *allocated = addElement(NULL, INTDATA(curIntReg), 0);
+            interval->mcRegConstraints = optimizeRegisterSet(
+                  interval->mcRegConstraints, allocated);
+            freeList(allocated);
+         }
+      }
 
       /* Get the next live interval */
       next_element = LNEXT(current_element);
