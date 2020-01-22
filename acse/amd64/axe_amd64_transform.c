@@ -4,19 +4,19 @@
 #include "axe_utils.h"
 
 #define R_ID(reg)       ((reg)->ID)
-#define R_DIR(reg)      ((reg)->indirect)
+#define R_IND(reg)      ((reg)->indirect)
 #define RD(inst)        ((inst)->reg_1)
 #define RD_ID(inst)     ((inst)->reg_1->ID)
-#define RD_DIR(inst)    ((inst)->reg_1->indirect)
+#define RD_IND(inst)    ((inst)->reg_1->indirect)
 #define RS1(inst)       ((inst)->reg_2)
 #define RS1_ID(inst)    ((inst)->reg_2->ID)
-#define RS1_DIR(inst)   ((inst)->reg_2->indirect)
+#define RS1_IND(inst)   ((inst)->reg_2->indirect)
 #define RS2(inst)       ((inst)->reg_3)
 #define RS2_ID(inst)    ((inst)->reg_3->ID)
-#define RS2_DIR(inst)   ((inst)->reg_3->indirect)
+#define RS2_IND(inst)   ((inst)->reg_3->indirect)
 
 #define CG_DIRECT(dest, src2)    (!!(dest) | ((!!(src2)) << 1))
-#define CG_DIRECT_R(dest, src2)  CG_DIRECT(R_DIR(dest), R_DIR(src2))
+#define CG_DIRECT_R(dest, src2)  CG_DIRECT(R_IND(dest), R_IND(src2))
 
 t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
       t_list *position)
@@ -40,7 +40,7 @@ t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
 
    pushInstrInsertionPoint(program, LPREV(position));
    gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
-         CG_DIRECT(RD_DIR(instr), 0));
+         CG_DIRECT(RD_IND(instr), 0));
    instr->reg_2->ID = instr->reg_1->ID;
    instr->reg_2->indirect = instr->reg_1->indirect;
    popInstrInsertionPoint(program);
@@ -107,6 +107,90 @@ void fixReadWrite(t_program_infos *program)
    }
 }
 
+void rewriteLogicalOperations(t_program_infos *program)
+{
+   t_list *cur = program->instructions;
+   while (cur) {
+      t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
+      t_list *next = LNEXT(cur);
+      assert((!inst->reg_2 || !RS1_IND(inst)) && "found illegal instruction with IND on SRC1");
+      
+      if (inst->opcode == ANDL || inst->opcode == EORL) {
+         pushInstrInsertionPoint(program, LPREV(cur));
+         int rs1 = getNewRegister(program);
+         int rs2 = getNewRegister(program);
+         gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+         gen_sne_instruction(program, rs1);
+         if (!RS2_IND(inst)) {
+            gen_andb_instruction(program, RS2_ID(inst), RS2_ID(inst), RS2_ID(inst), CG_DIRECT_ALL);
+         } else {
+            int tmp = getNewRegister(program);
+            gen_add_instruction(program, tmp, REG_0, RS2_ID(inst), CG_INDIRECT_DEST);
+         }
+         gen_sne_instruction(program, rs2);
+         RS1_ID(inst) = rs1;
+         RS2_ID(inst) = rs2;
+         RS2_IND(inst) = 0;
+         popInstrInsertionPoint(program);
+         inst->opcode = inst->opcode == ANDL ? ANDB : EORB;
+
+      } else if (inst->opcode == ORL) {
+         inst->opcode = ORB;
+         int destId = RD_ID(inst);
+         int destInd = RD_IND(inst);
+         RD_ID(inst) = getNewRegister(program);
+         RD_IND(inst) = 0;
+         pushInstrInsertionPoint(program, cur);
+         if (!destInd) {
+            gen_sne_instruction(program, destId);
+         } else {
+            int tmp2 = getNewRegister(program);
+            gen_sne_instruction(program, tmp2);
+            gen_add_instruction(program, destId, REG_0, tmp2, CG_DIRECT(destInd, 0));
+         }
+         popInstrInsertionPoint(program);
+
+      } else if (inst->opcode == ANDLI) {
+         /* this instruction is stupid #1 */
+         pushInstrInsertionPoint(program, LPREV(cur));
+         if (inst->immediate == 0) {
+            gen_eorb_instruction(program, RD_ID(inst), RD_ID(inst), RD_ID(inst), CG_DIRECT_ALL);
+         } else {
+            gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+            gen_sne_instruction(program, RD_ID(inst));
+         }
+         popInstrInsertionPoint(program);
+         removeInstructionLink(program, cur);
+
+      } else if (inst->opcode == ORLI) {
+         /* this instruction is stupid #2 */
+         pushInstrInsertionPoint(program, LPREV(cur));
+         if (inst->immediate != 0) {
+            gen_addi_instruction(program, RD_ID(inst), REG_0, 1);
+         } else {
+            gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+            gen_sne_instruction(program, RD_ID(inst));
+         }
+         popInstrInsertionPoint(program);
+         removeInstructionLink(program, cur);
+
+      } else if (inst->opcode == EORLI) {
+         /* this instruction is stupid #3 */
+         pushInstrInsertionPoint(program, LPREV(cur));
+         gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+         if (inst->immediate == 0) {
+            gen_sne_instruction(program, RD_ID(inst));
+         } else {
+            gen_seq_instruction(program, RD_ID(inst));
+         }
+         popInstrInsertionPoint(program);
+         removeInstructionLink(program, cur);
+      }
+
+      cur = next;
+   }
+}
+
 void insertRegisterAllocationConstraints(t_program_infos *program)
 {
    t_list *cur = program->instructions;
@@ -140,7 +224,7 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          /* Force source1 and destination to be in EAX. Add instructions for
           * zeroing out EDX before the division. */
          int rdest = RD_ID(inst);
-         int rdest_dir = RD_DIR(inst);
+         int rdest_dir = RD_IND(inst);
          int rtmp = getNewRegister(program);  /* RAX at codegen stage */
          int rEDX = getNewRegister(program);
 
@@ -168,6 +252,7 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
 
 void doTargetSpecificTransformations(t_program_infos *program)
 {
+   rewriteLogicalOperations(program);
    fixDestinationRegister(program);
    fixReadWrite(program);
    insertRegisterAllocationConstraints(program);

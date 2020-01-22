@@ -332,6 +332,9 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case NEG:
          fprintf(fp, "\tneg %s\n", rdb);
          break;
+      case NOTB:
+         fprintf(fp, "\tnot %s\n", rdb);
+         break;
       case ADDI:
          fprintf(fp, "\tadd %s, %d\n", rdb, current_instruction->immediate);
          break;
@@ -429,21 +432,21 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case AXE_WRITE:
          fprintf(fp, "\tcall __axe_write\n");
          break;
-      case ANDL:
-      case ORL:
-      case EORL:
-      case SPCL:
-      case ANDLI:
-      case ORLI:
-      case EORLI:
-      case NOTL:
-      case NOTB:
       case JSR:
       default:
          fprintf(fp, "; FIXME unimpl opcode %d\n", current_instruction->opcode);
          break;
+      case SPCL:
+      case ANDL:
+      case ORL:
+      case EORL:
+      case ANDLI:
+      case ORLI:
+      case EORLI:
+      case NOTL:
       case DIVI:
-         assert(0 && "DIVI cannot be encoded in x86_64; bug in axe_target_transform.c");
+         fprintf(stderr, "illegal x86_64 instruction %d\n", current_instruction->opcode);
+         assert(0 && "instr cannot be encoded in x86_64; bug in axe_target_transform.c");
    }
    
    return 0;
