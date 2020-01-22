@@ -1,0 +1,60 @@
+int a, b;
+
+read(a);
+read(b);
+
+/* note: 21930 == 0x55AA, 21930 == 0x5A5A */
+
+write(550001);
+
+write(a + b);
+write(a - b);
+write(a / b);
+write(a * b);
+write(a & b);
+write(a | b);
+write(a && b);
+write(a || b);
+
+write(550002);
+
+write(a + 5);
+write(a - 5);
+write(a / 5);
+write(a * 5);
+write(a & 21930); 
+write(a | 21930);
+write(a && 0);
+write(a || 0);
+write(a && 100);
+write(a || 100);
+
+write(550003);
+
+write(5 + b);
+write(5 - b);
+write(5 / b);
+write(5 * b);
+write(21930 & b);
+write(21930 | b);
+write(0 && b);
+write(0 || b);
+write(100 && b);
+write(100 || b);
+
+write(550004);
+
+write(10 + 5);
+write(10 - 5);
+write(10 / 5);
+write(10 * 5);
+write(23130 & 21930); /* 20490 */
+write(23130 | 21930); /* 24570 */
+write(0 && 0);
+write(0 || 0);
+write(0 && 100);
+write(0 || 100);
+write(123 && 0);
+write(123 || 0);
+write(123 && 100);
+write(123 || 100);

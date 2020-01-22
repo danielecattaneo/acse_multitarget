@@ -19,12 +19,18 @@
  * applied to `exp1' and `exp2'.
  *
  * Valid values for `binop' are:
- * ADD
+ * ADD 
  * ANDB
- * ORB
- * SUB
- * MUL
- * DIV */
+ * ANDL
+ * ORB 
+ * ORL 
+ * EORB
+ * EORL
+ * SUB 
+ * MUL 
+ * SHL 
+ * SHR 
+ * DIV  */
 extern t_axe_expression handle_bin_numeric_op (t_program_infos *program
          , t_axe_expression exp1, t_axe_expression exp2, int binop);
 

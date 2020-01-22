@@ -53,7 +53,15 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
                              , exp1.value, exp2.value); break;
          case ANDB : gen_andbi_instruction (program, output_register
                               , exp1.value, exp2.value); break;
+         case ANDL : gen_andli_instruction (program, output_register
+                              , exp1.value, exp2.value); break;
          case ORB  : gen_orbi_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case ORL  : gen_orli_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case EORB  : gen_eorbi_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case EORL  : gen_eorli_instruction (program, output_register
                              , exp1.value, exp2.value); break;
          case SUB : gen_subi_instruction (program, output_register
                              , exp1.value, exp2.value); break;
@@ -85,7 +93,15 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
                               , exp2.value, exp1.value); break;
          case ANDB :  gen_andbi_instruction (program, output_register
                               , exp2.value, exp1.value); break;
+         case ANDL :  gen_andli_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
          case ORB  :  gen_orbi_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case ORL  :  gen_orli_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case EORB  :  gen_eorbi_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case EORL  :  gen_eorli_instruction (program, output_register
                               , exp2.value, exp1.value); break;
          case SUB :
                   gen_subi_instruction (program, output_register
@@ -151,7 +167,19 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
          case ANDB :  gen_andb_instruction (program, output_register
                               , exp1.value, exp2.value, CG_DIRECT_ALL);
                      break;
+         case ANDL :  gen_andl_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
          case ORB :  gen_orb_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case ORL :  gen_orl_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case EORB :  gen_eorb_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case EORL :  gen_eorl_instruction (program, output_register
                               , exp1.value, exp2.value, CG_DIRECT_ALL);
                      break;
          case SUB :  gen_sub_instruction (program, output_register
@@ -185,7 +213,11 @@ t_axe_expression handle_bin_numeric_op_Imm
    {
       case ADD : return create_expression ((val1 + val2), IMMEDIATE);
       case ANDB : return create_expression ((val1 & val2), IMMEDIATE);
+      case ANDL : return create_expression ((val1 && val2), IMMEDIATE);
       case ORB  : return create_expression ((val1 | val2), IMMEDIATE);
+      case ORL  : return create_expression ((val1 || val2), IMMEDIATE);
+      case EORB  : return create_expression ((val1 ^ val2), IMMEDIATE);
+      case EORL  : return create_expression (((!!val1) != (!!val2)), IMMEDIATE);
       case SUB : return create_expression ((val1 - val2), IMMEDIATE);
       case MUL : return create_expression ((val1 * val2), IMMEDIATE);
       case SHL : return create_expression ((val1 << val2), IMMEDIATE);
