@@ -107,7 +107,7 @@ static t_list * _insertStore(t_program_infos *program, t_cflow_Graph *graph
       insertNodeAfter(current_block, current_node, storeNode);
    
       /* update the list of usedVars */
-      usedVars = removeElement(usedVars, storeNode->uses[0]);
+      usedVars = removeElement(usedVars, var);
    }
 
    return usedVars;
@@ -157,7 +157,7 @@ t_list * _insertLoad(t_program_infos *program, t_cflow_Graph *graph
       insertNodeBefore(current_block, current_node, loadNode);
 
       /* update the list of usedVars */
-      usedVars = addElement(usedVars, loadNode->def, -1);
+      usedVars = addElement(usedVars, var, -1);
    }
 
    return usedVars;
@@ -388,7 +388,7 @@ t_list * retrieveLabelBindings(t_program_infos *program, t_reg_allocator *RA)
    result = NULL;
    tlabel = NULL;
 
-   for (counter = 0; counter <= RA->varNum; counter++)
+   for (counter = 0; counter < RA->varNum; counter++)
    {
       if (RA->bindings[counter] == RA_SPILL_REQUIRED)
       {
@@ -478,41 +478,27 @@ t_cflow_Graph * insertLoadAndStoreInstr
          current_node = (t_cflow_Node *) LDATA(current_nd_element);
 
          /* test if we have to insert a load */
-         if (  (current_node->uses[0] != NULL)
-               && ((current_node->uses[0])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[0]) == NULL)
+         for (int usei=0; usei<CFLOW_MAX_USES; usei++) {
+            t_cflow_var *use = current_node->uses[usei];
+            if ((use != NULL) && (use->ID != REG_0) && (use->ID != VAR_PSW))
             {
-               usedVars = _insertLoad(program, graph, current_block
-                     , current_node, current_node->uses[0], usedVars);
-            }
-         }
-         if (  (current_node->uses[1] != NULL)
-               && ((current_node->uses[1])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[1]) == NULL)
-            {
-               usedVars = _insertLoad(program, graph, current_block
-                     , current_node, current_node->uses[1], usedVars);
-            }
-         }
-         if (  (current_node->uses[2] != NULL)
-               && ((current_node->uses[2])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[2]) == NULL)
-            {
-               usedVars = _insertLoad(program, graph, current_block
-                     , current_node, current_node->uses[2], usedVars);
+               if (findElement(usedVars, use) == NULL)
+               {
+                  usedVars = _insertLoad(program, graph, current_block
+                        , current_node, use, usedVars);
+               }
             }
          }
 
          /* test if we have to insert a store */
-         if (  (current_node->def != NULL)
-               && ((current_node->def)->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->def) == NULL)
+         for (int defi=0; defi<CFLOW_MAX_DEFS; defi++) {
+            t_cflow_var *def = current_node->defs[defi];
+            if ((def != NULL) && (def->ID != REG_0) && (def->ID != VAR_PSW))
             {
-               usedVars = addElement(usedVars, current_node->def, -1);
+               if (findElement(usedVars, def) == NULL)
+               {
+                  usedVars = addElement(usedVars, def, -1);
+               }
             }
          }
 
@@ -526,43 +512,28 @@ t_cflow_Graph * insertLoadAndStoreInstr
          current_node = (t_cflow_Node *) LDATA(current_nd_element);
 
          /* test if we have to insert a store */
-         if (  (current_node->uses[0] != NULL)
-               && ((current_node->uses[0])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[0]) != NULL)
+         for (int usei=0; usei<CFLOW_MAX_USES; usei++) {
+            t_cflow_var *use = current_node->uses[usei];
+            if ((use != NULL) && (use->ID != REG_0) && (use->ID != VAR_PSW))
             {
-               usedVars = _insertStore(program, graph, current_block
-                     , current_node, current_node->uses[0], usedVars);
+               if (findElement(usedVars, use) != NULL)
+               {
+                  usedVars = _insertStore(program, graph, current_block
+                        , current_node, use, usedVars);
+               }
             }
          }
+
          /* test if we have to insert a store */
-         if (  (current_node->uses[1] != NULL)
-               && ((current_node->uses[1])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[1]) != NULL)
+         for (int defi=0; defi<CFLOW_MAX_DEFS; defi++) {
+            t_cflow_var *def = current_node->defs[defi];
+            if ((def != NULL) && (def->ID != REG_0) && (def->ID != VAR_PSW))
             {
-               usedVars = _insertStore(program, graph, current_block
-                     , current_node, current_node->uses[1], usedVars);
-            }
-         }
-         /* test if we have to insert a store */
-         if (  (current_node->uses[2] != NULL)
-               && ((current_node->uses[2])->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->uses[2]) != NULL)
-            {
-               usedVars = _insertStore(program, graph, current_block
-                     , current_node, current_node->uses[2], usedVars);
-            }
-         }
-         /* test if we have to insert a store */
-         if (  (current_node->def != NULL)
-               && ((current_node->def)->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->def) != NULL)
-            {
-               usedVars = _insertStore(program, graph, current_block
-                     , current_node, current_node->def, usedVars);
+               if (findElement(usedVars, def) != NULL)
+               {
+                  usedVars = _insertStore(program, graph, current_block
+                        , current_node, def, usedVars);
+               }
             }
          }
          

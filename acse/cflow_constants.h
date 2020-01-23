@@ -10,11 +10,16 @@
 #ifndef _CFLOW_CONSTANTS_H
 #define _CFLOW_CONSTANTS_H
 
+#define VAR_PSW       -2
 #define VAR_UNDEFINED -1
 
 /* if this macro is set to 1, the control flow analysis will consider
  * R0 always as a LIVE IN temporary register (i.e. variable) */
 #define CFLOW_ALWAYS_LIVEIN_R0 1
+
+/* max number of defs and uses for each cfg node */
+#define CFLOW_MAX_DEFS 2
+#define CFLOW_MAX_USES 3
 
 /* errorcodes */
 #define CFLOW_OK 0

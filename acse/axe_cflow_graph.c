@@ -207,54 +207,37 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
    /* update the in list */
    cloned_list = cloneList(current_node->out);
    
+   for (int i=0; i<CFLOW_MAX_USES; i++) {
 #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
-   if ((current_node->uses)[0] != NULL && (current_node->uses)[0]->ID != REG_0)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[0], NULL);
-   if ((current_node->uses)[1] != NULL && (current_node->uses)[1]->ID != REG_0)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[1], NULL);
-   if ((current_node->uses)[2] != NULL && (current_node->uses)[2]->ID != REG_0)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[2], NULL);
+      if ((current_node->uses)[i] != NULL && (current_node->uses)[i]->ID != REG_0)
+         cloned_list = addVariableToSet
+               (cloned_list, (current_node->uses)[i], NULL);
 #else
-   if ((current_node->uses)[0] != NULL)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[0], NULL);
-   if ((current_node->uses)[1] != NULL)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[1], NULL);
-   
-   if ((current_node->uses)[2] != NULL)
-      cloned_list = addVariableToSet
-            (cloned_list, (current_node->uses)[2], NULL);
+      if ((current_node->uses)[i] != NULL)
+         cloned_list = addVariableToSet
+               (cloned_list, (current_node->uses)[i], NULL);
 #endif
+   }
 
-
-
-#if CFLOW_ALWAYS_LIVEIN_R0 == (1)
-   if (current_node->def != NULL && (current_node->def)->ID != REG_0)
-#else
-   if (current_node->def != NULL)
-#endif
-   {
+   for (int def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
       int found = 0;
-      int current_use_idx = 0;
-      
-      do
-      {
-         if ((current_node->uses)[current_use_idx] != NULL)
-         {
-            if ((current_node->uses)[current_use_idx]->ID == current_node->def->ID)
+      #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
+         if (!(current_node->defs)[def_i] || (current_node->defs)[def_i]->ID == REG_0)
+            continue;
+      #else
+         if (!(current_node->defs)[def_i])
+            continue;
+      #endif
+
+      for (int use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
+         if ((current_node->uses)[use_i]) {
+            if ((current_node->uses)[use_i]->ID == (current_node->defs)[def_i]->ID)
                found = 1;
          }
-         
-         current_use_idx++;
-         
-      } while((found == 0) && (current_use_idx < 3));
-      
+      }
+
       if (!found)
-         cloned_list = removeElement(cloned_list, current_node->def);
+         cloned_list = removeElement(cloned_list, current_node->defs[def_i]);
    }
    
    current_node->in = addListToSet
@@ -286,53 +269,37 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
       cloned_list = cloneList(current_node->out);
       
       /* update the in list */
+      for (int i=0; i<CFLOW_MAX_USES; i++) {
 #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
-      if ((current_node->uses)[0] != NULL && (current_node->uses)[0]->ID != REG_0)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[0], NULL);
-      if ((current_node->uses)[1] != NULL && (current_node->uses)[1]->ID != REG_0)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[1], NULL);
-      if ((current_node->uses)[2] != NULL && (current_node->uses)[2]->ID != REG_0)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[2], NULL);
+         if ((current_node->uses)[i] != NULL && (current_node->uses)[i]->ID != REG_0)
+            cloned_list = addVariableToSet
+                  (cloned_list, (current_node->uses)[i], NULL);
 #else
-      if ((current_node->uses)[0] != NULL)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[0], NULL);
-      if ((current_node->uses)[1] != NULL)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[1], NULL);
-      if ((current_node->uses)[2] != NULL)
-         cloned_list = addVariableToSet
-               (cloned_list, (current_node->uses)[2], NULL);
+         if ((current_node->uses)[i] != NULL)
+            cloned_list = addVariableToSet
+                  (cloned_list, (current_node->uses)[i], NULL);
 #endif
+      }
       
-#if CFLOW_ALWAYS_LIVEIN_R0 == (1)
-      if (current_node->def != NULL && (current_node->def)->ID != REG_0)
-#else
-      if (current_node->def != NULL)
-#endif
-      {
+      for (int def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
          int found = 0;
-         int current_use_idx = 0;
-      
-         do
-         {
-            if ((current_node->uses)[current_use_idx] != NULL)
-            {
-               if ((current_node->uses)[current_use_idx]->ID
-                        == current_node->def->ID)
-               {
+         #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
+            if (!(current_node->defs)[def_i] || (current_node->defs)[def_i]->ID == REG_0)
+               continue;
+         #else
+            if (!(current_node->defs)[def_i])
+               continue;
+         #endif
+
+         for (int use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
+            if ((current_node->uses)[use_i]) {
+               if ((current_node->uses)[use_i]->ID == (current_node->defs)[def_i]->ID)
                   found = 1;
-               }
             }
-            current_use_idx++;
-         
-         } while((found == 0) && (current_use_idx < 3));
-      
+         }
+
          if (!found)
-            cloned_list = removeElement(cloned_list, current_node->def);
+            cloned_list = removeElement(cloned_list, current_node->defs[def_i]);
       }
 
       current_node->in = addListToSet
@@ -456,9 +423,6 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
 void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
 {
    t_axe_instruction *instr;
-   t_cflow_var *varDest;
-   t_cflow_var *varSource1;
-   t_cflow_var *varSource2;
 
    /* preconditions */
    if (graph == NULL) {
@@ -484,15 +448,12 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
    /* update the value of `instr' */
    instr = node->instr;
 
-   /* if the instruction is a Jump instruction then does nothing */
-   if ( isJumpInstruction(instr))
-      return;
-
    /* initialize the values of varDest, varSource1 and varSource2 */
-   varDest = NULL;
-   varSource1 = NULL;
-   varSource2 = NULL;
-
+   t_cflow_var *varDest = NULL;
+   t_cflow_var *varSource1 = NULL;
+   t_cflow_var *varSource2 = NULL;
+   t_cflow_var *varPSW = allocVariable(graph, VAR_PSW);
+   
    /* update the values of the variables */
    if (instr->reg_1 != NULL)
       varDest = allocVariable(graph, (instr->reg_1)->ID);
@@ -501,27 +462,47 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
    if (instr->reg_3 != NULL)
       varSource2 = allocVariable(graph, (instr->reg_3)->ID);
    
+   /* set normal register defs/uses */
    switch(instr->opcode)
    {
-      case LOAD : case AXE_READ : node->def = varDest; break;
+      case LOAD : case AXE_READ : node->defs[0] = varDest; break;
       case STORE : case AXE_WRITE : (node->uses)[0] = varDest; break;
       case SGE : case SGT: case SLE : case SLT : case SNE :
-      case SEQ : node->def = varDest; break;
+      case SEQ : node->defs[0] = varDest; break;
       case HALT : case RET : case JSR : case NOP : break;
-      case MOVA : node->def = varDest; break;
+      case MOVA : node->defs[0] = varDest; break;
       case NOTB : case NOTL : case ROTRI : case ROTLI :
       case SHRI : case SHLI : case DIVI : case MULI :
       case EORBI : case ORBI : case ANDBI : case EORLI :
       case ORLI : case ANDLI : case SUBI : case ADDI :
-                node->def = varDest;
+                node->defs[0] = varDest;
                 (node->uses)[0] = varSource1; break;
       default :
+         if (!isJumpInstruction(instr)) {
                 if ((instr->reg_1)->indirect)
                      (node->uses)[2] = varDest;
                 else
-                     node->def = varDest;
+                     node->defs[0] = varDest;
                 (node->uses)[0] = varSource1;
                 (node->uses)[1] = varSource2;
+         }
+   }
+
+   /* set defs/uses of the flags register */
+   switch (instr->opcode) {
+      case ADD: case SUB: case ANDL: case ORL: case EORL: case ANDB: case ORB:
+      case EORB: case MUL: case DIV: case SHL: case SHR: case ROTL: case ROTR:
+      case NEG: case ADDI: case SUBI: case ANDLI: case ORLI: case EORLI:
+      case ANDBI: case ORBI: case EORBI: case MULI: case DIVI: case SHLI:
+      case SHRI: case ROTLI: case ROTRI: case NOTL: case NOTB:
+         node->defs[1] = varPSW;
+         break;
+      case SEQ: case SGE: case SGT: case SLE: case SLT: case SNE: 
+         node->defs[1] = varPSW;
+      case BHI: case BLS: case BCC: case BCS: case BNE: case BEQ: case BVC:
+      case BVS: case BPL: case BMI: case BGE: case BLT: case BLE:
+         node->uses[0] = varPSW;
+         break;
    }
 }
 
@@ -806,10 +787,10 @@ t_cflow_Node * allocNode
    }
 
    /* initialize result */
-   result->def = NULL;
-   result->uses[0] = NULL;
-   result->uses[1] = NULL;
-   result->uses[2] = NULL;
+   for (int i=0; i<CFLOW_MAX_DEFS; i++)
+      result->defs[i] = NULL;
+   for (int i=0; i<CFLOW_MAX_USES; i++)
+      result->uses[i] = NULL;
    result->instr = instr;
 
    /* set the def-uses for the current node */

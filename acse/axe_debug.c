@@ -12,7 +12,9 @@
 #include "reg_alloc_constants.h"
 #include "cflow_constants.h"
 
+static void printArrayOfVariables(t_cflow_var **array, int size, FILE *fout);
 static void printListOfVariables(t_list *variables, FILE *fout);
+static void printCFlowGraphVariable(t_cflow_var *var, FILE *fout);
 static void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose);
 static void printLiveIntervals(t_list *intervals, FILE *fout);
 static void printBindings(int *bindings, int numVars, FILE *fout);
@@ -28,11 +30,8 @@ void printBindings(int *bindings, int numVars, FILE *fout)
    if (fout == NULL)
       return;
 
-   /* initialize counter */
-   counter = 0;
    fprintf(fout, "BINDINGS : \n");
-   while(counter <= numVars)
-   {
+   for (counter = 0; counter < numVars; counter++) {
       if (bindings[counter] != RA_SPILL_REQUIRED)
       {
          fprintf(fout, "VAR T%d will be assigned to register R%d \n"
@@ -42,8 +41,6 @@ void printBindings(int *bindings, int numVars, FILE *fout)
       {
          fprintf(fout, "VAR T%d will be spilled \n", counter);
       }
-      
-      counter++;
    }
 
    fflush(fout);
@@ -122,17 +119,13 @@ void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
       debug_printInstruction(current_node->instr, fout);
       if (verbose != 0)
       {
-         if (current_node->def != NULL)
-            fprintf(fout, "\n\t\t\tDEF = [R%d]", (current_node->def)->ID);
-         if (current_node->uses[0] != NULL)
-         {
-            fprintf(fout, "\n\t\t\tUSES = [R%d", ((current_node->uses)[0])->ID);
-            if (current_node->uses[1] != NULL)
-               fprintf(fout, ", R%d", ((current_node->uses)[1])->ID);
-            if (current_node->uses[2] != NULL)
-               fprintf(fout, ", R%d", ((current_node->uses)[2])->ID);
-            fprintf(fout, "]");
-         }
+         fprintf(fout, "\n\t\t\tDEFS = [");
+         printArrayOfVariables(current_node->defs, CFLOW_MAX_DEFS, fout);
+         fprintf(fout, "]");
+         fprintf(fout, "\n\t\t\tUSES = [");
+         printArrayOfVariables(current_node->uses, CFLOW_MAX_USES, fout);
+         fprintf(fout, "]");
+
          fprintf(fout, "\n\t\t\tLIVE IN = [");
          printListOfVariables(current_node->in, fout);
          fprintf(fout, "]");
@@ -145,6 +138,24 @@ void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
       count++;
       current_element = LNEXT(current_element);
    }
+   fflush(fout);
+}
+
+void printArrayOfVariables(t_cflow_var **array, int size, FILE *fout)
+{
+   int foundVariables = 0;
+   
+   for (int i=0; i<size; i++) {
+      if (!(array[i]))
+         continue;
+         
+      if (foundVariables > 0)
+         fprintf(fout, ", ");
+         
+      printCFlowGraphVariable(array[i], fout);
+      foundVariables++;
+   }
+   
    fflush(fout);
 }
 
@@ -162,13 +173,23 @@ void printListOfVariables(t_list *variables, FILE *fout)
    while(current_element != NULL)
    {
       current_variable = (t_cflow_var *) LDATA(current_element);
-      fprintf(fout, "R%d", current_variable->ID);
+      printCFlowGraphVariable(current_variable, fout);
       if (LNEXT(current_element) != NULL)
          fprintf(fout, ", ");
       
       current_element = LNEXT(current_element);
    }
    fflush(fout);
+}
+
+void printCFlowGraphVariable(t_cflow_var *var, FILE *fout)
+{
+   if (var->ID == VAR_PSW)
+      fprintf(fout, "PSW");
+   else if (var->ID == VAR_UNDEFINED)
+      fprintf(fout, "<!UNDEF!>");
+   else
+      fprintf(fout, "R%d", var->ID);
 }
 
 void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose)

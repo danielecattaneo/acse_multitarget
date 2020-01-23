@@ -11,6 +11,7 @@
 #define _AXE_CFLOW_GRAPH_H
 
 #include <stdio.h>
+#include "cflow_constants.h"
 #include "axe_struct.h"
 #include "collections.h"
 
@@ -20,7 +21,8 @@ extern int cflow_errorcode;
 /* a variable of the intermediate code */
 typedef struct t_cflow_var
 {
-   int ID;   /* variable identifier */
+   int ID;   /* Variable identifier. Negative IDs are reserved for artificial 
+              * variables which are not part of the code */
 } t_cflow_var;
 
 /* A Node exists only in a basic block. It defines a list of
@@ -28,8 +30,8 @@ typedef struct t_cflow_var
  * inside the code */
 typedef struct t_cflow_Node
 {
-   t_cflow_var *def;        /* A variable that is defined by this node */
-   t_cflow_var *uses[3];    /* set of variables that will be used by this node */
+   t_cflow_var *defs[CFLOW_MAX_DEFS];  /* set of variables defined by this node */
+   t_cflow_var *uses[CFLOW_MAX_USES];  /* set of variables that will be used by this node */
    t_axe_instruction *instr;  /* a pointer to the instruction associated
                                * with this node */
    t_list *in;             /* variables that are live-in the current node */
