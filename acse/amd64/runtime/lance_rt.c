@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 int __axe_read(void)
 {
 	int tmp;
+	printf("int value? >");
 	scanf("%d", &tmp);
 	return tmp;
 }
