@@ -57,6 +57,11 @@ typedef struct t_cflow_Graph
    t_list *cflow_variables;      /* a list of all the variable identifiers */
 } t_cflow_Graph;
 
+typedef struct {
+   t_cflow_Node *node;
+   t_cflow_var *var;
+} t_cflow_reach_def;
+
 
 /* functions that are used in order to allocate/deallocate instances
  * of basic blocks, instruction nodes and flow graphs */
@@ -85,5 +90,10 @@ extern t_cflow_Graph *createFlowGraph(t_list *instructions);
 /* dataflow analysis */
 extern void performLivenessAnalysis(t_cflow_Graph *graph);
 
+/* reaching definitions */
+t_list *reachingDefinitionsOfNode(t_cflow_Graph *graph, t_basic_block *bb, 
+      t_cflow_Node *node);
+t_list *reachingDefinitionsOfInstruction(t_cflow_Graph *graph, 
+      t_axe_instruction *instr);
 
 #endif

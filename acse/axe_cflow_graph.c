@@ -1223,3 +1223,98 @@ void updateFlowGraph(t_cflow_Graph *graph)
       current_element = LNEXT(current_element);
    }
 }
+
+void reachingDefinitionsOfVarsInBB(t_cflow_Graph *graph, t_basic_block *bb, 
+      t_list *start, t_list **pRes, t_list **pNotReached, t_list **pVisitedBBs)
+{
+   if (findElement(*pVisitedBBs, bb))
+      return;
+
+   t_list *cur = start;
+   while (cur != NULL && *pNotReached != NULL) {
+      t_cflow_Node *node = LDATA(cur);
+      for (int i=0; i<CFLOW_MAX_DEFS; i++) {
+         if (node->defs[i] == NULL)
+            continue;
+         t_list *foundUse = findElement(*pNotReached, node->defs[i]);
+         if (foundUse) {
+            *pNotReached = removeElementLink(*pNotReached, foundUse);
+            t_cflow_reach_def *rdef = calloc(sizeof(t_cflow_reach_def), 1);
+            rdef->node = node;
+            rdef->var = node->defs[i];
+            *pRes = addElement(*pRes, rdef, 0);
+         }
+      }
+      cur = LPREV(cur);
+   }
+
+   *pVisitedBBs = addElement(*pVisitedBBs, bb, 0);
+
+   if (*pNotReached == NULL)
+      return;
+
+   t_list *prevBBLnk = bb->pred;
+   for (; prevBBLnk != NULL; prevBBLnk = LNEXT(prevBBLnk)) {
+      t_list *notReachedB = cloneList(*pNotReached);
+      t_basic_block *prevBB = LDATA(prevBBLnk);
+      reachingDefinitionsOfVarsInBB(graph, prevBB, 
+            getLastElement(prevBB->nodes), pRes, &notReachedB, pVisitedBBs);
+      freeList(notReachedB);
+   }
+}
+
+t_list *reachingDefinitionsOfNode(t_cflow_Graph *graph, t_basic_block *bb, 
+      t_cflow_Node *node)
+{
+   t_list *res = NULL;
+   t_list *visitedBBs = NULL;
+
+   t_list *notReached = NULL;
+   for (int i=0; i<CFLOW_MAX_USES; i++) {
+      if (node->uses[i] == NULL)
+         continue;
+      notReached = addElement(notReached, node->uses[i], 0);
+   }
+
+   t_list *start;
+   if (bb) {
+      start = findElement(bb->nodes, node);
+   } else {
+      t_list *bbLnk = graph->blocks;
+      for (; bbLnk != NULL; bbLnk = LNEXT(bbLnk)) {
+         t_basic_block *bb = LDATA(bbLnk);
+         start = findElement(bb->nodes, node);
+         if (start)
+            break;
+      }
+   }
+   assert(start && "node not found in cfg");
+   reachingDefinitionsOfVarsInBB(graph, bb, LPREV(start), 
+      &res, &notReached, &visitedBBs);
+
+   freeList(notReached);
+   freeList(visitedBBs);
+   return res;
+}
+
+t_list *reachingDefinitionsOfInstruction(t_cflow_Graph *graph, 
+      t_axe_instruction *instr)
+{
+   t_basic_block *bb = NULL;
+   t_cflow_Node *start = NULL;
+   t_list *bbLnk = graph->blocks;
+   for (; bbLnk != NULL && !start; bbLnk = LNEXT(bbLnk)) {
+      bb = LDATA(bbLnk);
+      t_list *nodeLnk = bb->nodes;
+      for (; nodeLnk != NULL; nodeLnk = LNEXT(nodeLnk)) {
+            t_cflow_Node *node = LDATA(nodeLnk);
+            if (node->instr == instr) {
+               start = node;
+               break;
+            }
+      }
+   }
+   assert(start && "instr not found in cfg");
+
+   return reachingDefinitionsOfNode(graph, bb, start);
+}
