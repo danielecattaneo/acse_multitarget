@@ -2,6 +2,7 @@
 #include "axe_target_info.h"
 #include "axe_gencode.h"
 #include "axe_utils.h"
+#include "axe_cflow_graph.h"
 
 #define R_ID(reg)       ((reg)->ID)
 #define R_IND(reg)      ((reg)->indirect)
@@ -250,9 +251,57 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
    }
 }
 
+void fixFlagUsers(t_program_infos *program)
+{
+   t_cflow_Graph *cfg = createFlowGraph(program->instructions);
+   performLivenessAnalysis(cfg);
+
+   t_list *bbLnk = cfg->blocks;
+   for (; bbLnk; bbLnk = LNEXT(bbLnk)) {
+      t_basic_block *bb = LDATA(bbLnk);
+      t_list *nodeLnk = bb->nodes;
+      for (; nodeLnk; nodeLnk = LNEXT(nodeLnk)) {
+         t_cflow_Node *node = LDATA(nodeLnk);
+         
+         if (!(node->uses[0] && node->uses[0]->ID == VAR_PSW))
+            continue;
+
+         t_list *reachDefLst = reachingDefinitionsOfNode(cfg, bb, node);
+         assert(reachDefLst && "invalid program; PSW used but never defined");
+
+         t_list *reachDefLnk = reachDefLst;
+         for (; reachDefLnk; reachDefLnk = LNEXT(reachDefLnk)) {
+            t_cflow_reach_def *reachDef = LDATA(reachDefLnk);
+
+            t_axe_register *dstReg;
+            if (!isMoveInstruction(reachDef->node->instr, &dstReg, NULL, NULL, NULL))
+               continue;
+            if (reachDef->node->instr->opcode == MOVA)
+               continue;
+
+            /* x86_64 move instructions do not set flags;
+             * patch it by setting them manually */
+            t_list *instLnk = findElement(program->instructions, reachDef->node->instr);
+            assert(instLnk && "instruction is in the CFG but not in the program");
+            pushInstrInsertionPoint(program, instLnk);
+            if (!R_IND(dstReg)) {
+               gen_andb_instruction(program, R_ID(dstReg), R_ID(dstReg), R_ID(dstReg), CG_DIRECT_ALL);
+            } else {
+               int tmp = getNewRegister(program);
+               gen_orb_instruction(program, tmp, REG_0, R_ID(dstReg), CG_DIRECT(0, R_IND(dstReg)));
+            }
+            popInstrInsertionPoint(program);
+         }
+      }
+   }
+
+   finalizeGraph(cfg);
+}
+
 void doTargetSpecificTransformations(t_program_infos *program)
 {
    rewriteLogicalOperations(program);
+   fixFlagUsers(program);
    fixDestinationRegister(program);
    fixReadWrite(program);
    insertRegisterAllocationConstraints(program);
