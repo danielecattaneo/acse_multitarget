@@ -207,6 +207,64 @@ int gen_load_immediate(t_program_infos *program, int immediate)
    return imm_register;
 }
 
+int isLoadInstruction(t_axe_instruction *instr)
+{
+   if (instr == NULL) {
+      return 0;
+   }
+
+   return (instr->opcode == LOAD) ? 1 : 0;
+}
+
+int isHaltInstruction(t_axe_instruction *instr)
+{
+   if (instr == NULL) {
+      return 0;
+   }
+
+   return (instr->opcode == HALT) ? 1 : 0;
+}
+
+/* test if the current instruction `instr' is a BT or a BF */
+int isUnconditionalJump(t_axe_instruction *instr)
+{
+   if (isJumpInstruction(instr))
+   {
+      if ((instr->opcode == BT) || (instr->opcode == BF))
+         return 1;
+   }
+
+   return 0;
+}
+
+/* test if the current instruction `instr' is a branch instruction */
+int isJumpInstruction(t_axe_instruction *instr)
+{
+   if (instr == NULL)
+      return 0;
+
+   switch(instr->opcode)
+   {
+      case BT :
+      case BF :
+      case BHI :
+      case BLS :
+      case BCC :
+      case BCS :
+      case BNE :
+      case BEQ :
+      case BVC :
+      case BVS :
+      case BPL :
+      case BMI :
+      case BGE :
+      case BLT :
+      case BGT :
+      case BLE : return 1;
+      default : return 0;
+   }
+}
+
 void set_end_Program(t_program_infos *program)
 {
    if (program == NULL)

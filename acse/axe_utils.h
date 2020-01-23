@@ -48,6 +48,18 @@ extern int gen_load_immediate(t_program_infos *program, int immediate);
 /* Generate the instruction to move an `immediate' value into a register. */
 extern void gen_move_immediate(t_program_infos *program, int dest, int imm);
 
+/* Returns 1 if `instr` is a jump (branch) instruction. */
+extern int isJumpInstruction(t_axe_instruction *instr);
+
+/* Returns 1 if `instr` is a unconditional jump instruction (BT, BF) */
+extern int isUnconditionalJump(t_axe_instruction *instr);
+
+/* Returns 1 if `instr` is the HALT instruction. */
+extern int isHaltInstruction(t_axe_instruction *instr);
+
+/* Returns 1 if `instr` is the LOAD instruction. */
+extern int isLoadInstruction(t_axe_instruction *instr);
+
 /* Notify the end of the program. This function is directly called
  * from the parser when the parsing process is ended */
 extern void set_end_Program(t_program_infos *program);

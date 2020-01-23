@@ -12,6 +12,7 @@
 #include "axe_cflow_graph.h"
 #include "cflow_constants.h"
 #include "collections.h"
+#include "axe_utils.h"
 #include "axe_debug.h"
 
 int cflow_errorcode;
@@ -20,10 +21,6 @@ int cflow_errorcode;
 static t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier);
 static int isEndingNode(t_axe_instruction *instr);
 static int isStartingNode(t_axe_instruction *instr);
-static int isJumpInstruction(t_axe_instruction *instr);
-static int isUnconditionalJump(t_axe_instruction *instr);
-static int isHaltInstruction(t_axe_instruction *instr);
-static int isLoadInstruction(t_axe_instruction *instr);
 static void updateFlowGraph(t_cflow_Graph *graph);
 static t_basic_block * searchLabel(t_cflow_Graph *graph, t_axe_label *label);
 static void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node);
@@ -353,26 +350,6 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
    return modified;
 }
 
-static int isLoadInstruction(t_axe_instruction *instr)
-{
-   if (instr == NULL) {
-      cflow_errorcode = CFLOW_INVALID_INSTRUCTION;
-      return 0;
-   }
-
-   return (instr->opcode == LOAD) ? 1 : 0;
-}
-
-int isHaltInstruction(t_axe_instruction *instr)
-{
-   if (instr == NULL) {
-      cflow_errorcode = CFLOW_INVALID_INSTRUCTION;
-      return 0;
-   }
-
-   return (instr->opcode == HALT) ? 1 : 0;
-}
-
 int performLivenessIteration(t_cflow_Graph *graph)
 {
    int modified;
@@ -545,46 +522,6 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
                      node->def = varDest;
                 (node->uses)[0] = varSource1;
                 (node->uses)[1] = varSource2;
-   }
-}
-
-/* test if the current instruction `instr' is a BT or a BF */
-int isUnconditionalJump(t_axe_instruction *instr)
-{
-   if (isJumpInstruction(instr))
-   {
-      if ((instr->opcode == BT) || (instr->opcode == BF))
-         return 1;
-   }
-
-   return 0;
-}
-
-/* test if the current instruction `instr' is a branch instruction */
-int isJumpInstruction(t_axe_instruction *instr)
-{
-   if (instr == NULL)
-      return 0;
-
-   switch(instr->opcode)
-   {
-      case BT :
-      case BF :
-      case BHI :
-      case BLS :
-      case BCC :
-      case BCS :
-      case BNE :
-      case BEQ :
-      case BVC :
-      case BVS :
-      case BPL :
-      case BMI :
-      case BGE :
-      case BLT :
-      case BGT :
-      case BLE : return 1;
-      default : return 0;
    }
 }
 
