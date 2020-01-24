@@ -80,9 +80,14 @@
 #define AXE_WRITE 62
 #define INVALID_OPCODE -1
 
-/* data types */
-#define INTEGER_TYPE 0
-#define UNKNOWN_TYPE -1
+/* data types
+ * note: keep the types in order of size. */
+#define PSW_TYPE          0
+#define INTEGER_TYPE      1
+#define PTR_TYPE_FLAG     0x10000
+#define INTEGER_PTR_TYPE  (INTEGER_TYPE | PTR_TYPE_FLAG)
+#define UNKNOWN_TYPE     -1
+#define INFERRED_TYPE    -2
 
 /* WARNINGS */
 #define WARN_DIVISION_BY_ZERO 1

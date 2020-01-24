@@ -21,7 +21,7 @@ t_axe_expression create_expression (int value, int type)
 }
 
 /* create and initialize an instance of `t_axe_register' */
-t_axe_register * alloc_register(int ID, int indirect)
+t_axe_register * alloc_register(int ID, int type, int indirect)
 {
    t_axe_register *result;
 
@@ -35,8 +35,9 @@ t_axe_register * alloc_register(int ID, int indirect)
 
    /* initialize the new label */
    result->ID = ID;
-   result->mcRegWhitelist = NULL;
+   result->type = type;
    result->indirect = indirect;
+   result->mcRegWhitelist = NULL;
 
    /* return the label */
    return result;
@@ -102,7 +103,7 @@ t_while_statement create_while_statement()
    return statement;
 }
 
-t_axe_label * alloc_label(int value)
+t_axe_label * alloc_label(int value, int type)
 {
    t_axe_label *result;
 
@@ -110,11 +111,12 @@ t_axe_label * alloc_label(int value)
    result = (t_axe_label *)
          malloc(sizeof(t_axe_label));
 
-   /* initialize the internal value of `result' */
+   /* initialize the internal value of `result' and `type' */
    result->labelID = value;
+   result->type = type;
    result->name = NULL;
 
-   /* return the just initialized new instance of `t_axe_label' */
+   /* return the new instance of `t_axe_label' */
    return result;
 }
 

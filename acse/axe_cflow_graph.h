@@ -24,6 +24,7 @@ typedef struct t_cflow_var
 {
    int ID;   /* Variable identifier. Negative IDs are reserved for artificial
               * variables which are not part of the code */
+   int type;
    t_list *mcRegWhitelist;
 } t_cflow_var;
 

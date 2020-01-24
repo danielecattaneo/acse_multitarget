@@ -57,6 +57,7 @@ void createVariable(t_program_infos *program, char *ID
    
    /* assign a new label to the newly created variable `var' */
    var->labelID = newLabel(program);
+   var->labelID->type = type;
    setLabelName(program->lmanager, var->labelID, ID);
 
    /* add the new variable to program */

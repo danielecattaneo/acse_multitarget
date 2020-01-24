@@ -82,7 +82,7 @@ void fixLargeImmediates(t_program_infos *program)
          int reg = getNewRegister(program);
          moveLabel(genLoweredImmediateMove(program, reg, instr->immediate), instr);
          instr->immediate = 0;
-         instr->reg_3 = alloc_register(reg, 0);
+         instr->reg_3 = alloc_register(reg, INFERRED_TYPE, 0);
          instr->opcode = switchOpcodeImmediateForm(instr->opcode);
          popInstrInsertionPoint(program);
       }

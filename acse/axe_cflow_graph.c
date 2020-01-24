@@ -18,7 +18,8 @@
 int cflow_errorcode;
 
 
-static t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcRegs);
+static t_cflow_var * allocVariable(t_cflow_Graph *graph, int identifier, 
+      t_list *mcRegs, int type);
 static int isEndingNode(t_axe_instruction *instr);
 static int isStartingNode(t_axe_instruction *instr);
 static void updateFlowGraph(t_cflow_Graph *graph);
@@ -379,7 +380,8 @@ int performLivenessIteration(t_cflow_Graph *graph)
 /* Alloc a new control flow graph variable object. If a variable object
  * referencing the same identifier already exists, returns the pre-existing
  * object. */
-t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcRegs)
+t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, 
+      t_list *mcRegs, int type)
 {
    t_cflow_var * result;
    t_list *elementFound;
@@ -400,6 +402,7 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcReg
    /* update the value of result */
    result->ID = identifier;
    result->mcRegWhitelist = NULL;
+   result->type = INFERRED_TYPE;
    
    /* test if a variable with the same identifier was already present */
    elementFound = CustomfindElement
@@ -408,8 +411,7 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcReg
    if (elementFound == NULL)
    {
       /* update the set of variables */
-      graph->cflow_variables = addElement
-            (graph->cflow_variables, result, -1);
+      graph->cflow_variables = addElement(graph->cflow_variables, result, -1);
    }
    else
    {
@@ -436,6 +438,9 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier, t_list *mcReg
          assert(result->mcRegWhitelist);
       }
    }
+   
+   if (result->type == INFERRED_TYPE)
+      result->type = type;
    
    /* return a new var identifier */
    return result;
@@ -474,15 +479,18 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
    t_cflow_var *varDest = NULL;
    t_cflow_var *varSource1 = NULL;
    t_cflow_var *varSource2 = NULL;
-   t_cflow_var *varPSW = allocVariable(graph, VAR_PSW, NULL);
+   t_cflow_var *varPSW = allocVariable(graph, VAR_PSW, NULL, PSW_TYPE);
    
    /* update the values of the variables */
    if (instr->reg_1 != NULL)
-      varDest = allocVariable(graph, (instr->reg_1)->ID, instr->reg_1->mcRegWhitelist);
+      varDest = allocVariable(graph, (instr->reg_1)->ID, 
+            instr->reg_1->mcRegWhitelist, instr->reg_1->type);
    if (instr->reg_2 != NULL)
-      varSource1 = allocVariable(graph, (instr->reg_2)->ID, instr->reg_2->mcRegWhitelist);
+      varSource1 = allocVariable(graph, (instr->reg_2)->ID, 
+            instr->reg_2->mcRegWhitelist, instr->reg_2->type);
    if (instr->reg_3 != NULL)
-      varSource2 = allocVariable(graph, (instr->reg_3)->ID, instr->reg_3->mcRegWhitelist);
+      varSource2 = allocVariable(graph, (instr->reg_3)->ID, 
+            instr->reg_3->mcRegWhitelist, instr->reg_3->type);
    
    /* set normal register defs/uses */
    switch(instr->opcode)
@@ -526,6 +534,27 @@ void setDefUses(t_cflow_Graph *graph, t_cflow_Node *node)
          node->uses[0] = varPSW;
          break;
    }
+
+   /* perform type inference */
+   if (varDest && varDest->type == INFERRED_TYPE) {
+      /* load the types of the arguments */
+      int tsrc1 = varSource1 ? varSource1->type : INFERRED_TYPE;
+      int tsrc2 = varSource2 ? varSource2->type : INFERRED_TYPE;
+      /* remove the pointer flag if the instruction performs a memory access */
+      if (tsrc1 != INFERRED_TYPE && instr->reg_2 && instr->reg_2->indirect)
+         tsrc1 &= ~PTR_TYPE_FLAG;
+      if (tsrc2 != INFERRED_TYPE && instr->reg_3 && instr->reg_3->indirect)
+         tsrc2 &= ~PTR_TYPE_FLAG;
+      /* take the largest type for the destination */
+      int inferred_t = tsrc1 > tsrc2 ? tsrc1 : tsrc2;
+      varDest->type = inferred_t;
+   }
+   if (varDest)
+      instr->reg_1->type = varDest->type;
+   if (varSource1)
+      instr->reg_2->type = varSource1->type;
+   if (varSource2)
+      instr->reg_3->type = varSource2->type;
 }
 
 /* look up for a label inside the graph */

@@ -252,7 +252,7 @@ t_axe_instruction * _createUnary (t_program_infos *program
       return NULL;
    }
 
-   result->reg_1 = alloc_register(reg, 0);
+   result->reg_1 = alloc_register(reg, INFERRED_TYPE, 0);
    if (result->reg_1 == NULL) {
       errorcode = AXE_OUT_OF_MEMORY;
       free_Instruction(result);

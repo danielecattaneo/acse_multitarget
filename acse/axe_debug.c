@@ -134,6 +134,15 @@ void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
       debug_printInstruction(current_node->instr, fout);
       if (verbose != 0)
       {
+         fprintf(fout, "\n\t\t\tTYPES = { ");
+         if (current_node->instr->reg_1)
+            fprintf(fout, "R%d=%d ", current_node->instr->reg_1->ID, current_node->instr->reg_1->type);
+         if (current_node->instr->reg_2)
+            fprintf(fout, "R%d=%d ", current_node->instr->reg_2->ID, current_node->instr->reg_2->type);
+         if (current_node->instr->reg_3)
+            fprintf(fout, "R%d=%d ", current_node->instr->reg_3->ID, current_node->instr->reg_3->type);
+         fprintf(fout, "}");
+         
          fprintf(fout, "\n\t\t\tDEFS = [");
          printArrayOfVariables(current_node->defs, CFLOW_MAX_DEFS, fout);
          fprintf(fout, "]");

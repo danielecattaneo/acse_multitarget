@@ -20,14 +20,18 @@
 typedef struct t_axe_label
 {
    unsigned int labelID; /* label identifier */
+   int type;             /* type of the value the label points to. 
+                          * UNKNOWN_TYPE if the label points to code. */
    char *name;           /* Name of the label. If NULL, the name will be 
                           * automatically generated in the form L<ID>. */
 } t_axe_label;
 
 typedef struct t_axe_register
 {
-   int ID;        /* an identifier of the register */
-   int indirect;  /* a boolean value: 1 if the register value is a pointer */
+   int ID;        /* an identifier of the register (temporary variable) */
+   int type;      /* the data type of the variable */
+   int indirect;  /* 1 if the instruction using this register object will 
+                   * dereference the pointer stored in the register. */
    t_list *mcRegWhitelist;  /* the list of machine registers where this 
                              * variable can be allocated. NULL if any register 
                              * is allowed. */
@@ -116,7 +120,7 @@ typedef struct t_while_statement
 } t_while_statement;
 
 /* create a label */
-extern t_axe_label *alloc_label(int value);
+extern t_axe_label *alloc_label(int value, int type);
 
 /* free a label */
 extern void free_label(t_axe_label *lab);
@@ -128,7 +132,7 @@ extern t_axe_expression create_expression(int value, int type);
 extern t_while_statement create_while_statement();
 
 /* create an instance of `t_axe_register' */
-extern t_axe_register *alloc_register(int ID, int indirect);
+extern t_axe_register * alloc_register(int ID, int type, int indirect);
 
 /* create an instance of `t_axe_instruction' */
 extern t_axe_instruction *alloc_instruction(int opcode);

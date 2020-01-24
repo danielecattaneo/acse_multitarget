@@ -57,7 +57,7 @@ t_axe_label * newLabelID(t_axe_label_manager *lmanager)
    assert(lmanager != NULL);
    
    /* initialize a new label */
-   result = alloc_label(lmanager->current_label_ID);
+   result = alloc_label(lmanager->current_label_ID, UNKNOWN_TYPE);
 
    /* update the value of `current_label_ID' */
    lmanager->current_label_ID++;
@@ -114,6 +114,8 @@ t_axe_label * assignLabelID(t_axe_label_manager *lmanager, t_axe_label *label)
    }
    else
       lmanager->label_to_assign = label;
+   
+   label->type = UNKNOWN_TYPE;
 
    /* all went good */
    return label;
