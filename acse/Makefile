@@ -1,3 +1,4 @@
+target ?= mace
 bindir = ../bin
 project = $(bindir)/acse
 BISON ?= bison
@@ -8,15 +9,15 @@ override YFLAGS +=
 override LFLAGS +=
 
 objdir = ./obj
-override CFLAGS += -I$(objdir) -I.
+override CFLAGS += -I$(objdir) -I./$(target) -I.
 
 y_src = Acse.y
 lex_src = Acse.lex
-c_src = $(wildcard *.c)
+c_src = $(wildcard *.c) $(wildcard $(target)/*.c)
 derived_c_src = $(objdir)/Acse.tab.c $(objdir)/lex.yy.c
 version_c = $(objdir)/axe_version.c
 
-c_objects = $(patsubst %, $(objdir)/%, $(c_src:.c=.o))
+c_objects = $(patsubst %, $(objdir)/%, $(notdir $(c_src:.c=.o)))
 object = $(c_objects) $(derived_c_src:.c=.o) $(version_c:.c=.o)
 deps = $(object:.o=.d)
 
@@ -30,6 +31,9 @@ $(project): $(object) $(bindir)
 	$(CC) $(LDFLAGS) $(object) -o $@
 
 $(objdir)/%.o: %.c
+	$(CC) $(CFLAGS) -MMD -c $< -o $@
+
+$(objdir)/%.o: $(target)/%.c
 	$(CC) $(CFLAGS) -MMD -c $< -o $@
 
 $(objdir)/lex.yy.c: Acse.lex $(objdir)/Acse.tab.h

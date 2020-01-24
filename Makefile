@@ -1,8 +1,14 @@
-objects = executor asm compiler
+target?=mace
 dirs:=mace assembler acse tests
 
+ifeq ($(target), mace)
+all : executor asm compiler
+else
+all : compiler
+endif
 
-all : $(objects)
+bin :
+	mkdir -p bin
 
 tests : 
 	cd ./tests && $(MAKE)
