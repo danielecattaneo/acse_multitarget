@@ -19,6 +19,12 @@
 #define CG_DIRECT(dest, src2)    (!!(dest) | ((!!(src2)) << 1))
 #define CG_DIRECT_R(dest, src2)  CG_DIRECT(R_IND(dest), R_IND(src2))
 
+void moveLabel(t_axe_instruction *dest, t_axe_instruction *src)
+{
+   dest->labelID = src->labelID;
+   src->labelID = NULL;
+}
+
 t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
       t_list *position)
 {
@@ -40,8 +46,8 @@ t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
       return position;
 
    pushInstrInsertionPoint(program, LPREV(position));
-   gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
-         CG_DIRECT(RD_IND(instr), 0));
+   moveLabel(gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
+         CG_DIRECT(RD_IND(instr), 0)), instr);
    instr->reg_2->ID = instr->reg_1->ID;
    instr->reg_2->indirect = instr->reg_1->indirect;
    popInstrInsertionPoint(program);
@@ -99,7 +105,7 @@ void fixReadWrite(t_program_infos *program)
             inst->reg_1->ID = getNewRegister(program);
             inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EDI, 0);
             pushInstrInsertionPoint(program, LPREV(cur));
-            gen_add_instruction(program, inst->reg_1->ID, srcReg, REG_0, CG_DIRECT_ALL);
+            moveLabel(gen_add_instruction(program, inst->reg_1->ID, srcReg, REG_0, CG_DIRECT_ALL), inst);
             popInstrInsertionPoint(program);
          }
       }
@@ -120,7 +126,7 @@ void rewriteLogicalOperations(t_program_infos *program)
          pushInstrInsertionPoint(program, LPREV(cur));
          int rs1 = getNewRegister(program);
          int rs2 = getNewRegister(program);
-         gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+         moveLabel(gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL), inst);
          gen_sne_instruction(program, rs1);
          if (!RS2_IND(inst)) {
             gen_andb_instruction(program, RS2_ID(inst), RS2_ID(inst), RS2_ID(inst), CG_DIRECT_ALL);
@@ -154,31 +160,35 @@ void rewriteLogicalOperations(t_program_infos *program)
       } else if (inst->opcode == ANDLI) {
          /* this instruction is stupid #1 */
          pushInstrInsertionPoint(program, LPREV(cur));
+         t_axe_instruction *firstInst;
          if (inst->immediate == 0) {
-            gen_eorb_instruction(program, RD_ID(inst), RD_ID(inst), RD_ID(inst), CG_DIRECT_ALL);
+            firstInst = gen_eorb_instruction(program, RD_ID(inst), RD_ID(inst), RD_ID(inst), CG_DIRECT_ALL);
          } else {
-            gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+            firstInst = gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
             gen_sne_instruction(program, RD_ID(inst));
          }
+         moveLabel(firstInst, inst);
          popInstrInsertionPoint(program);
          removeInstructionLink(program, cur);
 
       } else if (inst->opcode == ORLI) {
          /* this instruction is stupid #2 */
          pushInstrInsertionPoint(program, LPREV(cur));
+         t_axe_instruction *firstInst;
          if (inst->immediate != 0) {
-            gen_addi_instruction(program, RD_ID(inst), REG_0, 1);
+            firstInst = gen_addi_instruction(program, RD_ID(inst), REG_0, 1);
          } else {
-            gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+            firstInst = gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
             gen_sne_instruction(program, RD_ID(inst));
          }
+         moveLabel(firstInst, inst);
          popInstrInsertionPoint(program);
          removeInstructionLink(program, cur);
 
       } else if (inst->opcode == EORLI) {
          /* this instruction is stupid #3 */
          pushInstrInsertionPoint(program, LPREV(cur));
-         gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL);
+         moveLabel(gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL), inst);
          if (inst->immediate == 0) {
             gen_sne_instruction(program, RD_ID(inst));
          } else {
@@ -207,7 +217,7 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          inst->reg_3->ID = getNewRegister(program);
          inst->reg_3->indirect = 0;
          inst->reg_3->mcRegWhitelist = addElement(inst->reg_3->mcRegWhitelist, (void *)R_AMD64_ECX, 0);
-         gen_add_instruction(program, inst->reg_3->ID, REG_0, rShAmt, CG_DIRECT(0, rShAmtInd));
+         moveLabel(gen_add_instruction(program, inst->reg_3->ID, REG_0, rShAmt, CG_DIRECT(0, rShAmtInd)), inst);
          popInstrInsertionPoint(program);
       }
 
@@ -215,7 +225,8 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          /* move the immediate to a register because x86_64 does not have a DIV
           * instruction with an immediate parameter. */
          pushInstrInsertionPoint(program, LPREV(cur));
-         int rimm = gen_load_immediate(program, inst->immediate);
+         int rimm = getNewRegister(program);
+         moveLabel(gen_addi_instruction(program, rimm, REG_0, inst->immediate), inst);
          inst->opcode = DIV;
          inst->reg_3 = alloc_register(rimm, INTEGER_TYPE, 0);
          popInstrInsertionPoint(program);
@@ -230,7 +241,7 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          int rEDX = getNewRegister(program);
 
          pushInstrInsertionPoint(program, LPREV(cur));
-         gen_add_instruction(program, rtmp, REG_0, rdest, CG_DIRECT(0, rdest_dir));
+         moveLabel(gen_add_instruction(program, rtmp, REG_0, rdest, CG_DIRECT(0, rdest_dir)), inst);
          t_axe_instruction *zeroEdx = gen_addi_instruction(program, rEDX, REG_0, 0);
          zeroEdx->reg_1->mcRegWhitelist = addElement(zeroEdx->reg_1->mcRegWhitelist, (void *)R_AMD64_EDX, 0);
          popInstrInsertionPoint(program);
