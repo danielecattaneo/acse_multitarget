@@ -71,6 +71,11 @@ extern int isImmediateArgumentInstrOpcode(int opcode);
  * there is no immediate or non-immediate available. */
 extern int switchOpcodeImmediateForm(int orig);
 
+/* Set the list of allowed machine registers for a specific register object
+ * to the specified list of register identifiers. The list must be terminated
+ * by REG_INVALID or -1. */
+extern void setMCRegisterWhitelist(t_axe_register *regObj, ...);
+
 /* Notify the end of the program. This function is directly called
  * from the parser when the parsing process is ended */
 extern void set_end_Program(t_program_infos *program);

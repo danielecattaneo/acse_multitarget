@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <stdarg.h>
 #include "axe_utils.h"
 #include "axe_gencode.h"
 #include "symbol_table.h"
@@ -258,6 +259,24 @@ int switchOpcodeImmediateForm(int orig)
        !(ADDI <= orig && orig <= ROTRI))
       return orig;
    return orig ^ 0x10;
+}
+
+void setMCRegisterWhitelist(t_axe_register *regObj, ...)
+{
+   t_list *res = NULL;
+   va_list args;
+
+   va_start(args, regObj);
+   int cur = va_arg(args, int);
+   while (cur != REG_INVALID) {
+      res = addElement(res, INTDATA(cur), -1);
+      cur = va_arg(args, int);
+   }
+   va_end(args);
+
+   if (regObj->mcRegWhitelist)
+      freeList(regObj->mcRegWhitelist);
+   regObj->mcRegWhitelist = res;
 }
 
 void set_end_Program(t_program_infos *program)
