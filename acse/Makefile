@@ -13,9 +13,10 @@ y_src = Acse.y
 lex_src = Acse.lex
 c_src = $(wildcard *.c)
 derived_c_src = $(objdir)/Acse.tab.c $(objdir)/lex.yy.c
+version_c = $(objdir)/axe_version.c
 
 c_objects = $(patsubst %, $(objdir)/%, $(c_src:.c=.o))
-object = $(c_objects) $(derived_c_src:.c=.o)
+object = $(c_objects) $(derived_c_src:.c=.o) $(version_c:.c=.o)
 deps = $(object:.o=.d)
 
 .PHONY: all clean
@@ -41,6 +42,10 @@ $(objdir)/%.tab.h: $(objdir)/%.tab.c
 $(objdir)/Acse.tab.c: Acse.y
 	$(BISON) $(YFLAGS) -o $@ -d $< 
 
+$(version_c): ../VERSION
+	printf 'const char *axe_version = "%s";\n' `cat $<` > $@
+
+$(version_c): | $(objdir)
 $(derived_c_src): | $(objdir)
 $(object): | $(objdir)
 
