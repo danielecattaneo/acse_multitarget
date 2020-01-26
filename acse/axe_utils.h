@@ -1,9 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * axe_utils.h
- * Formal Languages & Compilers Machine, 2007/2008
+ * Formal Languages & Compilers Machine, 2007-2020
  * 
  * Contains important functions to access the list of symbols and other
  * utility functions and macros.

@@ -1,5 +1,15 @@
+/*
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
+ * 
+ * axe_target_info.h
+ * Formal Languages & Compilers Machine, 2007-2020
+ */
+
 #ifndef _AXE_TARGET_INFO_H
 #define _AXE_TARGET_INFO_H
+
+#define TARGET_NAME "x86_64"
 
 #define R_AMD64_EAX   1
 #define R_AMD64_EBX   2  /* callee-save */
@@ -20,7 +30,6 @@
 /* Number of registers to reserve for spilled temporaries. Shall be equal to
  * the maximum number of unique register operands in a single instruction. */
 #define NUM_SPILL_REGS 2
-#define TARGET_NAME "x86_64"
 
 /* number of bytes for each memory address */
 #define TARGET_PTR_GRANULARITY 1

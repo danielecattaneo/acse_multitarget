@@ -1,3 +1,11 @@
+/*
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
+ * 
+ * axe_amd64_transform.c
+ * Formal Languages & Compilers Machine, 2007-2020
+ */
+
 #include "axe_target_transform.h"
 #include "axe_target_info.h"
 #include "axe_gencode.h"

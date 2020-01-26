@@ -1,9 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * axe_struct.h
- * Formal Languages & Compilers Machine, 2007/2008
+ * Formal Languages & Compilers Machine, 2007-2020
  * 
  * Fundamental data structures
  */
@@ -77,7 +79,7 @@ typedef struct t_axe_instruction
                                   * instruction that generated the current
                                   * assembly. This string will be written
                                   * into the output code as a comment */
-   t_axe_label *labelID;        /* a label associated with the current
+   t_axe_label *labelID;         /* a label associated with the current
                                   * instruction */
 }t_axe_instruction;
 

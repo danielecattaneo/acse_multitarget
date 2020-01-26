@@ -1,9 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * collections.h
- * Formal Languages & Compilers Machine, 2007/2008
+ * Formal Languages & Compilers Machine, 2007-2020
  * 
  * A double-linked list. `prev' pointer of first element and `next' pointer of
  * last element are NULL.

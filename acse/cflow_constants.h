@@ -1,10 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * cflow_constants.h
- * Formal Languages & Compilers Machine, 2007/2008
- * 
+ * Formal Languages & Compilers Machine, 2007-2020
  */
 
 #ifndef _CFLOW_CONSTANTS_H

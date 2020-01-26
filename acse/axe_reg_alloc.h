@@ -1,9 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * axe_reg_alloc.h
- * Formal Languages & Compilers Machine, 2007/2008
+ * Formal Languages & Compilers Machine, 2007-2020
  * 
  * Register allocation pass
  */

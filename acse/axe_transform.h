@@ -1,9 +1,11 @@
 /*
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
+ * Daniele Cattaneo
+ * Politecnico di Milano, 2020
  * 
  * axe_transform.h
- * Formal Languages & Compilers Machine, 2007/2008
+ * Formal Languages & Compilers Machine, 2007-2020
  * 
  * Transformation passes used to generate LOAD and STOREs to memory for
  * scalar variables and to perform register allocation.
