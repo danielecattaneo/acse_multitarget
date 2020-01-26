@@ -82,7 +82,7 @@ t_list *genRegisterClobberingForCall(t_program_infos *program, t_list *callLnk, 
       int reg = regList[i];
       int var = getNewRegister(program);
       t_axe_instruction *instr = gen_addi_instruction(program, var, REG_0, 0);
-      instr->reg_1->mcRegWhitelist = addElement(instr->reg_1->mcRegWhitelist, (void *)reg, 0);
+      instr->reg_1->mcRegWhitelist = addElement(instr->reg_1->mcRegWhitelist, INTDATA(reg), 0);
       instr->mcFlags = MCFLAG_DUMMY;
    }
    return popInstrInsertionPoint(program);
