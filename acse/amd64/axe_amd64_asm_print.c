@@ -540,7 +540,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    /* write the .data directive */
    if (current_element != NULL)
    {
-      fprintf(fp, "section .bss\n");
+      fprintf(fp, "section .data\n");
    }
 
    /* iterate all the elements inside the data segment */
