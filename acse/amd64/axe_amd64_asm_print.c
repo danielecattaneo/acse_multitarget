@@ -12,65 +12,6 @@
 
 extern int errorcode;
 
-/* Translate the assembler directives (definitions inside the data segment */
-static void translateDataSegment(t_program_infos *program, FILE *fp);
-
-/* Translate all the instructions within the code segment */
-static void translateCodeSegment(t_program_infos *program, FILE *fp);
-
-
-void writeAssembly(t_program_infos *program, char *output_file)
-{
-   FILE *fp;
-   int _error;
-
-   /* test the preconditions */
-   if (program == NULL)
-      notifyError(AXE_PROGRAM_NOT_INITIALIZED);
-
-   /* If necessary, set the value of `output_file' to "output.asm" */
-   if (output_file == NULL)
-   {
-      /* set "output.o" as output file name */
-      output_file = "output.asm";
-   }
-
-#ifndef NDEBUG
-   fprintf(stdout, "\n\n*******************************************\n");
-   fprintf(stdout, "INITIALIZING OUTPUT FILE: %s. \n", output_file);
-   fprintf(stdout, "CODE SEGMENT has a size of %d instructions \n"
-         , getLength(program->instructions));
-   fprintf(stdout, "DATA SEGMENT has a size of %d elements \n"
-         , getLength(program->data));
-   fprintf(stdout, "NUMBER OF LABELS : %d. \n"
-         , get_number_of_labels(program->lmanager));
-   fprintf(stdout, "*******************************************\n\n");
-#endif
-   
-   /* open a new file */
-   fp = fopen(output_file, "w");
-   if (fp == NULL)
-      notifyError(AXE_FOPEN_ERROR);
-
-   fputs(
-      "bits 64\n"
-      "default rel\n"
-      "global __lance_start\n"
-      "extern __axe_read\n"
-      "extern __axe_write\n",
-      fp);
-
-   /* print the data segment */
-   translateDataSegment(program, fp);
-
-   /* print the code segment */
-   translateCodeSegment(program, fp);
-
-   /* close the file and return */
-   _error = fclose(fp);
-   if (_error == EOF)
-      notifyError(AXE_FCLOSE_ERROR);
-}
 
 void emitFunctionPrologue(t_program_infos *program, FILE *fp)
 {
@@ -140,12 +81,22 @@ char *translateAMD64_regValOrPtr(t_axe_register *reg, char *dest, int bufSize)
    return dest;
 }
 
+char *translateLabel(t_axe_label *label, char *dest, int bufSize)
+{
+   if (!label) {
+      if (bufSize >= 1) dest[0] = '\0'; 
+      return NULL;
+   }
+   snprintf(dest, bufSize, "L%d", label->labelID);
+   return dest;
+}
+
 char *translateLabelOrAddress(t_axe_address *address, char *dest, int bufSize)
 {
    if (address->type == ADDRESS_TYPE) {
       snprintf(dest, bufSize, "%d", address->addr);
    } else {
-      snprintf(dest, bufSize, "L%d", address->labelID->labelID);
+      translateLabel(address->labelID, dest, bufSize);
    }
    return dest;
 }
@@ -179,9 +130,8 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
    t_axe_address *srcAddr;
    int srcImm;
 
-   int ok = isMoveInstruction(instr, &dest, &srcReg, &srcAddr, &srcImm);
-   if (!ok)
-      return 1;
+   if (!isMoveInstruction(instr, &dest, &srcReg, &srcAddr, &srcImm))
+      return 0;
 
    if (srcAddr) {
       char flabel[20];
@@ -191,7 +141,7 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
       } else {
          fprintf(fp, "\tlea %s, [%s]\n", translateAMD64_regName_64bit(dest->ID), flabel);
       }
-      return 0;
+      return 1;
    }
 
    char rdest[20];
@@ -201,15 +151,15 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
       if (srcReg->ID == dest->ID && 
             srcReg->indirect == dest->indirect &&
             srcReg->type == dest->type)
-         return 0;
+         return 1;
       char rsrc[20];
       translateAMD64_regValOrPtr(srcReg, rsrc, 20);
       fprintf(fp, "\tmov %s, %s\n", rdest, rsrc);
-      return 0;
+      return 1;
    }
 
    fprintf(fp, "\tmov %s, %d\n", rdest, srcImm);
-   return 0;
+   return 1;
 }
 
 int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
@@ -224,7 +174,7 @@ int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *ins
       fprintf(fp, "\tmov %s, dword [%s]\n", reg, address);
    }
 
-   return 0;
+   return 1;
 }
 
 int translateAMD64_acseScc(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
@@ -253,126 +203,120 @@ int translateAMD64_acseScc(t_program_infos *p, t_axe_instruction *instr, FILE *f
    const char *byte = translateAMD64_regName_8bit(instr->reg_1->ID);
    const char *dword = translateAMD64_regName(instr->reg_1->ID);
    fprintf(fp, "\t%s %s\n\tmovzx %s, %s\n", amd64opc, byte, dword, byte);
-   return 0;
+   return 1;
 }
 
-int translateInstruction(t_program_infos *program, t_axe_instruction *current_instruction, FILE *fp)
+int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FILE *fp)
 {
-   if (current_instruction->mcFlags & MCFLAG_DUMMY)
-      return 0;
+   if (instr->mcFlags & MCFLAG_DUMMY)
+      return 1;
 
-   if (current_instruction->labelID != NULL) {
-      fprintf(fp, "L%d:\n", (current_instruction->labelID)->labelID);
+   if (instr->labelID) {
+      char labelBuffer[20];
+      translateLabel(instr->labelID, labelBuffer, 20);
+      fprintf(fp, "%s:\n", labelBuffer);
    }
 
-   if (!translateAMD64_mov(program, current_instruction, fp))
-      return 0;
+   if (translateAMD64_mov(program, instr, fp))
+      return 1;
 
-   char addrBuffer[20];
-   char rdb[20];
-   char rsb[20];
+   char addrBuf[20];
+   char rDstBuf[20];
+   char rSrcBuf[20];
 
-   t_axe_register *rdp = current_instruction->reg_1;
-   t_axe_register *rsp = current_instruction->reg_3 ?: current_instruction->reg_2;
+   t_axe_register *rDst = instr->reg_1;
+   t_axe_register *rSrc = instr->reg_3 ?: instr->reg_2;
 
-   int rd = rdp ? rdp->ID : -1;
-   if (rdp)
-      translateAMD64_regValOrPtr(rdp, rdb, 20);
-   int rs = rsp ? rsp->ID : -1;
-   if (rsp)
-      translateAMD64_regValOrPtr(rsp, rsb, 20);
+   if (rDst)
+      translateAMD64_regValOrPtr(rDst, rDstBuf, 20);
+   if (rSrc) {
+      emitCast(rSrc, rDst->type, fp);
+      translateAMD64_regValOrPtr(rSrc, rSrcBuf, 20);
+   }
 
-   t_axe_address *addr = current_instruction->address;
+   t_axe_address *addr = instr->address;
    if (addr)
-      translateLabelOrAddress(addr, addrBuffer, 20);
+      translateLabelOrAddress(addr, addrBuf, 20);
 
-   switch (current_instruction->opcode) {
+   switch (instr->opcode) {
       case BF:
       case NOP:
          fprintf(fp, "\tnop\n");
          break;
       case ADD:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\tadd %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         fprintf(fp, "\tadd %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case SUB:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\tsub %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         fprintf(fp, "\tsub %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case MUL:
-         assert(!rdp->indirect);
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\timul %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         assert(!rDst->indirect);
+         fprintf(fp, "\timul %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case DIV:
-         assert(!rdp->indirect && rdp->ID == R_AMD64_EAX);
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\tidiv %s\n", translateAMD64_regValOrPtr(rsp, rsb, 20));
+         assert(!rDst->indirect && rDst->ID == R_AMD64_EAX);
+         fprintf(fp, "\tidiv %s\n", rSrcBuf);
          break;
       case ANDB:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\tand %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         fprintf(fp, "\tand %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case ORB:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\tor %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         fprintf(fp, "\tor %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case EORB:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\txor %s, %s\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20));
+         fprintf(fp, "\txor %s, %s\n", rDstBuf, rSrcBuf);
          break;
       case SHL:
-         assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tsal %s, cl\n", rdb);
+         assert(!rSrc->indirect && rSrc->ID == R_AMD64_ECX);
+         fprintf(fp, "\tsal %s, cl\n", rDstBuf);
          break;
       case SHR:
-         assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tsar %s, cl\n", rdb);
+         assert(!rSrc->indirect && rSrc->ID == R_AMD64_ECX);
+         fprintf(fp, "\tsar %s, cl\n", rDstBuf);
          break;
       case ROTL:
-         assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\trol %s, cl\n", rdb);
+         assert(!rSrc->indirect && rSrc->ID == R_AMD64_ECX);
+         fprintf(fp, "\trol %s, cl\n", rDstBuf);
          break;
       case ROTR:
-         assert(rs == R_AMD64_ECX);
-         fprintf(fp, "\tror %s, cl\n", rdb);
+         assert(!rSrc->indirect && rSrc->ID == R_AMD64_ECX);
+         fprintf(fp, "\tror %s, cl\n", rDstBuf);
          break;
       case NEG:
-         fprintf(fp, "\tneg %s\n", rdb);
+         fprintf(fp, "\tneg %s\n", rDstBuf);
          break;
       case NOTB:
-         fprintf(fp, "\tnot %s\n", rdb);
+         fprintf(fp, "\tnot %s\n", rDstBuf);
          break;
       case ADDI:
-         fprintf(fp, "\tadd %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tadd %s, %d\n", rDstBuf, instr->immediate);
          break;
       case SUBI:
-         fprintf(fp, "\tsub %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tsub %s, %d\n", rDstBuf, instr->immediate);
          break;
       case MULI:
-         emitCast(rsp, rdp->type, fp);
-         fprintf(fp, "\timul %s, %s, %d\n", rdb, translateAMD64_regValOrPtr(rsp, rsb, 20), current_instruction->immediate);
+         fprintf(fp, "\timul %s, %s, %d\n", rDstBuf, rSrcBuf, instr->immediate);
          break;
       case ANDBI:
-         fprintf(fp, "\tand %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tand %s, %d\n", rDstBuf, instr->immediate);
          break;
       case ORBI:
-         fprintf(fp, "\tor %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tor %s, %d\n", rDstBuf, instr->immediate);
          break;
       case EORBI:
-         fprintf(fp, "\txor %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\txor %s, %d\n", rDstBuf, instr->immediate);
          break;
       case SHLI:
-         fprintf(fp, "\tsal %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tsal %s, %d\n", rDstBuf, instr->immediate);
          break;
       case SHRI:
-         fprintf(fp, "\tsar %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tsar %s, %d\n", rDstBuf, instr->immediate);
          break;
       case ROTLI:
-         fprintf(fp, "\trol %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\trol %s, %d\n", rDstBuf, instr->immediate);
          break;
       case ROTRI:
-         fprintf(fp, "\tror %s, %d\n", rdb, current_instruction->immediate);
+         fprintf(fp, "\tror %s, %d\n", rDstBuf, instr->immediate);
          break;
       case SEQ:
       case SGE:
@@ -380,54 +324,54 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case SLE:
       case SLT:
       case SNE:
-         return translateAMD64_acseScc(program, current_instruction, fp);
+         return translateAMD64_acseScc(program, instr, fp);
       case LOAD:
       case STORE:
-         return translateAMD64_acseLOAD_acseSTORE(program, current_instruction, fp);
+         return translateAMD64_acseLOAD_acseSTORE(program, instr, fp);
       case BT:
-         fprintf(fp, "\tjmp %s\n", addrBuffer);
+         fprintf(fp, "\tjmp %s\n", addrBuf);
          break;
       case BHI:
-         fprintf(fp, "\tja %s\n", addrBuffer);
+         fprintf(fp, "\tja %s\n", addrBuf);
          break;
       case BLS:
-         fprintf(fp, "\tjbe %s\n", addrBuffer);
+         fprintf(fp, "\tjbe %s\n", addrBuf);
          break;
       case BCC:
-         fprintf(fp, "\tjnc %s\n", addrBuffer);
+         fprintf(fp, "\tjnc %s\n", addrBuf);
          break;
       case BCS:
-         fprintf(fp, "\tjc %s\n", addrBuffer);
+         fprintf(fp, "\tjc %s\n", addrBuf);
          break;
       case BNE:
-         fprintf(fp, "\tjne %s\n", addrBuffer);
+         fprintf(fp, "\tjne %s\n", addrBuf);
          break;
       case BEQ:
-         fprintf(fp, "\tje %s\n", addrBuffer);
+         fprintf(fp, "\tje %s\n", addrBuf);
          break;
       case BVC:
-         fprintf(fp, "\tjno %s\n", addrBuffer);
+         fprintf(fp, "\tjno %s\n", addrBuf);
          break;
       case BVS:
-         fprintf(fp, "\tjo %s\n", addrBuffer);
+         fprintf(fp, "\tjo %s\n", addrBuf);
          break;
       case BPL:
-         fprintf(fp, "\tjns %s\n", addrBuffer);
+         fprintf(fp, "\tjns %s\n", addrBuf);
          break;
       case BMI:
-         fprintf(fp, "\tjs %s\n", addrBuffer);
+         fprintf(fp, "\tjs %s\n", addrBuf);
          break;
       case BGE:
-         fprintf(fp, "\tjge %s\n", addrBuffer);
+         fprintf(fp, "\tjge %s\n", addrBuf);
          break;
       case BLT:
-         fprintf(fp, "\tjl %s\n", addrBuffer);
+         fprintf(fp, "\tjl %s\n", addrBuf);
          break;
       case BGT:
-         fprintf(fp, "\tjg %s\n", addrBuffer);
+         fprintf(fp, "\tjg %s\n", addrBuf);
          break;
       case BLE:
-         fprintf(fp, "\tjle %s\n", addrBuffer);
+         fprintf(fp, "\tjle %s\n", addrBuf);
          break;
       case RET:
       case HALT:
@@ -440,10 +384,6 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case AXE_WRITE:
          fprintf(fp, "\tcall __axe_write\n");
          break;
-      case JSR:
-      default:
-         fprintf(fp, "; FIXME unimpl opcode %d\n", current_instruction->opcode);
-         break;
       case SPCL:
       case ANDL:
       case ORL:
@@ -453,11 +393,15 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
       case EORLI:
       case NOTL:
       case DIVI:
-         fprintf(stderr, "illegal x86_64 instruction %d\n", current_instruction->opcode);
+         fprintf(stderr, "illegal x86_64 instruction %d\n", instr->opcode);
          assert(0 && "instr cannot be encoded in x86_64; bug in axe_target_transform.c");
+      case JSR:
+      default:
+         fprintf(fp, "; FIXME unimpl opcode %d\n", instr->opcode);
+         break;
    }
    
-   return 0;
+   return 1;
 }
 
 /* translate each instruction in his assembler symbolic representation */
@@ -499,7 +443,7 @@ void translateCodeSegment(t_program_infos *program, FILE *fp)
       assert(current_instruction != NULL);
       assert(current_instruction->opcode != INVALID_OPCODE);
 
-      if (translateInstruction(program, current_instruction, fp)) {
+      if (!translateInstruction(program, current_instruction, fp)) {
          _error = fclose(fp);
          if (_error == EOF)
             notifyError(AXE_FCLOSE_ERROR);
@@ -553,14 +497,11 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       assert (current_data->directiveType != DIR_INVALID);
 
       /* create a string identifier for the label */
-      if ( (current_data->labelID != NULL)
-            && ((current_data->labelID)->labelID != LABEL_UNSPECIFIED) )
-      {
-         fprintf_error = fprintf(fp, "L%d:\t"
-                  , (current_data->labelID)->labelID);
-      }
-      else
-      {
+      char labelBuf[20];
+      char *lab = translateLabel(current_data->labelID, labelBuf, 20);
+      if (lab) {
+         fprintf_error = fprintf(fp, "%s:\t", lab);
+      } else {
          fprintf_error = fprintf(fp, "\t");
       }
 
@@ -608,5 +549,58 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       /* loop termination condition */
       current_element = LNEXT(current_element);
    }
+}
+
+void writeAssembly(t_program_infos *program, char *output_file)
+{
+   FILE *fp;
+   int _error;
+
+   /* test the preconditions */
+   if (program == NULL)
+      notifyError(AXE_PROGRAM_NOT_INITIALIZED);
+
+   /* If necessary, set the value of `output_file' to "output.asm" */
+   if (output_file == NULL)
+   {
+      /* set "output.o" as output file name */
+      output_file = "output.asm";
+   }
+
+#ifndef NDEBUG
+   fprintf(stdout, "\n\n*******************************************\n");
+   fprintf(stdout, "INITIALIZING OUTPUT FILE: %s. \n", output_file);
+   fprintf(stdout, "CODE SEGMENT has a size of %d instructions \n"
+         , getLength(program->instructions));
+   fprintf(stdout, "DATA SEGMENT has a size of %d elements \n"
+         , getLength(program->data));
+   fprintf(stdout, "NUMBER OF LABELS : %d. \n"
+         , get_number_of_labels(program->lmanager));
+   fprintf(stdout, "*******************************************\n\n");
+#endif
+   
+   /* open a new file */
+   fp = fopen(output_file, "w");
+   if (fp == NULL)
+      notifyError(AXE_FOPEN_ERROR);
+
+   fputs(
+      "bits 64\n"
+      "default rel\n"
+      "global __lance_start\n"
+      "extern __axe_read\n"
+      "extern __axe_write\n",
+      fp);
+
+   /* print the data segment */
+   translateDataSegment(program, fp);
+
+   /* print the code segment */
+   translateCodeSegment(program, fp);
+
+   /* close the file and return */
+   _error = fclose(fp);
+   if (_error == EOF)
+      notifyError(AXE_FCLOSE_ERROR);
 }
 

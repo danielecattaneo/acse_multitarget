@@ -27,47 +27,58 @@
 #define CG_DIRECT(dest, src2)    (!!(dest) | ((!!(src2)) << 1))
 #define CG_DIRECT_R(dest, src2)  CG_DIRECT(R_IND(dest), R_IND(src2))
 
+/* move the label of one instruction to another. */
 void moveLabel(t_axe_instruction *dest, t_axe_instruction *src)
 {
    dest->labelID = src->labelID;
    src->labelID = NULL;
 }
 
-t_list *fixDestinationRegisterOfInstruction(t_program_infos *program,
-      t_list *position)
+/* Remove instructions with three unique operands. 
+ * Note: this pass may produce instructions where SRC1 is an indirectly
+ * indexed register, which is otherwise impossible. */
+void fixInstrOperands(t_program_infos *program)
 {
-   t_axe_instruction *instr = LDATA(position);
-   assert(instr);
+   t_list *position = program->instructions;
+   for (; position; position = LNEXT(position)) {
+      t_axe_instruction *instr = LDATA(position);
 
-   if (isMoveInstruction(instr, NULL, NULL, NULL, NULL))
-      return position;
-   if (!instr->reg_2 || instr->reg_2->ID == REG_INVALID)
-      return position;
-   if (instr->reg_2->ID == instr->reg_1->ID && 
-         instr->reg_2->indirect == instr->reg_1->indirect)  
-      return position;
+      /* instructions that can be represented as a move are special-cased in the
+      * ASM printer, and do not need any fix */
+      if (isMoveInstruction(instr, NULL, NULL, NULL, NULL))
+         continue;
 
-   /* For some strange reason, the IMUL x86_64 instruction DOES have a form
-    * with an immediate, a source and a destination. In fact, it's the only
-    * form it has with provisions for an immediate operand! */
-   if (instr->opcode == MULI)
-      return position;
+      /* For some strange reason, the IMUL x86_64 instruction DOES have a form
+      * with an immediate, a source and a destination. In fact, it's the only
+      * form it has with provisions for an immediate operand! */
+      if (instr->opcode == MULI)
+         continue;
 
-   pushInstrInsertionPoint(program, LPREV(position));
-   moveLabel(gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
-         CG_DIRECT(RD_IND(instr), 0)), instr);
-   instr->reg_2->ID = instr->reg_1->ID;
-   instr->reg_2->indirect = instr->reg_1->indirect;
-   popInstrInsertionPoint(program);
-   return position;
-}
+      /* check if the instruction has at least 2 operands */
+      if (!RS1(instr) || RS1_ID(instr) == REG_INVALID)
+         continue;
 
-void fixDestinationRegister(t_program_infos *program)
-{
-   t_list *cur = program->instructions;
-   while (cur) {
-      cur = fixDestinationRegisterOfInstruction(program, cur);
-      cur = LNEXT(cur);
+      /* check if the instruction is not already in the form RD = RS1 */
+      if (RS1_ID(instr) == RD_ID(instr) && RS1_IND(instr) == RD_IND(instr))  
+         continue;
+
+      pushInstrInsertionPoint(program, LPREV(position));
+
+      if (RS2(instr) && RS2_IND(instr) && RD_IND(instr)) {
+         /* amd64 instructions cannot have more than one indirect operand */
+         int tmp = getNewRegister(program);
+         moveLabel(gen_add_instruction(program, tmp, REG_0, RS2_ID(instr), 
+               CG_DIRECT(0, RS2_IND(instr))), instr);
+         RS2_ID(instr) = tmp;
+         RS2_IND(instr) = 0;
+      }
+
+      moveLabel(gen_add_instruction(program, RD_ID(instr), REG_0, RS1_ID(instr), 
+            CG_DIRECT(RD_IND(instr), 0)), instr);
+      RS1_ID(instr) = RD_ID(instr);
+      RS1_IND(instr) = RD_IND(instr);
+
+      popInstrInsertionPoint(program);
    }
 }
 
@@ -82,7 +93,7 @@ t_list *genRegisterClobberingForCall(t_program_infos *program, t_list *callLnk, 
       int reg = regList[i];
       int var = getNewRegister(program);
       t_axe_instruction *instr = gen_addi_instruction(program, var, REG_0, 0);
-      instr->reg_1->mcRegWhitelist = addElement(instr->reg_1->mcRegWhitelist, INTDATA(reg), 0);
+      setMCRegisterWhitelist(RD(instr), reg, -1);
       instr->mcFlags = MCFLAG_DUMMY;
    }
    return popInstrInsertionPoint(program);
@@ -90,35 +101,35 @@ t_list *genRegisterClobberingForCall(t_program_infos *program, t_list *callLnk, 
 
 void fixReadWrite(t_program_infos *program)
 {
+   /* note: destination of read and write instructions 
+    * cannot be indirect */
+
    t_list *cur = program->instructions;
-   while (cur) {
+   for (; cur; cur = LNEXT(cur)) {
       t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
-      if (inst->opcode == AXE_READ || inst->opcode == AXE_WRITE) {
-         /* note: destination of read and write instructions 
-          * cannot be indirect */
 
-         if (inst->opcode == AXE_READ) {
-            t_list *afterCall = genRegisterClobberingForCall(program, cur, 1);
-            int destReg = inst->reg_1->ID;
-            inst->reg_1->ID = getNewRegister(program);
-            inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EAX, 0);
-            pushInstrInsertionPoint(program, afterCall);
-            gen_add_instruction(program, destReg, inst->reg_1->ID, REG_0, CG_DIRECT_ALL);
-            afterCall = popInstrInsertionPoint(program);
-         }
+      if (inst->opcode == AXE_READ) {
+         t_list *afterCall = genRegisterClobberingForCall(program, cur, 1);
 
-         if (inst->opcode == AXE_WRITE) {
-            genRegisterClobberingForCall(program, cur, 0);
-            int srcReg = inst->reg_1->ID;
-            inst->reg_1->ID = getNewRegister(program);
-            inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EDI, 0);
-            pushInstrInsertionPoint(program, LPREV(cur));
-            moveLabel(gen_add_instruction(program, inst->reg_1->ID, srcReg, REG_0, CG_DIRECT_ALL), inst);
-            popInstrInsertionPoint(program);
-         }
+         int destReg = RD_ID(inst);
+         RD_ID(inst) = getNewRegister(program);
+         setMCRegisterWhitelist(RD(inst), R_AMD64_EAX, -1);
+
+         pushInstrInsertionPoint(program, afterCall);
+         gen_add_instruction(program, destReg, RD_ID(inst), REG_0, CG_DIRECT_ALL);
+         popInstrInsertionPoint(program);
+
+      } else if (inst->opcode == AXE_WRITE) {
+         genRegisterClobberingForCall(program, cur, 0);
+
+         int srcReg = RD_ID(inst);
+         RD_ID(inst) = getNewRegister(program);
+         setMCRegisterWhitelist(RD(inst), R_AMD64_EDI, -1);
+
+         pushInstrInsertionPoint(program, LPREV(cur));
+         moveLabel(gen_add_instruction(program, RD_ID(inst), srcReg, REG_0, CG_DIRECT_ALL), inst);
+         popInstrInsertionPoint(program);
       }
-      
-      cur = LNEXT(cur);
    }
 }
 
@@ -128,7 +139,7 @@ void rewriteLogicalOperations(t_program_infos *program)
    while (cur) {
       t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
       t_list *next = LNEXT(cur);
-      assert((!inst->reg_2 || !RS1_IND(inst)) && "found illegal instruction with IND on SRC1");
+      assert((!RS1(inst) || !RS1_IND(inst)) && "found illegal instruction with IND on SRC1");
       
       if (inst->opcode == ANDL || inst->opcode == EORL) {
          pushInstrInsertionPoint(program, LPREV(cur));
@@ -217,14 +228,14 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
       t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
 
       if (inst->opcode == SHL || inst->opcode == SHR || 
-            inst->opcode == ROTL || inst->opcode == ROTR) {
+               inst->opcode == ROTL || inst->opcode == ROTR) {
          /* Force shift amount register to be ECX */
          pushInstrInsertionPoint(program, LPREV(cur));
-         int rShAmt = inst->reg_3->ID;
-         int rShAmtInd = inst->reg_3->indirect;
-         inst->reg_3->ID = getNewRegister(program);
-         inst->reg_3->indirect = 0;
-         inst->reg_3->mcRegWhitelist = addElement(inst->reg_3->mcRegWhitelist, (void *)R_AMD64_ECX, 0);
+         int rShAmt = RS2_ID(inst);
+         int rShAmtInd = RS2_IND(inst);
+         RS2_ID(inst) = getNewRegister(program);
+         RS2_IND(inst) = 0;
+         setMCRegisterWhitelist(RS2(inst), R_AMD64_ECX, -1);
          moveLabel(gen_add_instruction(program, inst->reg_3->ID, REG_0, rShAmt, CG_DIRECT(0, rShAmtInd)), inst);
          popInstrInsertionPoint(program);
       }
@@ -236,7 +247,7 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          int rimm = getNewRegister(program);
          moveLabel(gen_addi_instruction(program, rimm, REG_0, inst->immediate), inst);
          inst->opcode = DIV;
-         inst->reg_3 = alloc_register(rimm, INTEGER_TYPE, 0);
+         RS2(inst) = alloc_register(rimm, INTEGER_TYPE, 0);
          popInstrInsertionPoint(program);
       }
 
@@ -251,12 +262,12 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
          pushInstrInsertionPoint(program, LPREV(cur));
          moveLabel(gen_add_instruction(program, rtmp, REG_0, rdest, CG_DIRECT(0, rdest_dir)), inst);
          t_axe_instruction *zeroEdx = gen_addi_instruction(program, rEDX, REG_0, 0);
-         zeroEdx->reg_1->mcRegWhitelist = addElement(zeroEdx->reg_1->mcRegWhitelist, (void *)R_AMD64_EDX, 0);
+         setMCRegisterWhitelist(RD(zeroEdx), R_AMD64_EDX, -1);
          popInstrInsertionPoint(program);
 
-         inst->reg_1->ID = inst->reg_2->ID = rtmp;
-         inst->reg_1->indirect = inst->reg_2->ID = 0;
-         inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EAX, 0);
+         RD_ID(inst) = RS1_ID(inst) = rtmp;
+         RD_IND(inst) = RS1_IND(inst) = 0;
+         setMCRegisterWhitelist(RD(inst), R_AMD64_EAX, -1);
 
          pushInstrInsertionPoint(program, cur);
          /* tell the register allocator that DIV sets EDX */
@@ -299,7 +310,7 @@ void fixFlagUsers(t_program_infos *program)
                continue;
 
             /* x86_64 move instructions do not set flags;
-             * patch it by setting them manually */
+             * patch them by setting flags manually */
             t_list *instLnk = findElement(program->instructions, reachDef->node->instr);
             assert(instLnk && "instruction is in the CFG but not in the program");
             pushInstrInsertionPoint(program, instLnk);
@@ -321,7 +332,7 @@ void doTargetSpecificTransformations(t_program_infos *program)
 {
    rewriteLogicalOperations(program);
    fixFlagUsers(program);
-   fixDestinationRegister(program);
    fixReadWrite(program);
+   fixInstrOperands(program);
    insertRegisterAllocationConstraints(program);
 }
