@@ -63,14 +63,14 @@ void fixDestinationRegister(t_program_infos *program)
    }
 }
 
-t_list *genRegisterClobberingForCall(t_program_infos *program, t_list *callLnk)
+t_list *genRegisterClobberingForCall(t_program_infos *program, t_list *callLnk, int returns)
 {
    int regList[] = {
-      R_AMD64_ECX, R_AMD64_EDX, R_AMD64_ESI, R_AMD64_EDI, 
-      R_AMD64_R8D, R_AMD64_R9D, R_AMD64_R10D
+      R_AMD64_EAX, R_AMD64_ECX, R_AMD64_EDX, R_AMD64_ESI, R_AMD64_EDI,
+      R_AMD64_R8D, R_AMD64_R9D, R_AMD64_R10D, R_AMD64_R11D
    };
    pushInstrInsertionPoint(program, callLnk);
-   for (int i = 0; i<sizeof(regList)/sizeof(int); i++) {
+   for (int i = returns ? 1 : 0; i<sizeof(regList)/sizeof(int); i++) {
       int reg = regList[i];
       int var = getNewRegister(program);
       t_axe_instruction *instr = gen_addi_instruction(program, var, REG_0, 0);
@@ -86,12 +86,11 @@ void fixReadWrite(t_program_infos *program)
    while (cur) {
       t_axe_instruction *inst = (t_axe_instruction *)LDATA(cur);
       if (inst->opcode == AXE_READ || inst->opcode == AXE_WRITE) {
-         t_list *afterCall = genRegisterClobberingForCall(program, cur);
-
          /* note: destination of read and write instructions 
           * cannot be indirect */
 
          if (inst->opcode == AXE_READ) {
+            t_list *afterCall = genRegisterClobberingForCall(program, cur, 1);
             int destReg = inst->reg_1->ID;
             inst->reg_1->ID = getNewRegister(program);
             inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EAX, 0);
@@ -101,6 +100,7 @@ void fixReadWrite(t_program_infos *program)
          }
 
          if (inst->opcode == AXE_WRITE) {
+            genRegisterClobberingForCall(program, cur, 0);
             int srcReg = inst->reg_1->ID;
             inst->reg_1->ID = getNewRegister(program);
             inst->reg_1->mcRegWhitelist = addElement(inst->reg_1->mcRegWhitelist, (void *)R_AMD64_EDI, 0);
