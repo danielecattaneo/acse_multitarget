@@ -14,6 +14,7 @@
 #include "axe_target_info.h"
 #include "axe_errors.h"
 #include "axe_debug.h"
+#include "axe_utils.h"
 
 extern int errorcode;
 extern int cflow_errorcode;
@@ -576,48 +577,58 @@ t_cflow_Graph * insertLoadAndStoreInstr
 
 void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             , t_reg_allocator *RA, t_list *label_bindings)
-{
-   t_list *current_bb_element;
-   t_basic_block *current_block;
-   t_axe_instruction *current_instr;
-   t_list *current_nd_element;
-   t_cflow_Node *current_node;
-      
+{      
    /* preconditions */
    assert(program != NULL);
    assert(graph != NULL);
    assert(RA != NULL);
    
-   current_bb_element = graph->blocks;
+   t_list *current_bb_element = graph->blocks;
    while (current_bb_element != NULL)
    {
       int counter;
-      int assignedRegisters[RA_MIN_REG_NUM][3];
 
-      current_block = (t_basic_block *) LDATA(current_bb_element);
+      /* spill register slots
+       * each array element corresponds to one of the registers reserved for
+       * the spill, ordered by ascending register number. */
+      struct {
+         int assignedVar;
+         int needsWB;
+         int inUse;
+      } assignedRegisters[RA_MIN_REG_NUM];
+
+      t_basic_block *current_block = (t_basic_block *)LDATA(current_bb_element);
       assert(current_block != NULL);
 
       /* initialize used_Registers */
       for (counter = 0; counter < RA_MIN_REG_NUM; counter ++)
       {
-         assignedRegisters[counter][0] = REG_INVALID; /* invalid register */
-         assignedRegisters[counter][1] = 0;           /* need write back */
-         assignedRegisters[counter][2] = 0;           /* currently used */
+         assignedRegisters[counter].assignedVar = REG_INVALID;
+         assignedRegisters[counter].needsWB = 0;
+         assignedRegisters[counter].inUse = 0;
       }
 
       /* retrieve the list of nodes for the current basic block */
-      current_nd_element = current_block->nodes;
+      t_list *current_nd_element = current_block->nodes;
+      t_axe_instruction *current_instr;
+      t_cflow_Node *current_node;
       while(current_nd_element != NULL)
       {
+         /* reordering table which associates the three instruction registers
+          * (in this order: dest, src1, src2) to the spill register slots.
+          * For example, if used_Registers[1] == 2, the src1 register will be
+          * assigned to the third spill register. */
          int used_Registers[3] = {-1, -1, -1};
 
          /* retrieve the data associated with the current node of the block */
-         current_node = (t_cflow_Node *) LDATA(current_nd_element);
+         current_node = (t_cflow_Node *)LDATA(current_nd_element);
 
          /* fetch the current instruction */
          current_instr = current_node->instr;
 
-         /* Test if a requested variable is already loaded into a register */
+         /* Test if a requested variable is already loaded into a register
+          * from a previous instruction. 
+          * Note: in this moment, all inUse flags are set to zero. */
          if (current_instr->reg_1  != NULL)
          {
             if (RA->bindings[(current_instr->reg_1)->ID]
@@ -628,7 +639,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][0]
+                  if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_1)->ID)
                   {
                      /* update the value of used_Register */
@@ -636,7 +647,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
                      /* update the value of `assignedRegisters` */
                      /* set currently used flag */
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].inUse = 1;
 
                      /* test if a write back is needed */
                      if (! (current_instr->reg_1)->indirect)
@@ -650,13 +661,13 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                         if (  (current_instr->opcode != STORE)
                               && (current_instr->opcode != AXE_WRITE) )
                         {
-                           assignedRegisters[current_row][1] = 1;
+                           assignedRegisters[current_row].needsWB = 1;
                         }
                         /* if the current instruction is a STORE we have to
                          * notify that the write back is happened by
                          * resetting the flag "dirty" */
                         if (current_instr->opcode == STORE)
-                           assignedRegisters[current_row][1] = 0;
+                           assignedRegisters[current_row].needsWB = 0;
                      }
 
                      /* notify that the value was found */
@@ -677,7 +688,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][0]
+                  if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_2)->ID)
                   {
                      /* update the value of used_Register */
@@ -685,7 +696,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
                      /* update the value of `assignedRegisters` */
                      /* set currently used flag */
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].inUse = 1;
 
                      /* notify that the value was found */
                      found = 1;
@@ -705,7 +716,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][0]
+                  if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_3)->ID)
                   {
                      /* update the value of used_Register */
@@ -713,7 +724,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
                      /* update the value of `assignedRegisters` */
                      /* set currently used flag */
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].inUse = 1;
 
                      /* notify that the value was found */
                      found = 1;
@@ -723,7 +734,10 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                }
             }
          }
-         /* phase two */
+         /* phase two
+          * free space for the new values in the registers by writing back the
+          * variables we don't need for this instruction, and then loading
+          * the variables we need instead. */
          if (current_instr->reg_2  != NULL)
          {
             if ((RA->bindings[(current_instr->reg_2)->ID]
@@ -734,15 +748,15 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][2] == 0)
+                  if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
                      
-                     if (assignedRegisters[current_row][1] == 1)
+                     if (assignedRegisters[current_row].needsWB == 1)
                      {
                         /* NEED WRITE BACK */
-                        _insertStoreSpill(program, assignedRegisters[current_row][0]
+                        _insertStoreSpill(program, assignedRegisters[current_row].assignedVar
                               , register_found, graph, current_block
                                     , current_node, label_bindings, 1);
                      }
@@ -752,9 +766,9 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                                 , current_node, label_bindings, 1);
 
                      /* update the control informations */
-                     assignedRegisters[current_row][0] = (current_instr->reg_2)->ID;
-                     assignedRegisters[current_row][1] = 0;
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].assignedVar = (current_instr->reg_2)->ID;
+                     assignedRegisters[current_row].needsWB = 0;
+                     assignedRegisters[current_row].inUse = 1;
                      used_Registers[1] = current_row;
 
                      found = 1;
@@ -781,15 +795,15 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][2] == 0)
+                  if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
                      
-                     if (assignedRegisters[current_row][1] == 1)
+                     if (assignedRegisters[current_row].needsWB == 1)
                      {
                         /* NEED WRITE BACK */
-                        _insertStoreSpill(program, assignedRegisters[current_row][0]
+                        _insertStoreSpill(program, assignedRegisters[current_row].assignedVar
                               , register_found, graph, current_block
                                     , current_node, label_bindings, 1);
                      }
@@ -799,9 +813,9 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                                 , current_node, label_bindings, 1);
 
                      /* update the control informations */
-                     assignedRegisters[current_row][0] = (current_instr->reg_3)->ID;
-                     assignedRegisters[current_row][1] = 0;
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].assignedVar = (current_instr->reg_3)->ID;
+                     assignedRegisters[current_row].needsWB = 0;
+                     assignedRegisters[current_row].inUse = 1;
                      used_Registers[2] = current_row;
                      
                      found = 1;
@@ -821,15 +835,15 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
-                  if (assignedRegisters[current_row][2] == 0)
+                  if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
                      
-                     if (assignedRegisters[current_row][1] == 1)
+                     if (assignedRegisters[current_row].needsWB == 1)
                      {
                         /* NEED WRITE BACK */
-                        _insertStoreSpill(program, assignedRegisters[current_row][0]
+                        _insertStoreSpill(program, assignedRegisters[current_row].assignedVar
                               , register_found, graph, current_block
                                     , current_node, label_bindings, 1);
                      }
@@ -844,19 +858,19 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                      }
 
                      /* update the control informations */
-                     assignedRegisters[current_row][0] = (current_instr->reg_1)->ID;
+                     assignedRegisters[current_row].assignedVar = (current_instr->reg_1)->ID;
                      
                      if (! (current_instr->reg_1)->indirect)
                      {
                         if (  (current_instr->opcode != STORE)
                               && (current_instr->opcode != AXE_WRITE) )
                         {
-                           assignedRegisters[current_row][1] = 1;
+                           assignedRegisters[current_row].needsWB = 1;
                         }
                         if (current_instr->opcode == STORE)
-                           assignedRegisters[current_row][1] = 0;
+                           assignedRegisters[current_row].needsWB = 0;
                      }
-                     assignedRegisters[current_row][2] = 1;
+                     assignedRegisters[current_row].inUse = 1;
 
                      used_Registers[0] = current_row;
                      
@@ -869,7 +883,8 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             }
          }
          
-         /* update the instruction informations */
+         /* rewrite the register identifiers to use the appropriate spill
+          * register number instead of the variable number. */
          if (current_instr->reg_1 != NULL)
          {
             if (used_Registers[0] != -1)
@@ -877,7 +892,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                current_instr->reg_1->ID = used_Registers[0] + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
 
-               assignedRegisters[used_Registers[0]][2] = 0;
+               assignedRegisters[used_Registers[0]].inUse = 0;
             }
             else
                current_instr->reg_1->ID =
@@ -889,7 +904,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             {
                current_instr->reg_2->ID = used_Registers[1] + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
-               assignedRegisters[used_Registers[1]][2] = 0;
+               assignedRegisters[used_Registers[1]].inUse = 0;
             }
             else
                current_instr->reg_2->ID =
@@ -901,7 +916,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             {
                current_instr->reg_3->ID = used_Registers[2] + NUM_REGISTERS
                            + 1 - RA_MIN_REG_NUM;
-               assignedRegisters[used_Registers[2]][2] = 0;
+               assignedRegisters[used_Registers[2]].inUse = 0;
             }
             else
                current_instr->reg_3->ID =
@@ -913,16 +928,20 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
          current_nd_element = LNEXT(current_nd_element);
       }
 
-      /* initialize used_Registers */
+      int bbHasTermInstr = current_block->nodes && 
+            (isJumpInstruction(current_instr) || 
+            isHaltInstruction(current_instr));
+
+      /* writeback everything at the end of the basic block */
       for (counter = 0; counter < RA_MIN_REG_NUM; counter ++)
       {
-         if (assignedRegisters[counter][1] == 1)
+         if (assignedRegisters[counter].needsWB == 1)
          {
             /* NEED WRITE BACK */
-            _insertStoreSpill(program, assignedRegisters[counter][0]
+            _insertStoreSpill(program, assignedRegisters[counter].assignedVar
                      , (counter + NUM_REGISTERS + 1 - RA_MIN_REG_NUM)
                            , graph, current_block
-                              , current_node, label_bindings, 1);
+                              , current_node, label_bindings, bbHasTermInstr);
          }
       }
       
