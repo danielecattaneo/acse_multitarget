@@ -10,23 +10,40 @@
 #ifndef _COLLECTIONS_H
 #define _COLLECTIONS_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-/* macros */
-#define LNEXT(item) ((item)->next)
-#define LPREV(item) ((item)->prev)
-#define LDATA(item) ((item)->data)
-#define SET_DATA(item, _data) ((item)->data = (_data))
-#define SET_NEXT(item, _next) ((item)->next = (_next))
-#define SET_PREV(item, _prev) ((item)->prev = (_prev))
+
+/* create a list data item from an integer value */
+#define INTDATA(data)               ((void *)((intptr_t)(data)))
+
+/* get the next list item. NULL if item is the last item in the list. */
+#define LNEXT(item)                 ((item)->next)
+/* get the previous list item. NULL if item is the first item in the list. */
+#define LPREV(item)                 ((item)->prev)
+/* get the data associated to this list item. */
+#define LDATA(item)                 ((item)->data)
+/* get the integer value data associated to this list item. */
+#define LINTDATA(item)              ((int)((intptr_t)LDATA(item)))
+
+/* set the next list item. */
+#define SET_NEXT(item, _next)       ((item)->next = (_next))
+/* set the previous list item. */
+#define SET_PREV(item, _prev)       ((item)->prev = (_prev))
+/* set the data associated to this list item. */
+#define SET_DATA(item, _data)       ((item)->data = (_data))
+/* set an integer value as the data associated to this list item. */
+#define SET_INTDATA(item, _data)    ((item)->data = INTDATA(_data))
+
 #ifndef _ALLOC_FUNCTION
 #	define _ALLOC_FUNCTION malloc
 #endif
 #ifndef _FREE_FUNCTION
 #	define _FREE_FUNCTION free
 #endif
+
 
 /* a list element */
 typedef struct t_list
