@@ -46,7 +46,7 @@ const char *translateAMD64_regName_64bit(int rid)
    const char *registerNames[] = {
       "0", "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10",
       "r11", "r12", "r13", "r14", "r15"};
-   assert(rid >= 0 && rid < NUM_REGISTERS);
+   assert(rid >= 0 && rid < NUM_REGISTERS+1);
    return registerNames[rid];
 }
 
@@ -55,7 +55,7 @@ const char *translateAMD64_regName(int rid)
    const char *registerNames[] = {
       "0", "eax", "ebx", "ecx", "edx", "esi", "edi", "r8d", "r9d", "r10d",
       "r11d", "r12d", "r13d", "r14d", "r15d"};
-   assert(rid >= 0 && rid < NUM_REGISTERS);
+   assert(rid >= 0 && rid < NUM_REGISTERS+1);
    return registerNames[rid];
 }
 
@@ -64,7 +64,7 @@ const char *translateAMD64_regName_8bit(int rid)
    const char *registerNames[] = {
       "0", "al", "bl", "cl", "dl", "sil", "dil", "r8b", "r9b", "r10b",
       "r11b", "r12b", "r13b", "r14b", "r15b"};
-   assert(rid >= 0 && rid < NUM_REGISTERS);
+   assert(rid >= 0 && rid < NUM_REGISTERS+1);
    return registerNames[rid];
 }
 

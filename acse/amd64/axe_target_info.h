@@ -26,7 +26,8 @@
 #define R_AMD64_R14D 13  /* callee-save */
 #define R_AMD64_R15D 14  /* callee-save */
 
-#define NUM_REGISTERS (R_AMD64_R15D+1)
+/* Number of registers for this target (excluding REG_0) */
+#define NUM_REGISTERS R_AMD64_R15D
 /* Number of registers to reserve for spilled temporaries. Shall be equal to
  * the maximum number of unique register operands in a single instruction. */
 #define NUM_SPILL_REGS 2
