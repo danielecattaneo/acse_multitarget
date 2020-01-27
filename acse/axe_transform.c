@@ -608,7 +608,8 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
          assignedRegisters[counter].inUse = 0;
       }
 
-      /* retrieve the list of nodes for the current basic block */
+      /* phase one
+       * retrieve the list of nodes for the current basic block */
       t_list *current_nd_element = current_block->nodes;
       t_axe_instruction *current_instr;
       t_cflow_Node *current_node;
@@ -787,7 +788,9 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                int current_row = 0;
                int found = 0;
 
-               if ((current_instr->reg_3)->ID == (current_instr->reg_2)->ID)
+               /* reuse registers allocated in phase 2 of this same instruction
+                * if possible. */
+               if (current_instr->reg_2 && (current_instr->reg_3)->ID == (current_instr->reg_2)->ID)
                {
                   used_Registers[2] = used_Registers[1];
                   found = 1;
@@ -832,6 +835,15 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             {
                int current_row = 0;
                int found = 0;
+
+               /* reuse registers allocated in phase 2 if possible */
+               if (current_instr->reg_3 && (current_instr->reg_3)->ID == (current_instr->reg_1)->ID) {
+                  current_row = used_Registers[2];
+                  found = 1;
+               } else if (current_instr->reg_2 && (current_instr->reg_2)->ID == (current_instr->reg_1)->ID) {
+                  current_row = used_Registers[1];
+                  found = 1;
+               }
                
                while ((current_row < RA_MIN_REG_NUM) && !found)
                {
@@ -859,30 +871,31 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
                      /* update the control informations */
                      assignedRegisters[current_row].assignedVar = (current_instr->reg_1)->ID;
-                     
-                     if (! (current_instr->reg_1)->indirect)
-                     {
-                        if (  (current_instr->opcode != STORE)
-                              && (current_instr->opcode != AXE_WRITE) )
-                        {
-                           assignedRegisters[current_row].needsWB = 1;
-                        }
-                        if (current_instr->opcode == STORE)
-                           assignedRegisters[current_row].needsWB = 0;
-                     }
+                     assignedRegisters[current_row].needsWB = 0;
                      assignedRegisters[current_row].inUse = 1;
-
-                     used_Registers[0] = current_row;
                      
                      found = 1;
                   }
-                  
-                  current_row ++;
+                  else
+                  {
+                     current_row ++;
+                  }
                }
+
+               if (! (current_instr->reg_1)->indirect)
+               {
+                  if (  (current_instr->opcode != STORE)
+                        && (current_instr->opcode != AXE_WRITE) )
+                  {
+                     assignedRegisters[current_row].needsWB = 1;
+                  }
+               }
+               used_Registers[0] = current_row;
+
                assert(found != 0);
             }
          }
-         
+
          /* rewrite the register identifiers to use the appropriate spill
           * register number instead of the variable number. */
          if (current_instr->reg_1 != NULL)
