@@ -217,6 +217,10 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
       fprintf(fp, "%s:\n", labelBuffer);
    }
 
+   if (instr->user_comment) {
+      fprintf(fp, "\t; %s\n", instr->user_comment);
+   }
+
    if (translateAMD64_mov(program, instr, fp))
       return 1;
 
