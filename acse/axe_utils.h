@@ -54,8 +54,9 @@ extern int isJumpInstruction(t_axe_instruction *instr);
 /* Returns 1 if `instr` is a unconditional jump instruction (BT, BF) */
 extern int isUnconditionalJump(t_axe_instruction *instr);
 
-/* Returns 1 if `instr` is the HALT instruction. */
-extern int isHaltInstruction(t_axe_instruction *instr);
+/* Returns 1 if `instr` is either the HALT instruction or the RET 
+ * instruction. */
+extern int isHaltOrRetInstruction(t_axe_instruction *instr);
 
 /* Returns 1 if `instr` is the LOAD instruction. */
 extern int isLoadInstruction(t_axe_instruction *instr);

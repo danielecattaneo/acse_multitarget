@@ -947,7 +947,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
 
       int bbHasTermInstr = current_block->nodes && 
             (isJumpInstruction(current_instr) || 
-            isHaltInstruction(current_instr));
+            isHaltOrRetInstruction(current_instr));
 
       /* writeback everything at the end of the basic block */
       for (counter = 0; counter < RA_MIN_REG_NUM; counter ++)

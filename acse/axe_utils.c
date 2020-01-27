@@ -199,13 +199,13 @@ int isLoadInstruction(t_axe_instruction *instr)
    return (instr->opcode == LOAD) ? 1 : 0;
 }
 
-int isHaltInstruction(t_axe_instruction *instr)
+int isHaltOrRetInstruction(t_axe_instruction *instr)
 {
    if (instr == NULL) {
       return 0;
    }
 
-   return (instr->opcode == HALT) ? 1 : 0;
+   return instr->opcode == HALT || instr->opcode == RET;
 }
 
 /* test if the current instruction `instr' is a BT or a BF */

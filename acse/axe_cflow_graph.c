@@ -1161,7 +1161,7 @@ void updateFlowGraph(t_cflow_Graph *graph)
       last_instruction = last_node->instr;
       assert(last_instruction != NULL);
 
-      if (isHaltInstruction(last_instruction))
+      if (isHaltOrRetInstruction(last_instruction))
       {
          setSucc(current_block, graph->endingBlock);
          setPred(graph->endingBlock, current_block);
