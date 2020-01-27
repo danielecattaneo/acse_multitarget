@@ -186,6 +186,9 @@ void free_Instruction(t_axe_instruction *inst)
       _AXE_FREE_FUNCTION(inst->reg_3);
    if (inst->address != NULL)
       _AXE_FREE_FUNCTION(inst->address);
+   if (inst->user_comment != NULL) {
+      _AXE_FREE_FUNCTION(inst->user_comment);
+   }
 
    _AXE_FREE_FUNCTION(inst);
 }

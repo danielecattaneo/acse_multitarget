@@ -16,6 +16,10 @@
 
 /* global variable errorcode */
 int errorcode;
+/* global line number (defined in Acse.y) */
+extern int line_num;
+/* last line number inserted in an instruction as a comment */
+int prev_line_num = -1;
 
 /* Function used when a compare is needed between two labels */
 static int compareVariables (void *Var_A, void *Var_B);
@@ -473,6 +477,14 @@ void addInstruction(t_program_infos *program, t_axe_instruction *instr)
       notifyError(AXE_INVALID_LABEL_MANAGER);
 
    instr->labelID = assign_label(program->lmanager);
+
+   if (line_num >= 0 && line_num != prev_line_num) {
+      instr->user_comment = calloc(20, sizeof(char));
+      if (instr->user_comment) {
+         snprintf(instr->user_comment, 20, "line %d", line_num);
+      }
+   }
+   prev_line_num = line_num;
 
    /* update the list of instructions */
    program->instructions = addElement(program->instructions, instr, -1);
