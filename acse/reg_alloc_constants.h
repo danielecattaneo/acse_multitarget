@@ -10,9 +10,6 @@
 #ifndef _REG_ALLOC_CONSTANTS_H
 #define _REG_ALLOC_CONSTANTS_H
 
-/* minimum number of registers of the target machine */
-#define RA_MIN_REG_NUM 3
-
 /* constants */
 #define RA_SPILL_REQUIRED -1
 #define RA_REGISTER_INVALID 0

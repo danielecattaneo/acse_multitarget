@@ -572,13 +572,13 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
          int assignedVar;
          int needsWB;
          int inUse;
-      } assignedRegisters[RA_MIN_REG_NUM];
+      } assignedRegisters[NUM_SPILL_REGS];
 
       t_basic_block *current_block = (t_basic_block *)LDATA(current_bb_element);
       assert(current_block != NULL);
 
       /* initialize used_Registers */
-      for (counter = 0; counter < RA_MIN_REG_NUM; counter ++)
+      for (counter = 0; counter < NUM_SPILL_REGS; counter ++)
       {
          assignedRegisters[counter].assignedVar = REG_INVALID;
          assignedRegisters[counter].needsWB = 0;
@@ -615,7 +615,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                int current_row = 0;
                int found = 0;
                
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_1)->ID)
@@ -664,7 +664,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                int current_row = 0;
                int found = 0;
                
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_2)->ID)
@@ -692,7 +692,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                int current_row = 0;
                int found = 0;
                
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].assignedVar
                            == (current_instr->reg_3)->ID)
@@ -724,12 +724,12 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                int current_row = 0;
                int found = 0;
                
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
                      
                      if (assignedRegisters[current_row].needsWB == 1)
                      {
@@ -773,12 +773,12 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                   found = 1;
                }
 
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
                      
                      if (assignedRegisters[current_row].needsWB == 1)
                      {
@@ -822,12 +822,12 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
                   found = 1;
                }
                
-               while ((current_row < RA_MIN_REG_NUM) && !found)
+               while ((current_row < NUM_SPILL_REGS) && !found)
                {
                   if (assignedRegisters[current_row].inUse == 0)
                   {
                      int register_found = current_row + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
                      
                      if (assignedRegisters[current_row].needsWB == 1)
                      {
@@ -880,7 +880,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             if (used_Registers[0] != -1)
             {
                current_instr->reg_1->ID = used_Registers[0] + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
 
                assignedRegisters[used_Registers[0]].inUse = 0;
             }
@@ -893,7 +893,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             if (used_Registers[1] != -1)
             {
                current_instr->reg_2->ID = used_Registers[1] + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
                assignedRegisters[used_Registers[1]].inUse = 0;
             }
             else
@@ -905,7 +905,7 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             if (used_Registers[2] != -1)
             {
                current_instr->reg_3->ID = used_Registers[2] + NUM_REGISTERS
-                           + 1 - RA_MIN_REG_NUM;
+                           + 1 - NUM_SPILL_REGS;
                assignedRegisters[used_Registers[2]].inUse = 0;
             }
             else
@@ -923,13 +923,13 @@ void updatCflowInfos(t_program_infos *program, t_cflow_Graph *graph
             isHaltOrRetInstruction(current_instr));
 
       /* writeback everything at the end of the basic block */
-      for (counter = 0; counter < RA_MIN_REG_NUM; counter ++)
+      for (counter = 0; counter < NUM_SPILL_REGS; counter ++)
       {
          if (assignedRegisters[counter].needsWB == 1)
          {
             /* NEED WRITE BACK */
             _insertStoreSpill(program, assignedRegisters[counter].assignedVar
-                     , (counter + NUM_REGISTERS + 1 - RA_MIN_REG_NUM)
+                     , (counter + NUM_REGISTERS + 1 - NUM_SPILL_REGS)
                            , graph, current_block
                               , current_node, label_bindings, bbHasTermInstr);
          }

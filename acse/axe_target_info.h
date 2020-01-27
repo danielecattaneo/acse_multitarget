@@ -15,6 +15,9 @@
 
 /* Number of registers for this target (excluding REG_0) */
 #define NUM_REGISTERS 31
+/* Number of registers to reserve for spilled temporaries. Shall be equal to
+ * the maximum number of unique register operands in a single instruction. */
+#define NUM_SPILL_REGS 3
 
 /* number of bytes for each memory address */
 #define TARGET_PTR_GRANULARITY 4

@@ -259,8 +259,8 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
       notifyError(AXE_OUT_OF_MEMORY);
    
    /* initialize the register allocator informations */
-   /* Reserve a few registers (RA_MIN_REG_NUM) to handle spills */
-   result->regNum = NUM_REGISTERS - RA_MIN_REG_NUM;
+   /* Reserve a few registers (NUM_SPILL_REGS) to handle spills */
+   result->regNum = NUM_REGISTERS - NUM_SPILL_REGS;
 
    /* retrieve the max identifier from each live interval */
    max_var_ID = 0;
