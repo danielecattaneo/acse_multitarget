@@ -455,6 +455,43 @@ void translateCodeSegment(t_program_infos *program, FILE *fp)
    }
 }
 
+int translateDataObject(t_axe_data *current_data, FILE *fp)
+{
+   int fprintf_error;
+
+   /* assertions */
+   assert (current_data->directiveType != DIR_INVALID);
+
+   /* create a string identifier for the label */
+   char labelBuf[20];
+   char *lab = translateLabel(current_data->labelID, labelBuf, 20);
+   if (lab) {
+      fprintf_error = fprintf(fp, "%s:\t", lab);
+   } else {
+      fprintf_error = fprintf(fp, "\t");
+   }
+
+   /* test if an error occurred while executing the `fprintf' function */
+   if (fprintf_error < 0)
+      return 0;
+
+   /* print the directive identifier */
+   if (current_data->directiveType == DIR_WORD) {
+      if (fprintf(fp, "dd ") < 0)
+         return 0;
+
+   } else if (current_data->directiveType == DIR_SPACE) {
+      if (fprintf(fp, "resb ") < 0)
+         return 0;
+   }
+
+   /* print the value associated with the directive */
+   if (fprintf(fp, "%d\n", current_data->value) < 0)
+      return 0;
+      
+   return 1;
+}
+
 void translateDataSegment(t_program_infos *program, FILE *fp)
 {
    t_list *current_element;
@@ -469,86 +506,46 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    /* initialize the local variable `fprintf_error' */
    fprintf_error = 0;
    
-   if (program == NULL)
-   {
-      _error = fclose(fp);
-      if (_error == EOF)
-         notifyError(AXE_FCLOSE_ERROR);
+   if (!program)
+      goto fail; 
 
-      notifyError(AXE_PROGRAM_NOT_INITIALIZED);
-   }
+   if (!program->data)
+      return;
 
-   /* initialize the value of `current_element' */
-   current_element = program->data;
-
-   /* write the .data directive */
-   if (current_element != NULL)
-   {
-      fprintf(fp, "section .data\n");
-   }
+   fprintf(fp, "section .bss\n");
 
    /* iterate all the elements inside the data segment */
-   while (current_element != NULL)
-   {
+   current_element = program->data;
+   for (; current_element; current_element = LNEXT(current_element)) {
       /* retrieve the current data element */
       current_data = (t_axe_data *) LDATA(current_element);
+      if (current_data->directiveType != DIR_SPACE)
+         continue;
 
-      /* assertions */
-      assert (current_data->directiveType != DIR_INVALID);
-
-      /* create a string identifier for the label */
-      char labelBuf[20];
-      char *lab = translateLabel(current_data->labelID, labelBuf, 20);
-      if (lab) {
-         fprintf_error = fprintf(fp, "%s:\t", lab);
-      } else {
-         fprintf_error = fprintf(fp, "\t");
-      }
-
-      /* test if an error occurred while executing the `fprintf' function */
-      if (fprintf_error < 0)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
-
-      /* print the directive identifier */
-      if (current_data->directiveType == DIR_WORD)
-      {
-         if (fprintf(fp, "dd ") < 0)
-         {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-      }
-      
-      else if (current_data->directiveType == DIR_SPACE)
-      {
-         if (fprintf(fp, "resb ") < 0)
-         {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-      }
-
-      /* print the value associated with the directive */
-      if (fprintf(fp, "%d\n", current_data->value) < 0)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
-
-      /* loop termination condition */
-      current_element = LNEXT(current_element);
+      if (!translateDataObject(current_data, fp)) 
+         goto fail;
    }
+
+   fprintf(fp, "section .data\n");
+
+   current_element = program->data;
+   for (; current_element; current_element = LNEXT(current_element)) {
+      current_data = (t_axe_data *) LDATA(current_element);
+      if (current_data->directiveType != DIR_WORD)
+         continue;
+
+      if (!translateDataObject(current_data, fp)) 
+         goto fail;
+   }
+
+   return;
+
+fail:
+   _error = fclose(fp);
+   if (_error == EOF)
+      notifyError(AXE_FCLOSE_ERROR);
+   notifyError(AXE_FWRITE_ERROR);
+   return;
 }
 
 void writeAssembly(t_program_infos *program, char *output_file)
