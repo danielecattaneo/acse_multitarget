@@ -151,7 +151,7 @@ void rewriteLogicalOperations(t_program_infos *program)
             gen_andb_instruction(program, RS2_ID(inst), RS2_ID(inst), RS2_ID(inst), CG_DIRECT_ALL);
          } else {
             int tmp = getNewRegister(program);
-            gen_add_instruction(program, tmp, REG_0, RS2_ID(inst), CG_INDIRECT_DEST);
+            gen_add_instruction(program, tmp, REG_0, RS2_ID(inst), CG_INDIRECT_SOURCE);
          }
          gen_sne_instruction(program, rs2);
          RS1_ID(inst) = rs1;
