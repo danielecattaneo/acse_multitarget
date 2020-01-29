@@ -303,14 +303,31 @@ void fixFlagUsers(t_program_infos *program)
          for (; reachDefLnk; reachDefLnk = LNEXT(reachDefLnk)) {
             t_cflow_reach_def *reachDef = LDATA(reachDefLnk);
 
-            t_axe_register *dstReg;
-            if (!isMoveInstruction(reachDef->node->instr, &dstReg, NULL, NULL, NULL))
-               continue;
-            if (reachDef->node->instr->opcode == MOVA)
+            if (reachDef->var->ID != VAR_PSW)
                continue;
 
-            /* x86_64 move instructions do not set flags;
-             * patch them by setting flags manually */
+            t_axe_instruction *instr = reachDef->node->instr;
+            int needsSettingFlags = 0;
+            t_axe_register *dstReg;
+
+            if (isMoveInstruction(instr, &dstReg, NULL, NULL, NULL)) {
+               /* x86_64 MOV instructions do not set flags. However, MOVA does
+                * not set flags even in the ACSE IR. */
+               if (instr->opcode != MOVA)
+                  needsSettingFlags = 1;
+            } else if (instr->opcode == SEQ || instr->opcode == SGE ||
+                  instr->opcode == SGT || instr->opcode == SLE ||
+                  instr->opcode == SLT) {
+               /* SETcc instructions do not set flags on x86_64. SNE does not
+                * alter the state of the zero flag, thus we do not have to test
+                * for that. */
+               dstReg = RD(instr);
+               needsSettingFlags = 1;
+            }
+
+            if (!needsSettingFlags)
+               continue;
+
             t_list *instLnk = findElement(program->instructions, reachDef->node->instr);
             assert(instLnk && "instruction is in the CFG but not in the program");
             pushInstrInsertionPoint(program, instLnk);
