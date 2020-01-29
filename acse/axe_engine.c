@@ -45,6 +45,9 @@ static void printOpcode(int opcode, FILE *fp);
 /* print out to the file `fp' a register information */
 static void printRegister(t_axe_register *reg, FILE *fp);
 
+/* print out a label to the file `fp' */
+void printLabel(t_axe_label *label, FILE *fp);
+
 /* add a variable to the program */
 static void addVariable(t_program_infos *program, t_axe_variable *variable);
 
@@ -76,20 +79,16 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
 {
    if (current_instruction->labelID != NULL)
    {
-         /* create a string identifier for the label */
-         if (  fprintf(fp, "L%d : \t"
-                  , (current_instruction->labelID)->labelID ) < 0)
-         {
-            return 1;
-         }
+      printLabel(current_instruction->labelID, fp);
+      fprintf(fp, ":\t");
    }
    else
    {
-         /* create a string identifier for the label */
-         if (fprintf(fp, "\t") < 0)
-         {
-            return 1;
-         }
+      /* create a string identifier for the label */
+      if (fprintf(fp, "\t") < 0)
+      {
+         return 1;
+      }
    }
 
    /* print the opcode */
@@ -143,12 +142,7 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
          else
          {
             assert((current_instruction->address)->type == LABEL_TYPE);
-            if (  fprintf(fp, "L%d"
-                     , ((current_instruction->address)->labelID)
-                              ->labelID) < 0)
-            {
-               return 1;
-            }
+            printLabel((current_instruction->address)->labelID, fp);
          }
       }
       else if (fprintf(fp, "#%d", current_instruction->immediate) < 0)
@@ -272,8 +266,8 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       if ( (current_data->labelID != NULL)
             && ((current_data->labelID)->labelID != LABEL_UNSPECIFIED) )
       {
-         fprintf_error = fprintf(fp, "L%d : \t"
-                  , (current_data->labelID)->labelID);
+         printLabel(current_data->labelID, fp);
+         fprintf_error = fprintf(fp, ":\t");
       }
       else
       {
@@ -491,7 +485,7 @@ void addInstruction(t_program_infos *program, t_axe_instruction *instr)
 }
 
 /* reserve a new label identifier for future uses */
-t_axe_label * newLabel(t_program_infos *program)
+t_axe_label *newNamedLabel(t_program_infos *program, const char *name)
 {
    /* test the preconditions */
    if (program == NULL)
@@ -500,7 +494,15 @@ t_axe_label * newLabel(t_program_infos *program)
    if (program->lmanager == NULL)
       notifyError(AXE_INVALID_LABEL_MANAGER);
 
-   return newLabelID(program->lmanager);
+   t_axe_label *label = newLabelID(program->lmanager);
+   if (name)
+      setLabelName(program->lmanager, label, name);
+   return label;
+}
+
+t_axe_label * newLabel(t_program_infos *program)
+{
+   return newNamedLabel(program, NULL);
 }
 
 /* assign a new label identifier to the next instruction */
@@ -518,17 +520,22 @@ t_axe_label * assignLabel(t_program_infos *program, t_axe_label *label)
 }
 
 /* reserve a new label identifier */
-t_axe_label * assignNewLabel(t_program_infos *program)
+t_axe_label *assignNewNamedLabel(t_program_infos *program, const char *name)
 {
    t_axe_label * reserved_label;
 
    /* reserve a new label */
-   reserved_label = newLabel(program);
+   reserved_label = newNamedLabel(program, name);
    if (reserved_label == NULL)
       return NULL;
 
    /* fix the label */
    return assignLabel(program, reserved_label);
+}
+
+t_axe_label * assignNewLabel(t_program_infos *program)
+{
+   return assignNewNamedLabel(program, NULL);
 }
 
 void addVariable(t_program_infos *program, t_axe_variable *variable)
@@ -799,6 +806,18 @@ void printOpcode(int opcode, FILE *fp)
       if (_error == EOF)
          notifyError(AXE_FCLOSE_ERROR);
       notifyError(AXE_FWRITE_ERROR);
+   }
+}
+
+void printLabel(t_axe_label *label, FILE *fp)
+{
+   if (!label || label->labelID == LABEL_UNSPECIFIED)
+      return;
+   
+   if (label->name) {
+      fputs(label->name, fp);
+   } else {
+      fprintf(fp, "L%d", label->labelID);
    }
 }
 

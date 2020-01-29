@@ -16,6 +16,7 @@ static void printListOfVariables(t_list *variables, FILE *fout);
 static void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose);
 static void printLiveIntervals(t_list *intervals, FILE *fout);
 static void printBindings(int *bindings, int numVars, FILE *fout);
+static void printLabel(t_axe_label *label, int printInline, FILE *fout);
 
 void printBindings(int *bindings, int numVars, FILE *fout)
 {
@@ -239,9 +240,8 @@ void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
    }
 
    if (instr->labelID != NULL)
-      fprintf(fout, "L%d\t", (instr->labelID)->labelID);
-   else
-      fprintf(fout, "\t");
+      printLabel(instr->labelID, 1, fout);
+   fprintf(fout, "\t");
    
    switch(instr->opcode)
    {
@@ -338,9 +338,9 @@ void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
    if (instr->address != NULL)
    {
       if ((instr->address)->type == LABEL_TYPE)
-         fprintf(fout, "L%d ", ((instr->address)->labelID)->labelID);
+         printLabel(instr->address->labelID, 1, fout);
       else
-         fprintf(fout, "%d ", (instr->address)->addr);
+         fprintf(fout, "%d", (instr->address)->addr);
    }
 
    if (instr->user_comment) {
@@ -354,5 +354,20 @@ char * dataTypeToString(int codedType)
    {
       case INTEGER_TYPE : return "INTEGER";
       default : return "<INVALID_TYPE>";
+   }
+}
+
+void printLabel(t_axe_label *label, int printInline, FILE *fout)
+{
+   if (printInline) {
+      if (!label->name)
+         fprintf(fout, "L%d", label->labelID);
+      else
+         fprintf(fout, "%s", label->name);
+   } else {
+      if (!label->name)
+         fprintf(fout, "L%d", label->labelID);
+      else
+         fprintf(fout, "%s (ID=%d)", label->name, label->labelID);
    }
 }

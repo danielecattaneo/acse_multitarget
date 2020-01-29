@@ -110,9 +110,17 @@ t_axe_label * alloc_label(int value)
 
    /* initialize the internal value of `result' */
    result->labelID = value;
+   result->name = NULL;
 
    /* return the just initialized new instance of `t_axe_label' */
    return result;
+}
+
+void free_label(t_axe_label *lab)
+{
+   if (lab->name)
+      _AXE_FREE_FUNCTION(lab->name);
+   _AXE_FREE_FUNCTION(lab);
 }
 
 t_axe_declaration * alloc_declaration

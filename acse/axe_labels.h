@@ -43,4 +43,10 @@ extern int compareLabels(t_axe_label *labelA, t_axe_label *labelB);
 /* test if a label will be assigned to the next instruction */
 extern int isAssignedLabel(t_axe_label_manager *lmanager);
 
+/* Sets the name of a label to the specified string. Note: if another label
+ * with the same name already exists, the name assigned to this label will be
+ * modified to remove any ambiguity. */
+extern void setLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
+      const char *name);
+
 #endif

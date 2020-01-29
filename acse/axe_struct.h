@@ -25,6 +25,8 @@
 typedef struct t_axe_label
 {
    int labelID;      /* label identifier */
+   char *name;       /* Name of the label. If NULL, the name will be 
+                      * automatically generated in the form L<ID>. */
 } t_axe_label;
 
 typedef struct t_axe_register
@@ -116,6 +118,9 @@ typedef struct t_while_statement
 
 /* create a label */
 extern t_axe_label * alloc_label(int value);
+
+/* free a label */
+extern void free_label(t_axe_label *lab);
 
 /* create an expression */
 extern t_axe_expression create_expression (int value, int type);

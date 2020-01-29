@@ -48,6 +48,13 @@ extern t_axe_label * assignLabel(t_program_infos *program, t_axe_label *label);
  * value LABEL_UNSPECIFIED if an error occurred */
 extern t_axe_label * assignNewLabel(t_program_infos *program);
 
+/* Like the above functions, but with the ability to give a name to the label.
+ * If another label with the same name already exists, the name assigned to
+ * the new label will be modified to remove any ambiguity. */
+extern t_axe_label *newNamedLabel(t_program_infos *program, const char *name);
+extern t_axe_label *assignNewNamedLabel(t_program_infos *program,
+      const char *name);
+
 /* add a variable to the program */
 extern void createVariable(t_program_infos *program
       , char *ID, int type, int isArray, int arraySize, int init_val);
