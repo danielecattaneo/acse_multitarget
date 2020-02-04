@@ -176,6 +176,14 @@ void rewriteLogicalOperations(t_program_infos *program)
          }
          popInstrInsertionPoint(program);
 
+      } else if (inst->opcode == NOTL) {
+         assert(!RD_IND(inst) && "found illegal NOTL instruction with IND on DST");
+         pushInstrInsertionPoint(program, LPREV(cur));
+         moveLabel(gen_andb_instruction(program, RS1_ID(inst), RS1_ID(inst), RS1_ID(inst), CG_DIRECT_ALL), inst);
+         gen_seq_instruction(program, RD_ID(inst));
+         popInstrInsertionPoint(program);
+         removeInstructionLink(program, cur);
+
       } else if (inst->opcode == ANDLI) {
          /* this instruction is stupid #1 */
          pushInstrInsertionPoint(program, LPREV(cur));
