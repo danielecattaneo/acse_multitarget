@@ -23,6 +23,9 @@ t_translation_infos *infos;
 /* functions declared into assembler.y */
 char * AsmErrorToString(int errorcode);
 
+int yylex(void);
+int yyerror(const char* errmsg);
+
 %}
 
 %expect 3
