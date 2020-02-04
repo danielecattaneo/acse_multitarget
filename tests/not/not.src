@@ -1,0 +1,27 @@
+int a, b;
+
+a = !0;
+write(a);               /* 1 */
+a = !1;
+write(a);               /* 0 */
+a = !(10 - 5 * 2);
+write(a);               /* 1 */
+a = !(10 - 4 * 2);
+write(a);               /* 0 */
+a = !!(10 - 5 * 2);
+write(a);               /* 0 */
+a = !!(10 - 4 * 2);
+write(a);               /* 1 */
+a = !10 - 1;
+write(a);               /* -1 */
+a = !0 * 5;
+write(a);               /* 5 */
+a = !!10 * 5;
+write(a);               /* 5 */
+
+read(b);
+
+a = !b;
+write(a);
+a = !!b;
+write(a);

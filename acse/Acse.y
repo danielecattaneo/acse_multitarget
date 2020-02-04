@@ -153,7 +153,7 @@ extern int yyerror(const char* errmsg);
 %left SHL_OP SHR_OP
 %left MINUS PLUS
 %left MUL_OP DIV_OP
-%right NOT
+%right NOT_OP
 
 /*=========================================================================
                          BISON GRAMMAR
@@ -484,32 +484,29 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                      /* free the memory associated with the IDENTIFIER */
                      free($1);
    }
-   | NOT_OP NUMBER   {  if ($2 == 0)
-                           $$ = create_expression (1, IMMEDIATE);
-                        else
-                           $$ = create_expression (0, IMMEDIATE);
-   }
-   | NOT_OP IDENTIFIER  {
-                           int identifier_location;
-                           int output_register;
-   
-                           /* get the location of the symbol with the given ID */
-                           identifier_location =
-                                 get_symbol_location(program, $2, 0);
+   | NOT_OP exp {
+               if ($2.expression_type == IMMEDIATE)
+               {
+                  /* IMMEDIATE (constant) expression: compute the value at
+                   * compile-time and place the result in a new IMMEDIATE
+                   * expression */
+                  $$ = create_expression(!($2.value), IMMEDIATE);
+               }
+               else
+               {
+                  /* REGISTER expression: generate the code that will compute
+                   * the result at compile time */
 
-                           /* generate a NOT instruction. In order to do this,
-                            * at first we have to ask for a free register where
-                            * to store the result of the NOT instruction. */
-                           output_register = getNewRegister(program);
+                  /* Reserve a new register for the result */
+                  int output_register = getNewRegister(program);
 
-                           /* Now we are able to generate a NOT instruction */
-                           gen_notl_instruction (program, output_register
-                                 , identifier_location);
-
-                           $$ = create_expression (output_register, REGISTER);
-
-                           /* free the memory associated with the IDENTIFIER */
-                           free($2);
+                  /* Generate a NOTL instruction which will store the negated
+                   * logic value into the register we reserved */
+                  gen_notl_instruction(program, output_register, $2.value);
+                  
+                  /* Return a REGISTER expression with the result register */
+                  $$ = create_expression(output_register, REGISTER);
+               }
    }
    | exp AND_OP exp     {
                            $$ = handle_bin_numeric_op(program, $1, $3, ANDB);
