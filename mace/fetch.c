@@ -131,7 +131,7 @@ int executeTER(decoded_instr *instr){
             }
             if(old_src2) {
                 if(old_src2 > 32) carryout = (!func_is_unsigned(instr) && !SIGN(old_src1));
-                else carryout = !!(old_src1 & (1 << old_src2 - 1));
+                else carryout = !!(old_src1 & (1 << (old_src2 - 1)));
             }
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
@@ -217,7 +217,7 @@ int executeBIN(decoded_instr *instr)
             }
             if(old_src2) {
                 if(old_src2 > 32) carryout = !SIGN(old_src1);
-                else carryout = !!(old_src1 & (1 << old_src2 - 1));
+                else carryout = !!(old_src1 & (1 << (old_src2 - 1)));
             }
 		 break;
         case ROTLI: *dest = perform_rotl(*src1, *src2, &carryout);
