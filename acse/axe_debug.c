@@ -342,6 +342,10 @@ void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
       else
          fprintf(fout, "%d ", (instr->address)->addr);
    }
+
+   if (instr->user_comment) {
+      fprintf(fout, "\t/* %s */", instr->user_comment);
+   }
 }
 
 char * dataTypeToString(int codedType)

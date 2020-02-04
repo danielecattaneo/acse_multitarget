@@ -68,6 +68,103 @@ void createVariable(t_program_infos *program, char *ID
 }
 
 /* translate each instruction in his assembler symbolic representation */
+int translateInstruction(t_program_infos *program, t_axe_instruction *current_instruction, FILE *fp)
+{
+   if (current_instruction->labelID != NULL)
+   {
+         /* create a string identifier for the label */
+         if (  fprintf(fp, "L%d : \t"
+                  , (current_instruction->labelID)->labelID ) < 0)
+         {
+            return 1;
+         }
+   }
+   else
+   {
+         /* create a string identifier for the label */
+         if (fprintf(fp, "\t") < 0)
+         {
+            return 1;
+         }
+   }
+
+   /* print the opcode */
+   printOpcode(current_instruction->opcode, fp);
+
+   if (  (current_instruction->opcode == HALT)
+         || (current_instruction->opcode == NOP) )
+   {
+      /* do nothing */
+   }
+   else
+   {
+      if (fputc(' ', fp) == EOF)
+      {
+         return 1;
+      }
+
+      if (current_instruction->reg_1 != NULL)
+      {
+         printRegister(current_instruction->reg_1, fp);
+         
+         if (fputc(' ', fp) == EOF)
+         {
+            return 1;
+         }
+      }
+      if (current_instruction->reg_2 != NULL)
+      {
+         printRegister(current_instruction->reg_2, fp);
+         if (errorcode != AXE_OK)
+            return 1;
+
+         if (fputc(' ', fp) == EOF)
+         {
+            return 1;
+         }
+      }
+      if (current_instruction->reg_3 != NULL)
+      {
+         printRegister(current_instruction->reg_3, fp);
+      }
+      else if (current_instruction->address != NULL)
+      {
+         if ((current_instruction->address)->type == ADDRESS_TYPE)
+         {
+            if (fprintf(fp, "%d", (current_instruction->address)->addr) < 0)
+            {
+               return 1;
+            }
+         }
+         else
+         {
+            assert((current_instruction->address)->type == LABEL_TYPE);
+            if (  fprintf(fp, "L%d"
+                     , ((current_instruction->address)->labelID)
+                              ->labelID) < 0)
+            {
+               return 1;
+            }
+         }
+      }
+      else if (fprintf(fp, "#%d", current_instruction->immediate) < 0)
+      {
+         return 1;
+      }
+   }
+
+   if (current_instruction->user_comment)
+   {
+      fprintf(fp, "\t\t/* %s */", current_instruction->user_comment);
+   }
+
+   if (fprintf(fp, "\n") < 0) {
+      return 1;
+   }
+   return 0;
+}
+
+/* translate each instruction in its assembler symbolic representation */
 void translateCodeSegment(t_program_infos *program, FILE *fp)
 {
    t_list *current_element;
@@ -108,146 +205,7 @@ void translateCodeSegment(t_program_infos *program, FILE *fp)
       assert(current_instruction != NULL);
       assert(current_instruction->opcode != INVALID_OPCODE);
 
-      if (current_instruction->labelID != NULL)
-      {
-            /* create a string identifier for the label */
-            if (  fprintf(fp, "L%d : \t"
-                     , (current_instruction->labelID)->labelID ) < 0)
-            {
-              _error = fclose(fp);
-               if (_error == EOF)
-                  notifyError(AXE_FCLOSE_ERROR);
-               notifyError(AXE_FWRITE_ERROR);
-            }
-      }
-      else
-      {
-            /* create a string identifier for the label */
-            if (fprintf(fp, "\t") < 0)
-            {
-              _error = fclose(fp);
-               if (_error == EOF)
-                  notifyError(AXE_FCLOSE_ERROR);
-               notifyError(AXE_FWRITE_ERROR);
-            }
-      }
-
-      /* print the opcode */
-      printOpcode(current_instruction->opcode, fp);
-
-      if (  (current_instruction->opcode == HALT)
-            || (current_instruction->opcode == NOP) )
-      {
-         if (fprintf(fp, "\n") < 0)
-         {
-              _error = fclose(fp);
-               if (_error == EOF)
-                  notifyError(AXE_FCLOSE_ERROR);
-               notifyError(AXE_FWRITE_ERROR);
-         }
-
-         /* update the current_element */
-         current_element = LNEXT(current_element);
-         continue;
-      }
-      
-      if (fputc(' ', fp) == EOF)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
-
-      if (current_instruction->reg_1 != NULL)
-      {
-         printRegister(current_instruction->reg_1, fp);
-         
-         if (fputc(' ', fp) == EOF)
-         {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-      }
-      if (current_instruction->reg_2 != NULL)
-      {
-         printRegister(current_instruction->reg_2, fp);
-         if (errorcode != AXE_OK)
-            return;
-
-         if (fputc(' ', fp) == EOF)
-         {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-      }
-      if (current_instruction->reg_3 != NULL)
-      {
-         printRegister(current_instruction->reg_3, fp);
-
-         if (fprintf(fp, "\n") < 0) {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-
-         /* update the current_element */
-         current_element = LNEXT(current_element);
-         continue;
-      }
-
-      if (current_instruction->address != NULL)
-      {
-         if ((current_instruction->address)->type == ADDRESS_TYPE)
-         {
-            if (fprintf(fp, "%d", (current_instruction->address)->addr) < 0)
-            {
-               _error = fclose(fp);
-               if (_error == EOF)
-                  notifyError(AXE_FCLOSE_ERROR);
-               notifyError(AXE_FWRITE_ERROR);
-            }
-         }
-         else
-         {
-            assert((current_instruction->address)->type == LABEL_TYPE);
-            if (  fprintf(fp, "L%d"
-                     , ((current_instruction->address)->labelID)
-                              ->labelID) < 0)
-            {
-               _error = fclose(fp);
-               if (_error == EOF)
-                  notifyError(AXE_FCLOSE_ERROR);
-               notifyError(AXE_FWRITE_ERROR);
-            }
-         }
-         
-         if (fprintf(fp, "\n") < 0) {
-            _error = fclose(fp);
-            if (_error == EOF)
-               notifyError(AXE_FCLOSE_ERROR);
-            notifyError(AXE_FWRITE_ERROR);
-         }
-
-         /* update the current_element */
-         current_element = LNEXT(current_element);
-         continue;
-      }
-
-      if (fprintf(fp, "#%d", current_instruction->immediate) < 0)
-      {
-         _error = fclose(fp);
-         if (_error == EOF)
-            notifyError(AXE_FCLOSE_ERROR);
-         notifyError(AXE_FWRITE_ERROR);
-      }
-
-      if (fprintf(fp, "\n") < 0) {
+      if (translateInstruction(program, current_instruction, fp)) {
          _error = fclose(fp);
          if (_error == EOF)
             notifyError(AXE_FCLOSE_ERROR);
