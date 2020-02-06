@@ -471,16 +471,6 @@ t_cflow_Graph * insertLoadAndStoreInstr
       {
          current_node = (t_cflow_Node *) LDATA(current_nd_element);
 
-         /* test if we have to insert a store */
-         if (  (current_node->def != NULL)
-               && ((current_node->def)->ID != REG_0) )
-         {
-            if (findElement(usedVars, current_node->def) == NULL)
-            {
-               usedVars = addElement(usedVars, current_node->def, -1);
-            }
-         }
-
          /* test if we have to insert a load */
          if (  (current_node->uses[0] != NULL)
                && ((current_node->uses[0])->ID != REG_0) )
@@ -507,6 +497,16 @@ t_cflow_Graph * insertLoadAndStoreInstr
             {
                usedVars = _insertLoad(program, graph, current_block
                      , current_node, current_node->uses[2], usedVars);
+            }
+         }
+
+         /* test if we have to insert a store */
+         if (  (current_node->def != NULL)
+               && ((current_node->def)->ID != REG_0) )
+         {
+            if (findElement(usedVars, current_node->def) == NULL)
+            {
+               usedVars = addElement(usedVars, current_node->def, -1);
             }
          }
 

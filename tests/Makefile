@@ -1,4 +1,4 @@
-dirs:=arrays sum dowhile fact mult_table power binop not \
+dirs:=arrays sum dowhile fact mult_table power binop not initvar \
 	  semi assign arrays2 misc shift spilltest
 
 test: $(dirs)
