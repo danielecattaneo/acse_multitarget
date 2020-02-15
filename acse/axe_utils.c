@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <inttypes.h>
 #include "axe_utils.h"
 #include "axe_gencode.h"
 #include "symbol_table.h"
@@ -174,23 +175,25 @@ int is_int16(int immediate) {
   return immediate < (1 << 15) && immediate >= -(1 << 15);
 }
 
-
 void gen_move_immediate(t_program_infos *program, int dest, int immediate)
-{ 
-     int is_immediate_neg = 0;
-     if (immediate < 0) {
-	immediate = -immediate;
-        is_immediate_neg = 1;
-     }
-     int lo = immediate & 0xFFFF;
-     int hi = immediate >> 16;
+{
+   int imm0 = immediate;
+   int imm1 = 0;
+   if (!is_int16(imm0)) {
+      /* cast to int16_t to perform sign-extension */
+      imm0 = (int16_t)(immediate & 0xFFFF); 
+      imm1 = (immediate - imm0) >> 16;
+   }
 
-     gen_addi_instruction(program, dest, REG_0, hi);
-     gen_shli_instruction(program, dest, dest, 16);
-     gen_addi_instruction(program, dest, dest, lo);
-     if (is_immediate_neg){
-     gen_sub_instruction(program, dest, REG_0, dest, CG_DIRECT_ALL);
-     }
+   int basereg = REG_0;
+   if (imm1) {
+      gen_addi_instruction(program, dest, basereg, imm1);
+      gen_shli_instruction(program, dest, dest, 16);
+      basereg = dest;
+   }
+   if (imm0 || basereg == REG_0) {
+      gen_addi_instruction(program, dest, basereg, imm0);
+   }
 }
 
 int gen_load_immediate(t_program_infos *program, int immediate)
