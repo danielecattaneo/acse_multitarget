@@ -87,7 +87,10 @@ char *translateLabel(t_axe_label *label, char *dest, int bufSize)
       if (bufSize >= 1) dest[0] = '\0'; 
       return NULL;
    }
-   snprintf(dest, bufSize, "L%d", label->labelID);
+   if (label->name)
+      snprintf(dest, bufSize, "%s", label->name);
+   else
+      snprintf(dest, bufSize, "L%d", label->labelID);
    return dest;
 }
 
