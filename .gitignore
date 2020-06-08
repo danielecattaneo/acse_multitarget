@@ -9,4 +9,13 @@
 *.tab.h
 *.yy.c
 *.synctex.gz
-acse_*/bin
+bin
+tests/*/*.asm
+tests/*/*.bin
+tests/*/dataflow.cfg
+tests/*/output.cfg
+tests/*/regalloc.out
+tests/*/sy_table.out
+.clangd
+.vscode
+compile_commands.json
