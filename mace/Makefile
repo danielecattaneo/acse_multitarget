@@ -1,26 +1,33 @@
 project = ../bin/mace
-objects = machine.o fetch.o getbits.o decode.o main.o
-deps = $(objects:.o=.d)
-export project objects deps
+override CFLAGS += 
+override LDFLAGS +=
+
+objdir = ./obj
+override CFLAGS += -I$(objdir) -I.
+
+c_src = $(wildcard *.c)
+
+c_objects = $(patsubst %, $(objdir)/%, $(c_src:.c=.o))
+object = $(c_objects)
+deps = $(object:.o=.d)
 
 .PHONY: all clean
 
-all: $(deps)
-	make -f Makefile.all
+all: $(project)
 
-$(project): $(objects)
-	gcc -o $@ $^
+-include $(deps)
+
+$(project): $(object)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(objdir)/%.o: %.c
+	$(CC) $(CFLAGS) -MMD -c $< -o $@
+
+$(object): | $(objdir)
+
+$(objdir):
+	mkdir -p $@
 
 clean:
-	rm -f $(objects) $(deps) $(project) $(project:=.exe)
-
-# Automake dependencies for C/C++ files
-define make-dep
-@echo "Making dependencies for $<..." 
-@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $< | sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
-	[ -s $@ ] || rm -f $@"
-endef
-%.d: %.c
-	$(make-dep)
-
-
+	rm -rf $(objdir)
+	rm -f $(project) $(project:=.exe)
