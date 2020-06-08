@@ -1,13 +1,13 @@
-asm=$(CURDIR)/../bin/asm
-acse=$(CURDIR)/../bin/acse
+asm="$(CURDIR)"/../bin/asm
+acse="$(CURDIR)"/../bin/acse
 export asm acse
 dirs:=arrays sum dowhile fact mult_table power \
 	  semi assign arrays arrays2 misc shift
 
 test :
-	for i in $(dirs); do $(MAKE) -C $$i -f ../Makefile.test ; done
+	for i in $(dirs); do $(MAKE) -C "$$i" -f "../Makefile.test" ; done
 
 .PHONY : test clean
 
 clean :
-	for i in $(dirs); do $(MAKE) -C $$i -f ../Makefile.test clean ; done
+	for i in $(dirs); do $(MAKE) -C "$$i" -f "../Makefile.test" clean ; done
