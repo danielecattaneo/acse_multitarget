@@ -9,6 +9,11 @@
 
 #include "machine.h"
 
+int reg[NREGS];
+int mem[MEMSIZE];
+unsigned int pc;
+int psw;
+
 /* Debug printf, print the value of the status word */
 void print_psw(FILE *file)
 {

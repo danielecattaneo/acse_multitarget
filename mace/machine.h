@@ -33,17 +33,17 @@ enum term  { OK, NOARGS, NOFILE, INVALID_INSTR, INVALID_INSTR_FORMAT, MEM_FAULT,
 enum modes { BASIC, SEGMENTED };
 
 /* Dichiarazione degli elementi di memoria */
-int reg[NREGS];
+extern int reg[NREGS];
 
 void print_regs(FILE *file);
 void print_psw(FILE *file);
 
-int mem[MEMSIZE];
+extern int mem[MEMSIZE];
 
 void print_Memory_Dump(FILE *file, int begin);
 
-unsigned int pc;  /* the program counter      */
-int psw; /* the four condition flags */
+extern unsigned int pc;  /* the program counter */
+extern int psw; /* the four condition flags */
 
 enum flags { CARRY, OVERFLOW, ZERO, NEGATIVE } ;
 
