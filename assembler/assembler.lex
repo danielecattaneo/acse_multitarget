@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <math.h>
 #include "asm_struct.h"
 #include "collections.h"
