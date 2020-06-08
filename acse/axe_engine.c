@@ -636,6 +636,10 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
             notifyError(AXE_OUT_OF_MEMORY);
       }
    }
+   else
+   {
+      notifyError(AXE_INVALID_TYPE);
+   }
 
    /* update the list of directives */
    program->data = addElement(program->data, new_data_info, -1);
