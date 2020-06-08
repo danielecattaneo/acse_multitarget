@@ -1,12 +1,14 @@
+ASM=../../bin/asm
+ACSE=../../bin/acse
 objects=$(patsubst %.src,%.o,$(wildcard *.src))
 
 test : $(objects)
 
 %.o : %.asm
-	$(asm) $< $@	
+	$(ASM) $< $@	
 
 %.asm : %.src
-	$(acse) $< $@
+	$(ACSE) $< $@
 
 .PRECIOUS : %.asm
 
