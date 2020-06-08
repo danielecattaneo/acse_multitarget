@@ -569,24 +569,30 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
    
    /* test the preconditions */
    if (variable == NULL)
+   {
       notifyError(AXE_INVALID_VARIABLE);
+      return;
+   }
 
    if (program == NULL)
    {
       free_variable(variable);
       notifyError(AXE_PROGRAM_NOT_INITIALIZED);
+      return;
    }
 
    if (variable->ID == NULL)
    {
       free_variable(variable);
       notifyError(AXE_VARIABLE_ID_UNSPECIFIED);
+      return;
    }
 
    if (variable->type == UNKNOWN_TYPE)
    {
       free_variable(variable);
       notifyError(AXE_INVALID_TYPE);
+      return;
    }
 
    if (variable->isArray)
@@ -595,6 +601,7 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
       {
          free_variable(variable);
          notifyError(AXE_INVALID_ARRAY_SIZE);
+         return;
       }
    }
    
@@ -602,6 +609,7 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
    {
       free_variable(variable);
       notifyError(AXE_INVALID_LABEL);
+      return;
    }
    
    /* we have to test if already exists a variable with the same ID */
@@ -611,6 +619,7 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
    {
       free_variable(variable);
       notifyError(AXE_VARIABLE_ALREADY_DECLARED);
+      return;
    }
 
    /* now we can add the new variable to the program */
@@ -639,6 +648,7 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
    else
    {
       notifyError(AXE_INVALID_TYPE);
+      return;
    }
 
    /* update the list of directives */
@@ -809,6 +819,7 @@ void printOpcode(int opcode, FILE *fp)
          if (_error == EOF)
             notifyError(AXE_FCLOSE_ERROR);
          notifyError(AXE_INVALID_OPCODE);
+         return;
    }
       
    /* postconditions */
