@@ -85,8 +85,8 @@ t_cflow_Graph *graph;      /* An instance of a control flow graph. This instance
                             * will be generated starting from `program' and will
                             * be used during the register allocation process */
 
-t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan"
-                            * algorithm */
+t_reg_allocator *RA;       /* Register allocator. It implements the "Linear
+                            * scan" algorithm */
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
@@ -317,8 +317,8 @@ if_statement   : if_stmt
                }
                | if_stmt ELSE
                {
-                  /* reserve a new label that points to the address where to jump if
-                   * `exp' is verified */
+                  /* reserve a new label that points to the address where to
+                   * jump if `exp' is verified */
                   $2 = newLabel(program);
    
                   /* exit from the if-else */
@@ -376,7 +376,8 @@ while_statement  : WHILE
                       * block */
                      $1.label_end = newLabel(program);
 
-                     /* if `exp' returns FALSE, jump to the label $1.label_end */
+                     /* if `exp' returns FALSE, jump to the label 
+                      * $1.label_end */
                      gen_beq_instruction (program, $1.label_end, 0);
                   }
                   code_block
@@ -441,13 +442,12 @@ read_statement : READ LPAR IDENTIFIER RPAR
             
 write_statement : WRITE LPAR exp RPAR 
             {
-   
                int location;
 
                if ($3.expression_type == IMMEDIATE)
                {
-                  /* load `immediate' into a new register. Returns the new register
-                   * identifier or REG_INVALID if an error occurs */
+                  /* load `immediate' into a new register. Returns the new
+                   * register identifier or REG_INVALID if an error occurs */
                   location = gen_load_immediate(program, $3.value);
                }
                else
@@ -509,65 +509,41 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                   $$ = create_expression(output_register, REGISTER);
                }
    }
-   | exp AND_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ANDB);
-   }
-   | exp OR_OP exp      {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ORB);
-   }
-   | exp PLUS exp       {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ADD);
-   }
-   | exp MINUS exp      {
-                           $$ = handle_bin_numeric_op(program, $1, $3, SUB);
-   }
-   | exp MUL_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, MUL);
-   }
-   | exp DIV_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, DIV);
-   }
-   | exp LT exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _LT_);
-   }
-   | exp GT exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _GT_);
-   }
-   | exp EQ exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _EQ_);
-   }
-   | exp NOTEQ exp   {
-                        $$ = handle_binary_comparison (program, $1, $3, _NOTEQ_);
-   }
-   | exp LTEQ exp    {
-                        $$ = handle_binary_comparison (program, $1, $3, _LTEQ_);
-   }
-   | exp GTEQ exp    {
-                        $$ = handle_binary_comparison (program, $1, $3, _GTEQ_);
-   }
-   | exp SHL_OP exp  {  $$ = handle_bin_numeric_op(program, $1, $3, SHL); }
-   | exp SHR_OP exp  {  $$ = handle_bin_numeric_op(program, $1, $3, SHR); }
-   | exp ANDAND exp  {  $$ = handle_bin_numeric_op(program, $1, $3, ANDL); }
-   | exp OROR exp    {  $$ = handle_bin_numeric_op(program, $1, $3, ORL); }
-   | LPAR exp RPAR   { $$ = $2; }
-   | MINUS exp       {
-                        if ($2.expression_type == IMMEDIATE)
-                        {
-                           $$ = $2;
-                           $$.value = - ($$.value);
-                        }
-                        else
-                        {
-                           t_axe_expression exp_r0;
+   | exp AND_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, ANDB); }
+   | exp OR_OP exp  { $$ = handle_bin_numeric_op(program, $1, $3, ORB); }
+   | exp PLUS exp   { $$ = handle_bin_numeric_op(program, $1, $3, ADD); }
+   | exp MINUS exp  { $$ = handle_bin_numeric_op(program, $1, $3, SUB); }
+   | exp MUL_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, MUL); }
+   | exp DIV_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, DIV); }
+   | exp LT exp     { $$ = handle_binary_comparison(program, $1, $3, _LT_); }
+   | exp GT exp     { $$ = handle_binary_comparison(program, $1, $3, _GT_); }
+   | exp EQ exp     { $$ = handle_binary_comparison(program, $1, $3, _EQ_); }
+   | exp NOTEQ exp  { $$ = handle_binary_comparison(program, $1, $3, _NOTEQ_); }
+   | exp LTEQ exp   { $$ = handle_binary_comparison(program, $1, $3, _LTEQ_); }
+   | exp GTEQ exp   { $$ = handle_binary_comparison(program, $1, $3, _GTEQ_); }
+   | exp SHL_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, SHL); }
+   | exp SHR_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, SHR); }
+   | exp ANDAND exp { $$ = handle_bin_numeric_op(program, $1, $3, ANDL); }
+   | exp OROR exp   { $$ = handle_bin_numeric_op(program, $1, $3, ORL); }
+   | LPAR exp RPAR  { $$ = $2; }
+   | MINUS exp {
+                  if ($2.expression_type == IMMEDIATE)
+                  {
+                     $$ = $2;
+                     $$.value = - ($$.value);
+                  }
+                  else
+                  {
+                     t_axe_expression exp_r0;
 
-                           /* create an expression for register REG_0 */
-                           exp_r0.value = REG_0;
-                           exp_r0.expression_type = REGISTER;
-                           
-                           $$ = handle_bin_numeric_op
-                                 (program, exp_r0, $2, SUB);
-                        }
-                     }
+                     /* create an expression for register REG_0 */
+                     exp_r0.value = REG_0;
+                     exp_r0.expression_type = REGISTER;
+                     
+                     $$ = handle_bin_numeric_op
+                           (program, exp_r0, $2, SUB);
+                  }
+               }
 ;
 
 %%

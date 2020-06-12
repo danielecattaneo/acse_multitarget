@@ -101,8 +101,8 @@ typedef struct t_axe_expression
 typedef struct t_axe_declaration
 {
    int isArray;           /* must be TRUE if the current variable is an array */
-   int arraySize;         /* the size of the array. This information is useful only
-                           * if the field `isArray' is TRUE */
+   int arraySize;         /* the size of the array. This information is useful
+                           * only if the field `isArray' is TRUE */
    int init_val;          /* initial value of the current variable. */
    char *ID;              /* variable identifier (should never be a NULL pointer
                            * or an empty string "") */
@@ -129,16 +129,16 @@ extern t_axe_expression create_expression (int value, int type);
 extern t_while_statement create_while_statement();
 
 /* create an instance of `t_axe_register' */
-extern t_axe_register * alloc_register(int ID, int indirect);
+extern t_axe_register *alloc_register(int ID, int indirect);
 
 /* create an instance of `t_axe_instruction' */
-extern t_axe_instruction * alloc_instruction(int opcode);
+extern t_axe_instruction *alloc_instruction(int opcode);
 
 /* create an instance of `t_axe_address' */
-extern t_axe_address * alloc_address(int type, int address, t_axe_label *label);
+extern t_axe_address *alloc_address(int type, int address, t_axe_label *label);
 
 /* create an instance of `t_axe_data' */
-extern t_axe_data * alloc_data(int directiveType, int value, t_axe_label *label);
+extern t_axe_data *alloc_data(int directiveType, int value, t_axe_label *label);
 
 /* create an instance of `t_axe_variable' */
 extern t_axe_variable * alloc_variable

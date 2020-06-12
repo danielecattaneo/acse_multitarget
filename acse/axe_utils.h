@@ -61,8 +61,8 @@ extern int isHaltOrRetInstruction(t_axe_instruction *instr);
 /* Returns 1 if `instr` is the LOAD instruction. */
 extern int isLoadInstruction(t_axe_instruction *instr);
 
-/* Returns 1 if the opcode corresponds to an instruction with an immediate argument
- * (i.e. if the instruction mnemonic ends with `I`). */
+/* Returns 1 if the opcode corresponds to an instruction with an immediate
+ * argument (i.e. if the instruction mnemonic ends with `I`). */
 extern int isImmediateArgumentInstrOpcode(int opcode);
 
 /* Switches the immediate form of an opcode. For example, ADDI is transformed

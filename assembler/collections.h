@@ -54,10 +54,10 @@ typedef struct t_list
 }t_list;
 
 
-/* add an element `data' to the list `list' at position `pos'. If pos is negative
- * , or is larger than the number of elements in the list, the new element is
- * added on to the end of the list. Function `addElement' returns a pointer
- * to the new head of the list */
+/* add an element `data' to the list `list' at position `pos'. If pos is
+ * negative, or is larger than the number of elements in the list, the new
+ * element is added on to the end of the list. Function `addElement' returns a
+ * pointer to the new head of the list */
 extern t_list * addElement(t_list *list, void * data, int pos);
 
 /* add sorted */

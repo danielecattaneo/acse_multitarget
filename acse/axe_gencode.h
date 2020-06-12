@@ -383,14 +383,14 @@ extern t_axe_instruction * gen_spcl_instruction (t_program_infos *program
  *                   JUMP INSTRUCTIONS
  *---------------------------------------------------*/
 
-/* create a branch true instruction. By executing this instruction
- * the control is always passed to either the instruction with the label `label'
- * associated with, or (if `label' is a NULL pointer) to the explicit `address' */
+/* create a branch true instruction. By executing this instruction the control
+ * is always passed to either the instruction with the label `label' associated
+ * with, or (if `label' is a NULL pointer) to the explicit `address' */
 extern t_axe_instruction * gen_bt_instruction
       (t_program_infos *program, t_axe_label *label, int addr);
 
-/* create a branch false instruction. By executing this instruction
- * the control is always passed to the next instruction in the program
+/* create a branch false instruction. By executing this instruction the control
+ * is always passed to the next instruction in the program
  * (i.e.: the instruction pointed by PC + 1). */
 extern t_axe_instruction * gen_bf_instruction
       (t_program_infos *program, t_axe_label *label, int addr);
