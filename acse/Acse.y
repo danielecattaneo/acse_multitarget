@@ -37,7 +37,6 @@
 #endif
 
 
-
 /* global variables */
 int line_num;        /* this variable will keep track of the
                       * source code line number. Every time that a newline
@@ -114,6 +113,7 @@ extern int yyerror(const char* errmsg);
 =========================================================================*/
 %start program
 
+%token EOF_TOK /* end of file */
 %token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE
 %token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP
 %token AND_OP OR_OP NOT_OP
@@ -166,7 +166,7 @@ extern int yyerror(const char* errmsg);
       2. A list of instructions. (at least one instruction!).
  * When the rule associated with the non-terminal `program' is executed,
  * the parser notify it to the `program' singleton instance. */
-program  : var_declarations statements
+program  : var_declarations statements EOF_TOK
          {
             /* Notify the end of the program. Once called
              * the function `set_end_Program' - if necessary -

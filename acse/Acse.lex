@@ -104,5 +104,5 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 
 .                 { yyerror("Error: unexpected token");
                     num_error++;
-                    return (-1); /* invalid token */
-                  }
+                    return (-1); /* invalid token */ }
+<INITIAL><<EOF>>  { return EOF_TOK; }
