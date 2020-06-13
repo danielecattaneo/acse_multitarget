@@ -86,7 +86,7 @@ t_cflow_Graph *graph;      /* An instance of a control flow graph. This instance
                             * be used during the register allocation process */
 
 t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan"
-                            * algorythm */
+                            * algorithm */
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
@@ -166,7 +166,7 @@ extern int yyerror(const char* errmsg);
       1. declarations (zero or more);
       2. A list of instructions. (at least one instruction!).
  * When the rule associated with the non-terminal `program' is executed,
- * the parser notify it to the `program' singleton instance. */
+ * the parser notifies it to the `program' singleton instance. */
 program  : var_declarations statements EOF_TOK
          {
             /* Notify the end of the program. Once called
@@ -560,7 +560,7 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                         {
                            t_axe_expression exp_r0;
 
-                           /* create an expression for regisrer REG_0 */
+                           /* create an expression for register REG_0 */
                            exp_r0.value = REG_0;
                            exp_r0.expression_type = REGISTER;
                            
@@ -636,7 +636,7 @@ int main (int argc, char **argv)
     * informations stored into the control flow graph */
    RA = initializeRegAlloc(graph);
       
-   /* execute the linear scan algorythm */
+   /* execute the linear scan algorithm */
    execute_linear_scan(RA);
       
 #ifndef NDEBUG

@@ -15,13 +15,13 @@ extern int errorcode;
 /* print out a label to the file `fp' */
 void printLabel(t_axe_label *label, FILE *fp);
 
-/* print out to the file `fp' an opcode */
+/* print out an opcode to the file `fp' */
 static void printOpcode(int opcode, FILE *fp);
 
-/* print out to the file `fp' a register information */
+/* print out a register information to the file `fp' */
 static void printRegister(t_axe_register *reg, FILE *fp);
 
-/* Translate the assembler directives (definitions inside the data segment */
+/* Translate the assembler directives (definitions inside the data segment) */
 static void translateDataSegment(t_program_infos *program, FILE *fp);
 
 /* Translate all the instructions within the code segment */
@@ -40,7 +40,7 @@ void writeAssembly(t_program_infos *program, char *output_file)
    /* If necessary, set the value of `output_file' to "output.asm" */
    if (output_file == NULL)
    {
-      /* set "output.o" as output file name */
+      /* set "output.asm" as output file name */
       output_file = "output.asm";
    }
 

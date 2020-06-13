@@ -57,7 +57,7 @@ int executeTER(decoded_instr *instr){
 	int carryout=0, overflow=0, negative=0, zero=0;
     long long int mulresult;
 
-	/* Manage addressing modes (direct/indirect) */
+	/* Handle addressing modes (direct/indirect) */
 	if (func_indirect_dest(instr)) dest=&(mem[reg[instr->dest]]);
 	else dest=&(reg[instr->dest]);
 	src1=&(reg[instr->src1]);
@@ -169,7 +169,7 @@ int executeBIN(decoded_instr *instr)
 	int carryout=0, overflow=0, negative=0, zero=0;
         long long int mulresult;
 
-	/* Manage addressing modes (direct only) */
+	/* Handle addressing modes (direct only) */
 	dest=&(reg[instr->dest]);
 	src1=&(reg[instr->src1]);
 	src2=&(instr->imm);
@@ -251,7 +251,7 @@ int executeBIN(decoded_instr *instr)
 int executeUNR(decoded_instr *instr){
 	int *dest, src, new_psw;
 
-	/* Manage addressing modes (direct only) */
+	/* Handle addressing modes (direct only) */
 	dest=&reg[instr->dest];
 	src=instr->addr;
 

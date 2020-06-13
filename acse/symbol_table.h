@@ -58,7 +58,7 @@ extern char * getIDfromLocation(t_symbol_table *table
             , int location, int *errorcode);
 
 #ifndef NDEBUG
-/* This function print out to the file `fout' the content of the
+/* This function prints out to the file `fout' the content of the
  * symbol table given as input. The resulting text is formatted in
  * the following way: <ID> -- <TYPE> -- <REGISTER> */
 extern void printSymbolTable(t_symbol_table *table, FILE *fout);

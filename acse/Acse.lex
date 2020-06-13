@@ -9,7 +9,7 @@
  * Andrea Di Biagio
  * Politecnico di Milano, 2007
  * 
- * Axe.lex
+ * Acse.lex
  * Formal Languages & Compilers Machine, 2007/2008
  * 
  */

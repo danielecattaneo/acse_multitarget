@@ -61,10 +61,10 @@ typedef struct t_axe_variable
                             * of the variable inside the data segment */
 } t_axe_variable;
 
-/* a simbolic assembly instruction */
+/* a symbolic assembly instruction */
 typedef struct t_axe_instruction
 {
-   int opcode;                   /* instruction opcode (for example: AXE_ADD ) */
+   int opcode;                   /* instruction opcode (for example: ADD) */
    t_axe_register *reg_1;        /* destination register */
    t_axe_register *reg_2;        /* first source register */
    t_axe_register *reg_3;        /* second source register */
