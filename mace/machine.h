@@ -20,19 +20,19 @@
 /* FORMATS 0 to 3 */
 enum formats { TER, BIN, UNR, JMP };
 
-/* OPCODES (da 0 a 15)            */
+/* OPCODES (from 0 to 15) */
 enum opcTER { ADD, SUB, ANDL, ORL, EORL, ANDB, ORB, EORB, MUL, DIV, SHL, SHR, ROTL, ROTR, NEG, SPCL };
 enum opcBIN { ADDI, SUBI, ANDLI, ORLI, EORLI, ANDBI, ORBI, EORBI, MULI, DIVI, SHLI, SHRI, ROTLI, ROTRI, NOTL, NOTB };
 enum opcUNR { NOP, MOVA, JSR, RET, LOAD, STORE, HALT, SEQ, SGE, SGT, SLE, SLT, SNE, READ, WRITE, XPSW };
 enum opcJMP { BT, BF, BHI, BLS,	BCC, BCS, BNE, BEQ, BVC, BVS, BPL, BMI, BGE, BLT, BGT, BLE };
 
-/* Possibili terminazioni (OK e' corretta) */
+/* Exit codes (OK = no error) */
 enum term  { OK, NOARGS, NOFILE, INVALID_INSTR, INVALID_INSTR_FORMAT, MEM_FAULT, WRONG_FORMAT, WRONG_ARGS, BREAK };
 
-/* Modi di esecuzione */
+/* Execution modes */
 enum modes { BASIC, SEGMENTED };
 
-/* Dichiarazione degli elementi di memoria */
+/* Internal memory */
 extern int reg[NREGS];
 
 void print_regs(FILE *file);

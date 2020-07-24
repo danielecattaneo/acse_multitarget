@@ -31,24 +31,23 @@ int main(int argc, char **argv)
    decoded_instr *current_instr;
 #endif
 	
-	/* Apertura del file oggetto */
+	/* Opening the object file */
 	if (argc<2)
 	{
-		/* L'esecuzione termina poichè non è stato specificato il file
-		 * oggetto come argomento */
+		/* No object file has been specified as an argument:
+	     * execution terminates */
 		fprintf(stdout, "Formal Languages & Compilers Machine, 2007/2008.\n"
 			"\n\nSyntax:\n\tmace [options] objectfile\n");
 	  	return NOARGS;
 	}
 	
-	/* apre il file oggetto specificato come argomento */
+	/* open the object file specified as an argument */
     fp = fopen(argv[argc-1],"rb");
 	if (fp == NULL)
 	{
 		fprintf(stderr,"Object file %s doesn't exist.\n", argv[argc-1]);
 		
-		/* termina l'esecuzione in quanto è stato specificato un file
-		 * oggetto inesistente */
+		/* the object file specified does not exist: quit */
 		return NOFILE;
 	}
 	
@@ -60,12 +59,12 @@ int main(int argc, char **argv)
 		{
 			char *error;
 			
-			/* legge il prossimo argomento come numero in base 10 */
+			/* read the next argument as a base-10 number */
 			breakat = strtol(argv[i+1],&error,10);
 			
 			if (*error != '\0')
 			{
-				/* errore nella lettura dell'argomento */
+				/* could not parse the argument */
 				#ifdef DEBUG
 				fprintf(stderr,"Error while reading option "
 					"break: %d=%c, string=%s "
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
 				#endif
 				return WRONG_ARGS;
       			}
-			i++; /* salta l'argomento gia' letto */
+			i++; /* skip the argument we have just read */
 		}
 	}
 
@@ -81,11 +80,11 @@ int main(int argc, char **argv)
 	fprintf(stderr,"Running with %s memory \n", (mmgmt == BASIC)? "BASIC" : "SEGMENTED");
 	#endif
 	
-	/* Resetta i registri e la memoria */
+	/* initialize registers and memory */
 	for (i=0; i<NREGS; i++) reg[i] = 0;
 	for (i=0; i<MEMSIZE; i++) mem[i] = 0;
 	
-	/* Calcola lunghezza del file */
+	/* get file length */
 	fseek(fp,0,SEEK_END);
     /* The binary is made of 4-byte words */
     len = ftell(fp) / 4;
@@ -98,7 +97,7 @@ int main(int argc, char **argv)
    
 	if (mmgmt==BASIC)
 	{
-		/* Usa una sola area di memoria per codice e dati */
+		/* single memory area for both code and data */
 		if (len>MEMSIZE)
 		{
 			fprintf(stderr,"Out of memory.\n");
@@ -109,18 +108,19 @@ int main(int argc, char **argv)
     }
     else
 	{
-		/* Alloca spazio in memoria per il codice */
+		/* allocate a separate memory area just for the code */
 		code = (unsigned int*) malloc(sizeof(unsigned int)*len);
 	}
 
-	/* Carica il codice macchina in memoria   */
+	/* load the machine code into memory */
     if (check_signature(fp)) {
                   return WRONG_FORMAT;
                }
-    /* Salta i 16 byte per ora non usati */
+    /* skip currently unused 16 bits of header */
     fseek(fp, 16, SEEK_CUR);
-    /* Carica il codice */
-    lcode = len - 5;/*len contiene 5 istruzioni che corrispondo all'header (20 byte) */
+    /* actually load the code */
+    lcode = len - 5;/* compute the number of instructions by subtracting the length of 
+                       the header (which is = 5 in 4 bytes instructions, = 20 in bytes) */
     fread(code, 4, lcode , fp);
    #ifdef DEBUG
    fprintf(stderr,"Starting execution.\n");
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
    }
    #endif
 
-   /* decodifica ed esegue il codice */
+   /* decode and execute each instruction */
 	for (pc=0; pc<lcode && pc>=0; )
 	{
       pc = fetch_execute(code,pc);
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 
 		reg[0]=0; /* reset R0 to 0; R0 is wired to 0, so we ignore all writes */
 
-		count++; /* conta le istruzioni eseguite */
+		count++; /* count the amount of instructions we execute */
 		if ((breakat>0) && (breakat<=count))
 		{
 			#ifdef DEBUG

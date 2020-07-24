@@ -19,7 +19,7 @@ char *names[4][16] = {
 
 decoded_instr *decode(int the_instr) {
 		decoded_instr *instr = (decoded_instr *) malloc(sizeof(decoded_instr));
-		/* decodifica */
+		/* decoding */
 		instr->format = getbits(the_instr,31,30); /* Instruction format (2 bits) */
 		instr->opcode = getbits(the_instr,29,26); /* Opcode (4 bits) */
 		instr->dest   = getbits(the_instr,25,21); /* Destination register */
