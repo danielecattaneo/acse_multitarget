@@ -133,10 +133,10 @@
 #define LABEL_TYPE 1
 
 /* CODEGEN FLAGS */
-#define CG_DIRECT_ALL 0
-#define CG_INDIRECT_ALL 3
-#define CG_INDIRECT_DEST 1
-#define CG_INDIRECT_SOURCE 2
+#define CG_DIRECT_ALL 0       /*  DEST =  SRC1 <OP>  SRC2  */
+#define CG_INDIRECT_ALL 3     /* [DEST] = SRC1 <OP> [SRC2] */
+#define CG_INDIRECT_DEST 1    /* [DEST] = SRC1 <OP>  SRC2  */
+#define CG_INDIRECT_SOURCE 2  /*  DEST =  SRC1 <OP> [SRC2] */
 
 /* EXPRESSION TYPES */
 #define IMMEDIATE 0
