@@ -55,23 +55,23 @@ char * getIDfromLocation(t_symbol_table *table, int location, int *errorcode)
    return sym->ID;
 }
 
-int getTypeFromID(t_symbol_table *table, char *ID, int type)
+int getTypeFromID(t_symbol_table *table, char *ID)
 {
    t_symbol *found;
    
    /* test the preconditions */
    if (ID == NULL)
-      return SY_LOCATION_UNSPECIFIED;
+      return UNKNOWN_TYPE;
 
    /* search for the symbol with the given ID */
    found = getSymFromID(table, ID);
 
    /* test the postconditions */
    if (found == NULL)
-      return SY_LOCATION_UNSPECIFIED;
+      return UNKNOWN_TYPE;
 
-   /* return the value of the `reg_location' field for the found symbol */
-   return found->reg_location;
+   /* return the value of the `type' field for the found symbol */
+   return found->type;
 }
 
 int getLocation(t_symbol_table *table, char *ID, int *errorcode)

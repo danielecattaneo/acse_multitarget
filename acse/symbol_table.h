@@ -43,7 +43,7 @@ extern int setLocation(t_symbol_table *table, char *ID, int reg);
 extern int getLocation(t_symbol_table *table, char *ID, int *errorcode);
 
 /* get the type associated with the symbol with ID as identifier */
-extern int getTypeFromID(t_symbol_table *table, char *ID, int type);
+extern int getTypeFromID(t_symbol_table *table, char *ID);
 
 /* initialize the symbol table */
 extern t_symbol_table * initialize_sy_table();
