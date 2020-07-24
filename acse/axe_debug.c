@@ -45,6 +45,8 @@ void printBindings(int *bindings, int numVars, FILE *fout)
       
       counter++;
    }
+
+   fflush(fout);
 }
 
 void printRegAllocInfos(t_reg_allocator *RA, FILE *fout)
@@ -63,6 +65,7 @@ void printRegAllocInfos(t_reg_allocator *RA, FILE *fout)
    fprintf(fout, "-------------------------\n");
    printBindings(RA->bindings, RA->varNum, fout);
    fprintf(fout, "*************************\n\n");
+   fflush(fout);
 }
 
 void printLiveIntervals(t_list *intervals, FILE *fout)
@@ -88,6 +91,7 @@ void printLiveIntervals(t_list *intervals, FILE *fout)
       /* retrieve the next element in the list of intervals */
       current_element = LNEXT(current_element);
    }
+   fflush(fout);
 }
 
 void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
@@ -141,6 +145,7 @@ void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
       count++;
       current_element = LNEXT(current_element);
    }
+   fflush(fout);
 }
 
 void printListOfVariables(t_list *variables, FILE *fout)
@@ -163,6 +168,7 @@ void printListOfVariables(t_list *variables, FILE *fout)
       
       current_element = LNEXT(current_element);
    }
+   fflush(fout);
 }
 
 void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose)
@@ -224,6 +230,7 @@ void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose)
    }
    
    fprintf(fout,"\n\n");
+   fflush(fout);
 }
 
 
