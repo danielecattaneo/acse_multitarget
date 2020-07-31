@@ -23,7 +23,6 @@ extern int num_error;
 %}
 
 %x comment
-%s DATA
 %option noyywrap
 
 DIGIT	[0-9]
@@ -31,10 +30,12 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 [ \t\f\v]+		{ /* Ignore whitespace. */ }
-"/*"                    {  BEGIN(comment); return BEGIN_COMMENT; }
-<comment>[^*]*          {  return COMMENT; }
-<comment>"*"+[^*/]*     {  return COMMENT; }
-<comment>"*"+"/"        {  BEGIN(INITIAL); return END_COMMENT; }
+"/*"                    { BEGIN(comment); }
+<comment>[^*\n]*
+<comment>[^*\n]*\n      { ++line_num; }
+<comment>"*"+[^*/\n]*   
+<comment>"*"+[^*/\n]*\n { ++line_num; }
+<comment>"*"+"/"        { BEGIN(INITIAL); }
 
 
 "("		{ return LPAR; }
@@ -43,7 +44,6 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 "]"    { return RSQUARE; }
 ":"		{ return COLON; }
 "#"		{ return BEGIN_IMMEDIATE; }
-"-"      { return MINUS; }
 
 "add"|"ADD"        { yylval.opcode = ADD_OP; return OPCODE3; }
 "sub"|"SUB"        { yylval.opcode = SUB_OP; return OPCODE3; }
@@ -110,15 +110,15 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 "bgt"|"BGT"        { yylval.opcode = BGT_OP; return CCODE; }
 "ble"|"BLE"        { yylval.opcode = BLE_OP; return CCODE; }
 
-".data"|".DATA"            BEGIN(DATA); {line_num++; }
-".text"|".TEXT"            BEGIN(INITIAL); {line_num++; }
-<DATA>".word"|".WORD"		{return _WORD;}
-<DATA>".space"|".SPACE"    {return _SPACE;}
+".data"|".DATA"    return _DATA;
+".text"|".TEXT"    return _TEXT;
+".word"|".WORD"    return _WORD;
+".space"|".SPACE"  return _SPACE;
 
-["R"|"r"]{DIGIT}+  { yylval.immediate = atoi(&yytext[1]); return REG; }
+["R"|"r"]{DIGIT}+ { yylval.immediate = atoi(&yytext[1]); return REG; }
 
-\n						{ /* DOES NOTHING */ }
-{DIGIT}+          { yylval.immediate = atoi(yytext); return IMM; };
+\n						{ line_num++; }
+[-]?{DIGIT}+      { yylval.immediate = atoi(yytext); return IMM; };
 {ID}              { yylval.svalue = strdup(yytext); return ETI; };
 .						{ return(yytext[0]); num_error++; }
 %%

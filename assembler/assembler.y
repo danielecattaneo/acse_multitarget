@@ -27,8 +27,6 @@ int yylex(void);
 int yyerror(const char* errmsg);
 
 %}
-
-%expect 3
       
 %union{
 	char *svalue;
@@ -50,6 +48,8 @@ int yyerror(const char* errmsg);
 %token <opcode> CCODE
 %token <opcode> HALT
 %token <opcode> NOP
+%token _DATA
+%token _TEXT
 %token _WORD
 %token _SPACE
 %token <immediate>REG
@@ -58,11 +58,7 @@ int yyerror(const char* errmsg);
 %token LSQUARE
 %token RSQUARE
 %token COLON
-%token MINUS
 %token BEGIN_IMMEDIATE
-%token BEGIN_COMMENT
-%token END_COMMENT
-%token <svalue> COMMENT
 %token <svalue> ETI
 %token <immediate> IMM
 
@@ -70,27 +66,21 @@ int yyerror(const char* errmsg);
 %type <reg> register
 %type <immediate> immediate
 %type <address> address
-%type <svalue> comment
 %type <label> label_decl
 %type <instr> instr
 
 %%
 
-asm :       asm data_segm instruction_segm { /* DOES NOTHING */}
-            | data_segm instruction_segm     { /* DOES NOTHING */}
-            | instruction_segm               { /* DOES NOTHING */}
+asm :       asm _DATA data_segm _TEXT instruction_segm { /* DOES NOTHING */}
+            | _DATA data_segm _TEXT instruction_segm   { /* DOES NOTHING */}
+            | _TEXT instruction_segm                   { /* DOES NOTHING */}
 ;
 
-instruction_segm :   instruction_segm instruction   { line_num++; }
-                     | instruction                  { line_num++; }
+instruction_segm :   instruction_segm instruction   { }
+                     | instruction                  { }
 ;
 
-instruction :  instr comment           { /* DOES NOTHING */}
-            | label_decl instr comment {
-               /* assign the label to the current instruction */
-               $1->data = (void *) $2;
-            }
-            | instr            { /* DOES NOTHING */}
+instruction : instr            { /* DOES NOTHING */}
             | label_decl instr {
                /* assign the label to the current instruction */
                $1->data = (void *) $2;
@@ -287,9 +277,8 @@ instr : OPCODE3 register REG register  {
       }
 ;
 
-data_segm : data_segm data_def   { line_num++; }
-            | data_def comment   { line_num++; }
-            | data_def           { line_num++; }
+data_segm : data_segm data_def   { }
+            | data_def           { }
 ;
 
 data_def : label_decl data_value {
@@ -423,7 +412,6 @@ register : REG {
 ;
 
 immediate : BEGIN_IMMEDIATE IMM { $$ = $2; }
-          | BEGIN_IMMEDIATE MINUS IMM {$$ = - $3; }
 ;
 
 address  : ETI {
@@ -486,10 +474,6 @@ address  : ETI {
             }
          }
 ;
-
-comment  : BEGIN_COMMENT COMMENT END_COMMENT { }
-;
-
 
 %%
 		 
