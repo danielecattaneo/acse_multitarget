@@ -88,12 +88,12 @@ void print(FILE* file, decoded_instr *instr)
             fprintf(file,"%s R%d \n"
                   , names[instr->format][instr->opcode], instr->dest);
          else
-            fprintf(file,"%s R%d, $%d \n", names[instr->format][instr->opcode]
-                        , instr->dest, instr->addr);
+            fprintf(file,"%s R%d, #%d\n", names[instr->format][instr->opcode],
+                  instr->dest, instr->addr);
          break;
       case FORMAT_CC :
-         fprintf(file,"%s $%d \n"
-            , names[instr->format][instr->opcode], instr->addr);
+         fprintf(file,"%s $ %c %d\n", names[instr->format][instr->opcode], 
+               instr->addr < 0 ? '-' : '+', abs(instr->addr));
          break;
       default :
          fprintf(file,"[UNKNOWN INSTRUCTION FORMAT] \n");
