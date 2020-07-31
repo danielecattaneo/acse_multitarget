@@ -1,18 +1,21 @@
 ASM=../../bin/asm
 ACSE=../../bin/acse
 objects=$(patsubst %.src,%.o,$(wildcard *.src))
+# add .exe at the end on Windows
+asm_file=$(wildcard $(ASM)*)
+acse_file=$(wildcard $(ACSE)*)
 
 test : $(objects)
 
-%.o : %.asm
-	$(ASM) $< $@	
+%.o: %.asm $(asm_file)
+	$(ASM) $< $@
 
-%.asm : %.src
+%.asm: %.src $(acse_file)
 	$(ACSE) $< $@
 
 .PRECIOUS : %.asm
 
-.PHONY : clean test
+.PHONY : clean test 
 
 clean :
 	rm -f *.out
