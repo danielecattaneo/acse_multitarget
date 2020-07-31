@@ -21,7 +21,7 @@ void print_psw(FILE *file)
    if (file == NULL)
       file = stderr;
 
-   fprintf(file, "PSW=[0x%08x]\n", psw);
+   fprintf(file, "PSW = 0x%08x\n", psw);
    fprintf(file,  "CARRY (C):\t %d\nOVERFLOW (V):\t %d\n"
                   "ZERO (Z):\t %d\nNEGATIVE (N):\t %d\n\n"
                   , getflag(CARRY), getflag(OVERFLOW)
@@ -38,35 +38,12 @@ void print_regs(FILE *file)
       file = stderr;
    
    fprintf(file, "\n*** REGISTER FILE STATUS ***\n");
-	for (i=0; i<NREGS / 8; i++)
-	   fprintf(file,"R%d =[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i=NREGS / 8; i<NREGS / 4; i++)
-      fprintf(file,"R%d =[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i=NREGS / 4; i< (3*NREGS / 8); i++)
-   {
-      if (i < 10)
-         fprintf(file,"R%d =[0x%08x]\t", i, reg[i]);
-      else
-         fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
+   for (i=0; i<NREGS; i++) {
+      fprintf(file, "R%-2d = 0x%08x%s", i, reg[i], i%4==3 ? "\n" : "  ");
    }
-   fprintf(file, "\n");
-   for (i=(3*NREGS / 8); i<NREGS / 2; i++)
-      fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i= NREGS / 2; i<(5*NREGS / 8); i++)
-      fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i=(5*NREGS / 8); i<(6*NREGS / 8); i++)
-      fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i=(6*NREGS / 8); i<(7*NREGS / 8); i++)
-      fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
-   fprintf(file, "\n");
-   for (i=(7*NREGS / 8); i<NREGS; i++)
-      fprintf(file,"R%d=[0x%08x]\t", i, reg[i]);
-	fprintf(file,"\n");
+   if (i % 4 != 0)
+      fprintf(file, "\n");
+   fprintf(file, "PC  = 0x%08x\n", pc);
 }
 
 /* Debug, execute a memory dump      */
@@ -79,8 +56,13 @@ void print_Memory_Dump(FILE *file, int lcode)
       file = stderr;
    
 	fprintf(file,"*** Memory Dump *** \n");
-	for (i=0; i<lcode; i++)
-	   fprintf(file,"[0x%08x]\n", mem[i]);
+	for (i=0; i<lcode; i++) {
+      if (i % 4 == 0)
+         fprintf(file, "0x%08x:  ", i);
+	   fprintf(file,"0x%08x%s", mem[i], i%4==3 ? "\n" : "  ");
+   }
+   if (i % 4 != 0)
+      fprintf(file, "\n");
    
 	fprintf(file,"*** END Memory Dump *** \n");
 }
