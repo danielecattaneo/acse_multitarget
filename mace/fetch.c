@@ -22,8 +22,8 @@ static int executeBIN(decoded_instr *instr);
 static int executeUNR(decoded_instr *instr);
 static int executeJMP(decoded_instr *instr);
 static int handle_special_instruction(decoded_instr *instr);
-static int perform_add(int sign, int a, int b, int *carry, int *overflow);
-static int perform_sub(int sign, int a, int b, int *carry, int *overflow);
+static int perform_add(int a, int b, int *carry, int *overflow);
+static int perform_sub(int a, int b, int *carry, int *overflow);
 static int perform_rotl(int value, int amount, int *carry);
 static int perform_rotr(int value, int amount, int *carry);
 
@@ -70,12 +70,12 @@ int executeTER(decoded_instr *instr){
 
    switch (instr->opcode) {
         case ADD  :
-            *dest = perform_add(!func_is_unsigned(instr), *src1, *src2, &carryout, &overflow);
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            *dest = perform_add(*src1, *src2, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
         break;
         case SUB  :
-            * dest= perform_sub(!func_is_unsigned(instr), *src1, *src2, &carryout, &overflow);
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *src1, 1, &carryout, &overflow);
+            * dest= perform_sub(*src1, *src2, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(*src1, 1, &carryout, &overflow);
 		 break;
 		case ANDL : *dest = *src1 && *src2 ;
 		 break;
@@ -90,16 +90,12 @@ int executeTER(decoded_instr *instr){
 		case EORB : *dest = *src1 ^ *src2 ;
 		 break;
         case MUL  :
-            if (!func_is_unsigned(instr)) {
-                mulresult = (long long)*src1 * (long long)*src2;
-                if ((mulresult >> 32) != 0 && ((mulresult >> 32)&UINT_MAX) != UINT_MAX) overflow = 1;
-                if (SIGN(mulresult) != SIGN((int)(mulresult >> 32))) overflow = 1;
-			} else {
-                mulresult = (long long)((unsigned)*src1) * (long long)((unsigned)*src2);
-                if (mulresult >> 32) carryout = 1;
-			}
+            mulresult = (long long)*src1 * (long long)*src2;
+            if ((mulresult >> 32) != 0 && ((mulresult >> 32)&UINT_MAX) != UINT_MAX) overflow = 1;
+            if (SIGN(mulresult) != SIGN((int)(mulresult >> 32))) overflow = 1;
+            if (mulresult / 0x100000000LL) carryout = 1;
             *dest = mulresult & UINT_MAX;
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
         case DIV  :
             if (!func_is_unsigned(instr)) {
@@ -108,7 +104,7 @@ int executeTER(decoded_instr *instr){
 			} else {
                 *dest = ((unsigned)*src1) / ((unsigned)*src2);
 			}
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(*dest, 1, &carryout, &overflow);
 		 break;
         case SHL  : 
             if(old_src2 > 32) {
@@ -117,7 +113,7 @@ int executeTER(decoded_instr *instr){
                 *dest = *src1 << *src2;
                 carryout = !!(old_src1 & (1 << (32 - old_src2)));
             }
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
         case SHR  :
             *dest = *src1 >> *src2;
@@ -133,15 +129,15 @@ int executeTER(decoded_instr *instr){
                 if(old_src2 > 32) carryout = (!func_is_unsigned(instr) && !SIGN(old_src1));
                 else carryout = !!(old_src1 & (1 << (old_src2 - 1)));
             }
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
         case ROTL : *dest = perform_rotl(*src1, *src2, &carryout);
 		 break;
         case ROTR : *dest = perform_rotr(*src1, *src2, &carryout);
 		 break;
 		case NEG  : *dest = - *src2;
-            if (!func_is_unsigned(instr) && old_src2 == INT_MIN) overflow = 1;
-            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
+            if (old_src2 == INT_MIN) overflow = 1;
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(*dest, 1, &carryout, &overflow);
 		 break;
 		case SPCL : pc=handle_special_instruction(instr) ;
 		 break;
@@ -177,9 +173,9 @@ int executeBIN(decoded_instr *instr)
     old_src2 = *src2;
 
 	switch (instr->opcode) {
-        case ADDI  : *dest = perform_add(1, *src1, *src2, &carryout, &overflow);
+        case ADDI  : *dest = perform_add(*src1, *src2, &carryout, &overflow);
 		 break;
-        case SUBI  : *dest = perform_sub(1, *src1, *src2, &carryout, &overflow);
+        case SUBI  : *dest = perform_sub(*src1, *src2, &carryout, &overflow);
 		 break;
 		case ANDLI : *dest = *src1 && *src2 ;
 		 break;
@@ -386,24 +382,16 @@ int handle_special_instruction(decoded_instr *instr){
 }
 
 
-static int perform_add(int sign, int a, int b, int *carry, int *overflow) {
+static int perform_add(int a, int b, int *carry, int *overflow) {
     int result = a + b;
-    if (sign) {
-        if (SIGN(result) != SIGN(a) && SIGN(a) == SIGN(b)) *overflow = 1;
-    }
-    else {
-        if (MSB(result) < MSB(a) + MSB(b)) { *carry = 1; }
-    }
+    if (SIGN(result) != SIGN(a) && SIGN(a) == SIGN(b)) *overflow = 1;
+    if (MSB(result) < MSB(a) + MSB(b)) { *carry = 1; }
     return result;
 }
-static int perform_sub(int sign, int a, int b, int *carry, int *overflow) {
+static int perform_sub(int a, int b, int *carry, int *overflow) {
     int result = a - b;
-    if (sign) {
-        if (SIGN(result) != SIGN(a) && SIGN(a) != SIGN(b)) *overflow = 1;
-    }
-    else {
-        if (MSB(result) > MSB(a) + MSB(b)) { *carry = 1; }
-    }
+    if (SIGN(result) != SIGN(a) && SIGN(a) != SIGN(b)) *overflow = 1;
+    if (MSB(result) > MSB(a) + MSB(b)) { *carry = 1; }
     return result;
 }
 static int perform_rotl(int value, int amount, int *carry) {
