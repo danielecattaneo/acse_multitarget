@@ -15,6 +15,10 @@
 #include "axe_constants.h"
 #include "collections.h"
 
+/* maximum and minimum between two values */
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define MIN(x, y) ((x) > (y) ? (y) : (x))
+
 /* create a variable for each `t_axe_declaration' inside
  * the list `variables'. Each new variable will be of type
  * `varType'. */

@@ -39,13 +39,13 @@ typedef struct _instr {
  */
 decoded_instr *decode(int the_instr);
 
-int carry(decoded_instr *instr);
+int func_carry(decoded_instr *instr);
 
-int sign(decoded_instr *instr);
+int func_is_unsigned(decoded_instr *instr);
 
-int indirect_dest(decoded_instr *instr);
+int func_indirect_dest(decoded_instr *instr);
 
-int indirect_src2(decoded_instr *instr);
+int func_indirect_src2(decoded_instr *instr);
 
 void print(FILE* file, decoded_instr *instr);
 
@@ -73,7 +73,7 @@ Formats
 
 func bits
 	0 add carry
-	1 signed/unsigned
+	1 signed (unset) / unsigned (set)
 	2 indirect addressing dest
 	3 indirect addressing src2
 	4

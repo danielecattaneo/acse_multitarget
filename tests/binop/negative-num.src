@@ -1,0 +1,37 @@
+int a,b,c,d;
+
+a = -100;
+b = 5;
+c = 100;
+d = -5;
+
+/* should all print -20, flags NZVC=1000 (except when constant folding) */
+write((-100) / 5);
+write((-100) / b);
+write(a / 5);
+write(a / b);
+
+write(100 / -5);
+write(100 / d);
+write(c / -5);
+write(c / d);
+
+/* should all print -4, flags NZVC=1001 (except when constant folding) */
+write((-100) >> 5);
+write((-100) >> b);
+write(a >> 5);
+write(a >> b);
+
+/* should all print -2, flags NZVC=1000 (except when constant folding) */
+b = 6;
+write((-100) >> 6);
+write((-100) >> b);
+write(a >> 6);
+write(a >> b);
+
+/* should all print -1, flags NZVC=1001 (except when constant folding) */
+b = 40;
+write((-100) >> 40);
+write((-100) >> b);
+write(a >> 40);
+write(a >> b);

@@ -221,7 +221,12 @@ t_axe_expression handle_bin_numeric_op_Imm
       case SUB : return create_expression ((val1 - val2), IMMEDIATE);
       case MUL : return create_expression ((val1 * val2), IMMEDIATE);
       case SHL : return create_expression ((val1 << val2), IMMEDIATE);
-      case SHR : return create_expression ((val1 >> val2), IMMEDIATE);
+      case SHR:
+         /* the C language does not guarantee a right shift of a signed value
+          * is an arithmetic shift, so we have to make sure it is */
+         return create_expression((val1 >> val2) | 
+               (val1 < 0 ? (((1 << val2) - 1) << MAX(32 - val2, 0)) : 0), 
+               IMMEDIATE);
       case DIV :
          if (val2 == 0){
             printWarningMessage(WARN_DIVISION_BY_ZERO);

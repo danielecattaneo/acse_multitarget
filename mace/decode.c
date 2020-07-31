@@ -32,19 +32,19 @@ decoded_instr *decode(int the_instr) {
 		return instr;
 }		
 
-int carry(decoded_instr *instr){
+int func_carry(decoded_instr *instr){
 	return instr->func & 1;
 }
 
-int sign(decoded_instr *instr){
+int func_is_unsigned(decoded_instr *instr){
 	return instr->func & 2;
 }
 
-int indirect_dest(decoded_instr *instr){
+int func_indirect_dest(decoded_instr *instr){
 	return instr->func & 4;
 }
 
-int indirect_src2(decoded_instr *instr){
+int func_indirect_src2(decoded_instr *instr){
 	return instr->func & 8;
 }
 
@@ -66,12 +66,12 @@ void print(FILE* file, decoded_instr *instr)
    {
       case FORMAT_TER :
          fprintf(file,"%s ", names[instr->format][instr->opcode]);
-         if (indirect_dest(instr))
+         if (func_indirect_dest(instr))
             fprintf(file,"(R%d) ", instr->dest);
          else
             fprintf(file,"R%d ", instr->dest);
          fprintf(file,"R%d ", instr->src1);
-         if (indirect_src2(instr))
+         if (func_indirect_src2(instr))
             fprintf(file,"(R%d) \n", instr->src2);
          else
             fprintf(file,"R%d \n", instr->src2);

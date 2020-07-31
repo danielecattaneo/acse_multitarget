@@ -58,10 +58,10 @@ int executeTER(decoded_instr *instr){
     long long int mulresult;
 
 	/* Manage addressing modes (direct/indirect) */
-	if (indirect_dest(instr)) dest=&(mem[reg[instr->dest]]);
+	if (func_indirect_dest(instr)) dest=&(mem[reg[instr->dest]]);
 	else dest=&(reg[instr->dest]);
 	src1=&(reg[instr->src1]);
-	if (indirect_src2(instr)) src2=&(mem[reg[instr->src2]]);
+	if (func_indirect_src2(instr)) src2=&(mem[reg[instr->src2]]);
 	else src2=&(reg[instr->src2]);
 
     old_dest = *dest;
@@ -70,12 +70,12 @@ int executeTER(decoded_instr *instr){
 
    switch (instr->opcode) {
         case ADD  :
-            *dest = perform_add(sign(instr), *src1, *src2, &carryout, &overflow);
-            if (carry(instr) && getflag(CARRY)) *dest = perform_add(sign(instr), *dest, 1, &carryout, &overflow);
+            *dest = perform_add(!func_is_unsigned(instr), *src1, *src2, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
         break;
         case SUB  :
-            * dest= perform_sub(sign(instr), *src1, *src2, &carryout, &overflow);
-            if (carry(instr) && getflag(CARRY)) *dest = perform_sub(sign(instr), *src1, 1, &carryout, &overflow);
+            * dest= perform_sub(!func_is_unsigned(instr), *src1, *src2, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *src1, 1, &carryout, &overflow);
 		 break;
 		case ANDL : *dest = *src1 && *src2 ;
 		 break;
@@ -90,7 +90,7 @@ int executeTER(decoded_instr *instr){
 		case EORB : *dest = *src1 ^ *src2 ;
 		 break;
         case MUL  :
-            if (sign(instr)) {
+            if (!func_is_unsigned(instr)) {
                 mulresult = (long long)*src1 * (long long)*src2;
                 if ((mulresult >> 32) != 0 && ((mulresult >> 32)&UINT_MAX) != UINT_MAX) overflow = 1;
                 if (SIGN(mulresult) != SIGN((int)(mulresult >> 32))) overflow = 1;
@@ -99,16 +99,16 @@ int executeTER(decoded_instr *instr){
                 if (mulresult >> 32) carryout = 1;
 			}
             *dest = mulresult & UINT_MAX;
-            if (carry(instr) && getflag(CARRY)) *dest = perform_add(sign(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
         case DIV  :
-            if (sign(instr)) {
+            if (!func_is_unsigned(instr)) {
                 *dest = *src1 / *src2;
                 if (old_src1 == INT_MIN && old_src2 == -1) overflow = 1;
 			} else {
                 *dest = ((unsigned)*src1) / ((unsigned)*src2);
 			}
-            if (carry(instr) && getflag(CARRY)) *dest = perform_sub(sign(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
         case SHL  : 
             if(old_src2 > 32) {
@@ -117,31 +117,31 @@ int executeTER(decoded_instr *instr){
                 *dest = *src1 << *src2;
                 carryout = !!(old_src1 & (1 << (32 - old_src2)));
             }
-            if (carry(instr) && getflag(CARRY)) *dest = perform_add(sign(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
         case SHR  :
             *dest = *src1 >> *src2;
-            if (sign(instr) && !SIGN(old_src1)) {
+            if (!func_is_unsigned(instr) && !SIGN(old_src1)) {
                 /* Arithmetic shift */
                 *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
             }
-            else if(!sign(instr)) {
+            else if(func_is_unsigned(instr)) {
                 /* Logic shift */
                 *dest &= (1 << MAX(32 - old_src2, 0)) - 1;
             }
             if(old_src2) {
-                if(old_src2 > 32) carryout = (sign(instr) && !SIGN(old_src1));
+                if(old_src2 > 32) carryout = (!func_is_unsigned(instr) && !SIGN(old_src1));
                 else carryout = !!(old_src1 & (1 << old_src2 - 1));
             }
-            if (carry(instr) && getflag(CARRY)) *dest = perform_add(sign(instr), *dest, 1, &carryout, &overflow);
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
         case ROTL : *dest = perform_rotl(*src1, *src2, &carryout);
 		 break;
         case ROTR : *dest = perform_rotr(*src1, *src2, &carryout);
 		 break;
 		case NEG  : *dest = - *src2;
-            if (sign(instr) && old_src2 == INT_MIN) overflow = 1;
-            if (carry(instr) && getflag(CARRY)) *dest = perform_sub(sign(instr), *dest, 1, &carryout, &overflow);
+            if (!func_is_unsigned(instr) && old_src2 == INT_MIN) overflow = 1;
+            if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(!func_is_unsigned(instr), *dest, 1, &carryout, &overflow);
 		 break;
 		case SPCL : pc=handle_special_instruction(instr) ;
 		 break;
@@ -216,7 +216,7 @@ int executeBIN(decoded_instr *instr)
                 *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
             }
             if(old_src2) {
-                if(old_src2 > 32) carryout = (sign(instr) && !SIGN(old_src1));
+                if(old_src2 > 32) carryout = !SIGN(old_src1);
                 else carryout = !!(old_src1 & (1 << old_src2 - 1));
             }
 		 break;
