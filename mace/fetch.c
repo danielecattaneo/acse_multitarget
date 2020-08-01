@@ -91,9 +91,8 @@ int executeTER(decoded_instr *instr){
 		 break;
         case MUL  :
             mulresult = (long long)*src1 * (long long)*src2;
-            if ((mulresult >> 32) != 0 && ((mulresult >> 32)&UINT_MAX) != UINT_MAX) overflow = 1;
-            if (SIGN(mulresult) != SIGN((int)(mulresult >> 32))) overflow = 1;
             if (mulresult / 0x100000000LL) carryout = 1;
+            if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
             *dest = mulresult & UINT_MAX;
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
@@ -191,8 +190,7 @@ int executeBIN(decoded_instr *instr)
 		 break;
         case MULI  :
             mulresult = (long long)*src1 * (long long)*src2;
-            if ((mulresult >> 32) != 0 && ((mulresult >> 32)&UINT_MAX) != UINT_MAX) overflow = 1;
-            if (SIGN(mulresult) != SIGN((int)(mulresult >> 32))) overflow = 1;
+            if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
             *dest = mulresult & UINT_MAX;
 		 break;
 		case DIVI  : *dest=*src1 / *src2; 
