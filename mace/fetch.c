@@ -102,8 +102,13 @@ int executeTER(decoded_instr *instr){
 		 break;
         case DIV  :
             if (!func_is_unsigned(instr)) {
-                *dest = *src1 / *src2;
-                if (old_src1 == INT_MIN && old_src2 == -1) overflow = 1;
+               if (old_src1 == INT_MIN && old_src2 == -1) {
+                  /* INT_MIN / -1 throws SIGFPE on x86_64 */
+                  overflow = 1;
+                  *dest = INT_MIN;
+               } else {
+                  *dest = *src1 / *src2;
+               }
 			} else {
                 *dest = ((unsigned)*src1) / ((unsigned)*src2);
 			}
@@ -197,8 +202,13 @@ int executeBIN(decoded_instr *instr)
             if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
             *dest = mulresult & UINT_MAX;
 		 break;
-		case DIVI  : *dest=*src1 / *src2; 
-            if (old_src1 == INT_MIN && old_src2 == -1) overflow = 1;
+		case DIVI  : 
+            if (old_src1 == INT_MIN && old_src2 == -1) {
+               *dest = INT_MIN;
+               overflow = 1;
+            } else {
+               *dest=*src1 / *src2; 
+            }
 		 break;
         case SHLI  :
             if(old_src2 > 32) {
