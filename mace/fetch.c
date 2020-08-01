@@ -91,7 +91,6 @@ int executeTER(decoded_instr *instr){
 		 break;
         case MUL  :
             mulresult = (long long)*src1 * (long long)*src2;
-            if (mulresult / 0x100000000LL) carryout = 1;
             if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
             *dest = mulresult & UINT_MAX;
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
