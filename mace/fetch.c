@@ -90,8 +90,13 @@ int executeTER(decoded_instr *instr){
 		case EORB : *dest = *src1 ^ *src2 ;
 		 break;
         case MUL  :
-            mulresult = (long long)*src1 * (long long)*src2;
-            if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
+            if (!func_is_unsigned(instr)) {
+               mulresult = (long long)*src1 * (long long)*src2;
+               if (mulresult < -(0x80000000LL) || mulresult > 0x7FFFFFFFLL) overflow = 1;
+            } else {
+               mulresult = (unsigned long long)*src1 * (unsigned long long)*src2;
+               if ((unsigned long long)mulresult >= (0x100000000ULL)) overflow = 1;
+            }
             *dest = mulresult & UINT_MAX;
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
