@@ -422,9 +422,8 @@ static int perform_rotr(int value, int amount, int *carry) {
     int inv_mask;
     amount &= 31;
     amount_mask = (1 << amount) - 1;
-    inv_mask = (1 << (32 - amount)) - 1;
-    result = (value >> amount) & inv_mask;
-    result |= (value & amount_mask) << (32 - amount);
+    result = (unsigned)value >> amount;
+    result |= amount > 0 ? (value & amount_mask) << (32 - amount) : 0;
     *carry = amount && MSB(result);
     return result;
 }
