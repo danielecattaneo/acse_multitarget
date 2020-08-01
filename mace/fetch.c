@@ -391,7 +391,7 @@ static int perform_add(int a, int b, int *carry, int *overflow) {
 static int perform_sub(int a, int b, int *carry, int *overflow) {
     int result = a - b;
     if (SIGN(result) != SIGN(a) && SIGN(a) != SIGN(b)) *overflow = 1;
-    if (MSB(result) > MSB(a) + MSB(b)) { *carry = 1; }
+    if (MSB(result) > MSB(a) - MSB(b)) { *carry = 1; }
     return result;
 }
 static int perform_rotl(int value, int amount, int *carry) {
