@@ -119,7 +119,7 @@ int executeTER(decoded_instr *instr){
                 *dest = 0;
             } else {
                 *dest = *src1 << *src2;
-                carryout = !!(old_src1 & (1 << (32 - old_src2)));
+                carryout = !!((unsigned long long)((unsigned)old_src1) & (1ULL << (32 - old_src2)));
             }
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_add(*dest, 1, &carryout, &overflow);
 		 break;
@@ -215,7 +215,7 @@ int executeBIN(decoded_instr *instr)
                 *dest = 0;
             } else {
                 *dest = *src1 << *src2;
-                carryout = !!(old_src1 & (1 << (32 - old_src2)));
+                carryout = !!((unsigned long long)((unsigned)old_src1) & (1ULL << (32 - old_src2)));
             }
 		 break;
 		case SHRI  : *dest = *src1 >> *src2; 
