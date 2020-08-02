@@ -143,8 +143,8 @@ int executeTER(decoded_instr *instr){
 		 break;
         case ROTR : *dest = perform_rotr(*src1, *src2, &carryout);
 		 break;
-		case NEG  : *dest = - *src2;
-            if (old_src2 == INT_MIN) overflow = 1;
+		case NEG  : 
+            *dest = perform_sub(0, *src2, &carryout, &overflow);
             if (func_carry(instr) && getflag(CARRY)) *dest = perform_sub(*dest, 1, &carryout, &overflow);
 		 break;
 		case SPCL : pc=handle_special_instruction(instr) ;
