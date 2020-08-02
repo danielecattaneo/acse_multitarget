@@ -26,6 +26,7 @@ extern int num_error;
 %option noyywrap
 
 DIGIT	[0-9]
+HEX_DIGIT   [0-9A-Fa-f]
 ID	[a-zA-Z_][a-zA-Z0-9_]*
 
 %%
@@ -118,7 +119,9 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 ["R"|"r"]{DIGIT}+ { yylval.immediate = atoi(&yytext[1]); return REG; }
 
 \n						{ line_num++; }
-[-]?{DIGIT}+      { yylval.immediate = atoi(yytext); return IMM; };
-{ID}              { yylval.svalue = strdup(yytext); return ETI; };
+[-]?({DIGIT}+|"0x"{HEX_DIGIT}+) { char *end = NULL;
+                                  yylval.immediate = strtol(yytext, &end, 0);
+                                  return IMM; }
+{ID}              { yylval.svalue = strdup(yytext); return ETI; }
 .						{ return(yytext[0]); num_error++; }
 %%
