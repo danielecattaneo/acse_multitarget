@@ -249,11 +249,14 @@ int executeBIN(decoded_instr *instr)
 }
 
 int executeUNR(decoded_instr *instr){
-	int *dest, src ;
+	int *dest, src;
 
 	/* Manage addressing modes (direct only) */
 	dest=&reg[instr->dest];
 	src=instr->addr;
+
+   /* default PC updating behavior */
+   pc = pc + 1;
 
 	switch (instr->opcode) {
 		case NOP : /* NOP */
@@ -267,9 +270,12 @@ int executeUNR(decoded_instr *instr){
          break;
       case STORE : mem[src] = *dest;
          break;
-		case JSR : /* Not implemented yet */ ;
+		case JSR:
+         mem[--(*dest)] = pc;   /* push next PC to the stack */
+         pc = src;              /* jump to the address */
 			break;
-		case RET : /* Not implemented yet */ ;
+		case RET:
+         pc = mem[(*dest)++];   /* pop the PC from the stack */
 			break;
       case SEQ :  *dest = getflag(ZERO);
                   setflag(ZERO, (*dest == 0));
@@ -322,7 +328,7 @@ int executeUNR(decoded_instr *instr){
 	}
 
    /* update the value of program counter */
-	return pc+1;
+	return pc;
 }
 
 int executeJMP(decoded_instr *instr){
