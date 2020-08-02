@@ -63,6 +63,7 @@ int yyerror(const char* errmsg);
 %token <immediate> IMM
 
 %type <dataVal> data_value
+%type <dataVal> data_value_words
 %type <reg> register
 %type <immediate> immediate
 %type <address> address
@@ -282,30 +283,10 @@ data_segm : data_segm data_def   { }
 ;
 
 data_def : label_decl data_value {
-                  int asm_errorcode;
-
-                  /* insert data into the data segment */
-                  asm_errorcode = addData(infos, $2);
-                  if (asm_errorcode != ASM_OK)
-                  {
-                     /* an error occurred */
-                     yyerror(AsmErrorToString(asm_errorcode));
-                  }
-
                   /* assign the label to the current block of data */
                   $1->data = (void *) $2;
          }
-         | data_value {
-                  int asm_errorcode;
-
-                  /* insert data into the data segment */
-                  asm_errorcode = addData(infos, $1);
-                  if (asm_errorcode != ASM_OK)
-                  {
-                     /* an error occurred */
-                     yyerror(AsmErrorToString(asm_errorcode));
-                  }
-         }
+         | data_value { }
 ;
 
 label_decl : ETI COLON {
@@ -351,21 +332,13 @@ label_decl : ETI COLON {
          }
 ;
 
-data_value : _WORD IMM {
-               /* create an instance of `t_asm_data' */
-               $$ = allocData(ASM_WORD, $2);
+data_value: _WORD data_value_words {
+               /* propagate the location of the first word */
+               $$ = $2;
+            }
+            | _SPACE IMM {
+               int asm_errorcode;
 
-               /* $$ shouldn't be a NULL pointer */
-               if ($$ == NULL)
-               {
-                  /* an out of memory occurred */
-                  yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
-               
-                  /* stop the parser */
-                  YYABORT;
-               }
-           }
-           | _SPACE IMM {
                /* create an instance of `t_asm_data' */
                $$ = allocData(ASM_SPACE, $2);
 
@@ -378,7 +351,64 @@ data_value : _WORD IMM {
                   /* stop the parser */
                   YYABORT;
                }
-           }
+
+               /* insert data into the data segment */
+               asm_errorcode = addData(infos, $$);
+               if (asm_errorcode != ASM_OK)
+               {
+                  /* an error occurred */
+                  yyerror(AsmErrorToString(asm_errorcode));
+               }
+            }
+;
+
+data_value_words:
+   data_value_words IMM
+   {
+      int asm_errorcode;
+      /* create an instance of `t_asm_data' */
+      t_asm_data *data = allocData(ASM_WORD, $2);
+      if (!data)
+      {
+         /* an out of memory occurred */
+         yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
+      
+         /* stop the parser */
+         YYABORT;
+      }
+      /* insert data into the data segment */
+      asm_errorcode = addData(infos, data);
+      if (asm_errorcode != ASM_OK)
+      {
+         /* an error occurred */
+         yyerror(AsmErrorToString(asm_errorcode));
+      }
+      /* propagate the location of the first word */
+      $$ = $1;
+   }
+   | IMM
+   {
+      int asm_errorcode;
+      /* create an instance of `t_asm_data' */
+      t_asm_data *data = allocData(ASM_WORD, $1);
+      if (!data)
+      {
+         /* an out of memory occurred */
+         yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
+      
+         /* stop the parser */
+         YYABORT;
+      }
+      /* insert data into the data segment */
+      asm_errorcode = addData(infos, data);
+      if (asm_errorcode != ASM_OK)
+      {
+         /* an error occurred */
+         yyerror(AsmErrorToString(asm_errorcode));
+      }
+      /* propagate the location of the first word */
+      $$ = data;
+   }
 ;
 		
 register : REG {
