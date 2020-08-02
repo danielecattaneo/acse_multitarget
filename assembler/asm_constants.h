@@ -86,6 +86,7 @@
 #define STORE_OP 60
 #define READ_OP 61
 #define WRITE_OP 62
+#define XPSW_OP 63
 #define INVALID_OPCODE -1
 
 /* error codes */

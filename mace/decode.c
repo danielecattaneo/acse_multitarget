@@ -13,7 +13,7 @@
 char *names[4][16] = { 
 	{ "ADD", "SUB", "ANDL", "ORL", "EORL", "ANDB", "ORB", "EORB", "MUL", "DIV", "SHL", "SHR", "ROTL", "ROTR", "NEG", "SPCL" },
 	{ "ADDI", "SUBI", "ANDLI", "ORLI", "EORLI", "ANDBI", "ORBI", "EORBI", "MULI", "DIVI", "SHLI", "SHRI", "ROTLI", "ROTRI", "NOTL", "NOTB" },
-	{ "NOP", "MOVA", "JSR", "RET", "LOAD", "STORE", "HALT", "SEQ", "SGE", "SGT", "SLE", "SLT", "SNE", "READ", "WRITE", "ILL15" },
+	{ "NOP", "MOVA", "JSR", "RET", "LOAD", "STORE", "HALT", "SEQ", "SGE", "SGT", "SLE", "SLT", "SNE", "READ", "WRITE", "XPSW" },
 	{ "BT", "BF", "BHI", "BLS", "BCC", "BCS", "BNE", "BEQ", "BVC", "BVS", "BPL", "BMI", "BGE", "BLT", "BGT", "BLE" } 
 };
 

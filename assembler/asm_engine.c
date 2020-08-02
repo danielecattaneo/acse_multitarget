@@ -742,6 +742,7 @@ int getBinaryOpcode(int opcode)
       case SNE_OP: return 12;
       case READ_OP: return 13;
       case WRITE_OP: return 14;
+      case XPSW_OP: return 15;
       case BT_OP: return 0;
       case BF_OP: return 1;
       case BHI_OP: return 2;

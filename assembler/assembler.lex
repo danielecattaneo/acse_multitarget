@@ -91,6 +91,7 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 "sne"|"SNE"        { yylval.opcode = SNE_OP; return OPCODEI; }
 "read"|"READ"      { yylval.opcode = READ_OP; return OPCODEI; }
 "write"|"WRITE"    { yylval.opcode = WRITE_OP; return OPCODEI; }
+"xpsw"|"XPSW"      { yylval.opcode = XPSW_OP; return OPCODEI; }
 "halt"|"HALT"      { yylval.opcode = HALT_OP; return HALT; }
 "bt"|"BT"          { yylval.opcode = BT_OP; return CCODE; }
 "bf"|"BF"          { yylval.opcode = BF_OP; return CCODE; }

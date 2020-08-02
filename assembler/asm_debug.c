@@ -101,6 +101,7 @@ char * opcode_toString(int opcode)
       case STORE_OP : return "STORE";
       case READ_OP : return "READ";
       case WRITE_OP : return "WRITE";
+      case XPSW_OP: return "XPSW";
       default : return "<INVALID_OPCODE>";
       
    }

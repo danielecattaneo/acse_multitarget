@@ -249,7 +249,7 @@ int executeBIN(decoded_instr *instr)
 }
 
 int executeUNR(decoded_instr *instr){
-	int *dest, src;
+	int *dest, src, new_psw;
 
 	/* Manage addressing modes (direct only) */
 	dest=&reg[instr->dest];
@@ -323,6 +323,11 @@ int executeUNR(decoded_instr *instr){
                   fscanf(stdin, "%d", dest);
          break;
       case WRITE : fprintf(stdout, "%d\n", (*dest) );
+         break;
+      case XPSW:
+         new_psw = *dest & 0xF;
+         *dest = psw;
+         psw = new_psw;
          break;
 		default : return INVALID_INSTR;
 	}
