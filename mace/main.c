@@ -131,6 +131,7 @@ int main(int argc, char **argv)
       current_instr = decode(code[0]);
       print(stderr, current_instr);
       free(current_instr);
+      fflush(stderr);
    }
    #endif
 
@@ -165,6 +166,7 @@ int main(int argc, char **argv)
       fprintf(stderr,"\n\n");
       print(stderr, current_instr);
       free(current_instr);
+      fflush(stderr);
         #endif
 	}
 	
