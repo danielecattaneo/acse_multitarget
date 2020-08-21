@@ -28,6 +28,9 @@ $(object): | $(objdir)
 $(objdir):
 	mkdir -p $@
 
+verify:
+	$(MAKE) -C verification
+
 clean:
 	rm -rf $(objdir)
 	rm -f $(project) $(project:=.exe)
