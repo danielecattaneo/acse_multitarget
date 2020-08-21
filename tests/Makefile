@@ -1,5 +1,5 @@
 dirs:=arrays sum dowhile fact mult_table power \
-	  semi assign arrays2 misc shift
+	  semi assign arrays2 misc shift spilltest
 
 test: $(dirs)
 
