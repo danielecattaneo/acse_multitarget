@@ -178,17 +178,9 @@ t_program_infos * allocProgramInfos()
    result->data = NULL;
    result->current_register = 1; /* we are excluding the register R0 */
    result->lmanager = initialize_label_manager();
-
-   if (result->lmanager == NULL)
-   {
-      finalizeProgramInfos(result);
-      notifyError(AXE_OUT_OF_MEMORY);
-   }
-
    result->sy_table = initialize_sy_table();
-   
-   /* test if the sy_table is a NULL pointer */
-   if (result->sy_table == NULL)
+
+   if (result->lmanager == NULL || result->sy_table == NULL)
    {
       finalizeProgramInfos(result);
       notifyError(AXE_OUT_OF_MEMORY);
