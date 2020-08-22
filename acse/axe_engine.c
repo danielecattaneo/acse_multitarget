@@ -115,10 +115,7 @@ int compareVariables (void *Var_A, void *Var_B)
    t_axe_variable *vb;
    
    if (Var_A == NULL)
-   {
-      if (Var_B == NULL)
-         return 1;
-   }
+      return Var_B == NULL;
 
    if (Var_B == NULL)
       return 0;
