@@ -423,11 +423,17 @@ t_asm_label * findLabel(t_translation_infos *infos, char *ID, int *asm_errorcode
    t_list *label_element;
    
    /* preconditions */
-   if (infos == NULL && asm_errorcode != NULL)
-      (*asm_errorcode) = ASM_NOT_INITIALIZED_INFO;
+   if (infos == NULL) {
+      if (asm_errorcode)
+         *asm_errorcode = ASM_NOT_INITIALIZED_INFO;
+      return NULL;
+   }
    
-   if (ID == NULL && asm_errorcode != NULL)
-      (*asm_errorcode) = ASM_INVALID_LABEL_FOUND;
+   if (ID == NULL) {
+      if (asm_errorcode)
+         *asm_errorcode = ASM_INVALID_LABEL_FOUND;
+      return NULL;
+   }
    
    /* initialize the value of `asm_errorcode' */
    (*asm_errorcode) = ASM_OK;
