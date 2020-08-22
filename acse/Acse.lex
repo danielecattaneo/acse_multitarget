@@ -66,7 +66,6 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "("               { return LPAR; }
 ")"               { return RPAR; }
 ";"               { return SEMI; }
-":"               { return COLON; }
 "+"               { return PLUS; }
 "-"               { return MINUS; }
 "*"               { return MUL_OP; }
@@ -90,7 +89,6 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 
 "do"              { return DO; }
 "else"            { return ELSE; }
-"for"             { return FOR; }
 "if"              { return IF; }
 "int"             { yylval.intval = INTEGER_TYPE; return TYPE; }
 "while"           { return WHILE; }

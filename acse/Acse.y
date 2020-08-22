@@ -117,12 +117,11 @@ extern int yyerror(const char* errmsg);
 
 %token EOF_TOK /* end of file */
 %token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE
-%token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP
+%token SEMI PLUS MINUS MUL_OP DIV_OP MOD_OP
 %token AND_OP OR_OP NOT_OP
 %token ASSIGN LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ
 %token ANDAND OROR
 %token COMMA
-%token FOR
 %token RETURN
 %token READ
 %token WRITE
