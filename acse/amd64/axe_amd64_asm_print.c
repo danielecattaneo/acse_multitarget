@@ -504,14 +504,10 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    t_list *current_element;
    t_axe_data *current_data;
    int _error;
-   int fprintf_error;
    
    /* preconditions */
    if (fp == NULL)
       notifyError(AXE_INVALID_INPUT_FILE);
-
-   /* initialize the local variable `fprintf_error' */
-   fprintf_error = 0;
    
    if (!program)
       goto fail; 
