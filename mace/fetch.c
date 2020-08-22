@@ -53,7 +53,7 @@ int fetch_execute(unsigned int *code, int pc){
 
 int executeTER(decoded_instr *instr){
 	int *dest, *src1, *src2;
-    int old_dest, old_src1, old_src2;
+    int old_src1, old_src2;
 	int carryout=0, overflow=0, negative=0, zero=0;
     long long int mulresult;
 
@@ -64,7 +64,6 @@ int executeTER(decoded_instr *instr){
 	if (func_indirect_src2(instr)) src2=&(mem[reg[instr->src2]]);
 	else src2=&(reg[instr->src2]);
 
-    old_dest = *dest;
     old_src1 = *src1;
     old_src2 = *src2;
 
@@ -166,7 +165,7 @@ int executeTER(decoded_instr *instr){
 int executeBIN(decoded_instr *instr)
 {
 	int *dest, *src1, *src2;
-        int old_dest, old_src1, old_src2;
+        int old_src1, old_src2;
 	int carryout=0, overflow=0, negative=0, zero=0;
         long long int mulresult;
 
@@ -176,7 +175,6 @@ int executeBIN(decoded_instr *instr)
 	src2=&(instr->imm);
 
 
-    old_dest = *dest;
     old_src1 = *src1;
     old_src2 = *src2;
 
