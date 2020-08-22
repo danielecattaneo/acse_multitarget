@@ -249,7 +249,6 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
    int max_var_ID;
    int counter;
 
-
    /* Check preconditions: the cfg must exist */
    if (graph == NULL)
       notifyError(AXE_INVALID_CFLOW_GRAPH);
@@ -303,7 +302,6 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
    {
       if (insertListOfIntervals(result, intervals) != RA_OK)
       {
-         finalizeRegAlloc(result);
          notifyError(AXE_REG_ALLOC_ERROR);
       }
 
