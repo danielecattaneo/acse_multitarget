@@ -25,12 +25,12 @@ extern int num_error;
 %x comment
 %option noyywrap
 
-DIGIT	[0-9]
+DIGIT [0-9]
 HEX_DIGIT   [0-9A-Fa-f]
-ID	[a-zA-Z_][a-zA-Z0-9_]*
+ID [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
-[ \t\f\v]+		{ /* Ignore whitespace. */ }
+[ \t\f\v]+     { /* Ignore whitespace. */ }
 "/*"                    { BEGIN(comment); }
 <comment>[^*\n]*
 <comment>[^*\n]*\n      { ++line_num; }
@@ -39,12 +39,12 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 <comment>"*"+"/"        { BEGIN(INITIAL); }
 
 
-"("		{ return LPAR; }
-")"		{ return RPAR; }
+"("      { return LPAR; }
+")"      { return RPAR; }
 "["    { return LSQUARE; }
 "]"    { return RSQUARE; }
-":"		{ return COLON; }
-"#"		{ return BEGIN_IMMEDIATE; }
+":"      { return COLON; }
+"#"      { return BEGIN_IMMEDIATE; }
 
 "add"|"ADD"        { yylval.opcode = ADD_OP; return OPCODE3; }
 "sub"|"SUB"        { yylval.opcode = SUB_OP; return OPCODE3; }
@@ -118,10 +118,10 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 
 ["R"|"r"]{DIGIT}+ { yylval.immediate = atoi(&yytext[1]); return REG; }
 
-\n						{ line_num++; }
+\n                { line_num++; }
 [-]?({DIGIT}+|"0x"{HEX_DIGIT}+) { char *end = NULL;
                                   yylval.immediate = strtol(yytext, &end, 0);
                                   return IMM; }
 {ID}              { yylval.svalue = strdup(yytext); return ETI; }
-.						{ return(yytext[0]); num_error++; }
+.                 { return(yytext[0]); num_error++; }
 %%

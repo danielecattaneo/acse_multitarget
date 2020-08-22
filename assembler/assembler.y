@@ -29,11 +29,11 @@ int yyerror(const char* errmsg);
 %}
       
 %union{
-	char *svalue;
-	int immediate;
-	int opcode;
-	t_asm_address *address;
-	t_asm_data *dataVal;
+   char *svalue;
+   int immediate;
+   int opcode;
+   t_asm_address *address;
+   t_asm_data *dataVal;
    t_asm_instruction *instr;
    t_asm_label *label;
    t_asm_register *reg;
@@ -410,7 +410,7 @@ data_value_words:
       $$ = data;
    }
 ;
-		
+      
 register : REG {
                /* alloc memory for a register info. */
                $$ = allocRegister($1, 0);
@@ -506,12 +506,12 @@ address  : ETI {
 ;
 
 %%
-		 
+       
 int yyerror(const char* errmsg)
 {
-	fprintf(stdout, "line %d , error: %s \n", line_num, errmsg);
-	num_error++;
-	return 0;
+   fprintf(stdout, "line %d , error: %s \n", line_num, errmsg);
+   num_error++;
+   return 0;
 }
 
 int main (int argc, char **argv)
@@ -519,11 +519,11 @@ int main (int argc, char **argv)
    int errorcode;
    char *filename;
    FILE *input_file;
-	extern FILE *yyin;
+   extern FILE *yyin;
 
    argc--;
    argv++;
-	
+   
    if (argc > 0)
    {
       input_file = fopen(argv[0], "r");
@@ -536,12 +536,12 @@ int main (int argc, char **argv)
    }
    else
       yyin = stdin;
-	
+   
    if (argc <= 1)
       filename = "output.o";
    else
       filename = argv[1];
-	
+   
 #ifndef NDEBUG
    fprintf(stdout, "Initializing the assembler data structures.\n");
 #endif
@@ -576,7 +576,7 @@ int main (int argc, char **argv)
 #ifndef NDEBUG
    fprintf(stdout, "Parsing complete. \n");
 #endif
-	
+   
    /* test if the parsing job found some errors */
    if (num_error == 0)
    {

@@ -15,9 +15,9 @@
 
 typedef struct
 {
-	t_list *code; /* the instruction+data segment */
-	t_list *labels; /* a set of asm_labels */
-	int codesize; /* the size of the instruction segment */
+   t_list *code; /* the instruction+data segment */
+   t_list *labels; /* a set of asm_labels */
+   int codesize; /* the size of the instruction segment */
 }t_translation_infos;
 
 /* create an instance of `t_translation_info' initializing the internal data
@@ -26,7 +26,7 @@ extern t_translation_infos * initStructures(int *errorcode);
 
 /* Insert an instruction inside the `code' list of `infos' */
 extern int addInstruction(t_translation_infos *infos
-		, t_asm_instruction *instruction);
+      , t_asm_instruction *instruction);
 
 /* Insert a new label. The label must be initialized externally */
 extern int insertLabel(t_translation_infos *infos, t_asm_label *label);

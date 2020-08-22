@@ -54,7 +54,7 @@ static void finalizeLabels(t_list *labels);
 int getInstructionOrDataIndex(t_translation_infos *infos
       , void *target)
 {
-   t_list	*target_element;
+   t_list   *target_element;
    int position;
 
    /* the list is empty */

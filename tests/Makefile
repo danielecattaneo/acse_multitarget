@@ -1,5 +1,5 @@
 dirs:=arrays sum dowhile fact mult_table power binop not initvar largeimm \
-	  semi assign arrays2 misc shift spilltest
+      semi assign arrays2 misc shift spilltest
 
 test: $(dirs)
 

@@ -38,19 +38,19 @@
 #define SET_INTDATA(item, _data)    ((item)->data = INTDATA(_data))
 
 #ifndef _ALLOC_FUNCTION
-#	define _ALLOC_FUNCTION malloc
+#  define _ALLOC_FUNCTION malloc
 #endif
 #ifndef _FREE_FUNCTION
-#	define _FREE_FUNCTION free
+#  define _FREE_FUNCTION free
 #endif
 
 
 /* a list element */
 typedef struct t_list
 {
-	void	*data;
-	struct t_list *next;
-	struct t_list *prev;
+   void  *data;
+   struct t_list *next;
+   struct t_list *prev;
 }t_list;
 
 
