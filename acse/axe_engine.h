@@ -32,7 +32,7 @@ typedef struct t_program_infos
  * is called once: its only purpouse is to initialize an instance of the struct
  * `t_program_infos' that will contain all the informations about the program
  * that will be compiled */
-extern t_program_infos * allocProgramInfos();
+extern t_program_infos *allocProgramInfos();
 
 /* add a new instruction to the current program. This function is directly
  * called by all the functions defined in `axe_gencode.h' */
@@ -52,35 +52,33 @@ extern void pushInstrInsertionPoint(t_program_infos *p, t_list *ip);
 extern t_list *popInstrInsertionPoint(t_program_infos *p);
 
 /* reserve a new label identifier and return the identifier to the caller */
-extern t_axe_label * newLabel(t_program_infos *program);
+extern t_axe_label *newLabel(t_program_infos *program);
 
 /* assign the given label identifier to the next instruction. Returns
  * the label assigned; otherwise (an error occurred) LABEL_UNSPECIFIED */
-extern t_axe_label * assignLabel(t_program_infos *program, t_axe_label *label);
+extern t_axe_label *assignLabel(t_program_infos *program, t_axe_label *label);
 
 /* reserve and fix a new label. It returns either the label assigned or the
  * value LABEL_UNSPECIFIED if an error occurred */
-extern t_axe_label * assignNewLabel(t_program_infos *program);
+extern t_axe_label *assignNewLabel(t_program_infos *program);
 
 /* Like the above functions, but with the ability to give a name to the label.
  * If another label with the same name already exists, the name assigned to
  * the new label will be modified to remove any ambiguity. */
 extern t_axe_label *newNamedLabel(t_program_infos *program, const char *name);
-extern t_axe_label *assignNewNamedLabel(t_program_infos *program,
-      const char *name);
+extern t_axe_label *assignNewNamedLabel(
+      t_program_infos *program, const char *name);
 
 /* add a variable to the program */
-extern void createVariable(t_program_infos *program
-      , char *ID, int type, int isArray, int arraySize, int init_val);
+extern void createVariable(t_program_infos *program, char *ID, int type,
+      int isArray, int arraySize, int init_val);
 
 /* get a previously allocated variable */
-extern t_axe_variable * getVariable
-      (t_program_infos *program, char *ID);
+extern t_axe_variable *getVariable(t_program_infos *program, char *ID);
 
 /* get the label that marks the starting address of the variable
  * with name "ID" */
-extern t_axe_label * getLabelFromVariableID
-            (t_program_infos *program, char *ID);
+extern t_axe_label *getLabelFromVariableID(t_program_infos *program, char *ID);
 
 /* get a register still not used. This function returns
  * the ID of the register found*/

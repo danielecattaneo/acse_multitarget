@@ -54,8 +54,8 @@ extern int finalize_sy_table(t_symbol_table *table);
 /* given a register identifier (location), it returns the ID of the variable
  * stored inside the register `location'. This function returns NULL
  * if the location is an invalid location. */
-extern char * getIDfromLocation(t_symbol_table *table
-            , int location, int *errorcode);
+extern char *getIDfromLocation(
+      t_symbol_table *table, int location, int *errorcode);
 
 #ifndef NDEBUG
 /* This function prints out to the file `fout' the content of the

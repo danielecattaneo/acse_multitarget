@@ -33,8 +33,8 @@
  * SHL 
  * SHR 
  * DIV  */
-extern t_axe_expression handle_bin_numeric_op (t_program_infos *program
-         , t_axe_expression exp1, t_axe_expression exp2, int binop);
+extern t_axe_expression handle_bin_numeric_op(t_program_infos *program,
+      t_axe_expression exp1, t_axe_expression exp2, int binop);
 
 /* This function generates instructions that perform a
  * comparison between two values.  It takes as input two
@@ -57,7 +57,7 @@ extern t_axe_expression handle_bin_numeric_op (t_program_infos *program
  *           or equal to the value of `exp2')
  * _GTEQ_   (used to test if the value of `exp1' is greater than
  *           the value of `exp2')  */
-extern t_axe_expression handle_binary_comparison (t_program_infos *program
-         , t_axe_expression exp1, t_axe_expression exp2, int condition);
+extern t_axe_expression handle_binary_comparison(t_program_infos *program,
+      t_axe_expression exp1, t_axe_expression exp2, int condition);
 
 #endif

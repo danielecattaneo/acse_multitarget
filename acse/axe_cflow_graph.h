@@ -58,28 +58,27 @@ typedef struct t_cflow_Graph
 
 /* functions that are used in order to allocate/deallocate instances
  * of basic blocks, instruction nodes and flow graphs */
-extern t_cflow_Node * allocNode
-      (t_cflow_Graph *graph, t_axe_instruction *instr);
+extern t_cflow_Node *allocNode(t_cflow_Graph *graph, t_axe_instruction *instr);
 extern void finalizeNode(t_cflow_Node *node);
-extern t_basic_block * allocBasicBlock();
+extern t_basic_block *allocBasicBlock();
 extern void finalizeBasicBlock(t_basic_block *block);
-extern t_cflow_Graph * allocGraph();
+extern t_cflow_Graph *allocGraph();
 extern void finalizeGraph(t_cflow_Graph *graph);
 
 /* working with basic blocks */
 extern void setPred(t_basic_block *block, t_basic_block *pred);
 extern void setSucc(t_basic_block *block, t_basic_block *succ);
 extern void insertNode(t_basic_block *block, t_cflow_Node *node);
-extern void insertNodeBefore(t_basic_block *block
-      , t_cflow_Node *before_node, t_cflow_Node *new_node);
-extern void insertNodeAfter(t_basic_block *block
-      , t_cflow_Node *after_node, t_cflow_Node *new_node);
-extern t_list * getLiveINVars(t_basic_block *bblock);
-extern t_list * getLiveOUTVars(t_basic_block *bblock);
+extern void insertNodeBefore(
+      t_basic_block *block, t_cflow_Node *before_node, t_cflow_Node *new_node);
+extern void insertNodeAfter(
+      t_basic_block *block, t_cflow_Node *after_node, t_cflow_Node *new_node);
+extern t_list *getLiveINVars(t_basic_block *bblock);
+extern t_list *getLiveOUTVars(t_basic_block *bblock);
 
 /* working with the control flow graph */
 extern void insertBlock(t_cflow_Graph *graph, t_basic_block *block);
-extern t_cflow_Graph * createFlowGraph(t_list *instructions);
+extern t_cflow_Graph *createFlowGraph(t_list *instructions);
 
 /* dataflow analysis */
 extern void performLivenessAnalysis(t_cflow_Graph *graph);

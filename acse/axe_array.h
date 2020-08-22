@@ -22,8 +22,8 @@
  * position `index'.  `index' is an expression: its value can be
  * either a register location (i.e., the value of `index' is
  * stored inside a register) or an immediate value. */
-extern int loadArrayElement(t_program_infos *program
-               , char *ID, t_axe_expression index);
+extern int loadArrayElement(
+      t_program_infos *program, char *ID, t_axe_expression index);
 
 /* This function generates instructions that load the address of
  * an element of an array in a regester.  This function takes as
@@ -34,8 +34,8 @@ extern int loadArrayElement(t_program_infos *program
  * at position `index'.  `index' is an expression: its value can
  * be either a register location (i.e., the value of `index' is
  * stored inside a register) or an immediate value. */
-extern int loadArrayAddress(t_program_infos *program
-               , char *ID, t_axe_expression index);
+extern int loadArrayAddress(
+      t_program_infos *program, char *ID, t_axe_expression index);
 
 /* This function generates instructions that store a value
  * specified by `data' into the element at position `index' of
@@ -45,7 +45,7 @@ extern int loadArrayAddress(t_program_infos *program
  * stored (data).  `data' and `index' are expressions: their
  * value can be either register locations (i.e. their values are
  * stored inside a register) or immediate values. */
-extern void storeArrayElement(t_program_infos *program, char *ID
-            , t_axe_expression index, t_axe_expression data);
+extern void storeArrayElement(t_program_infos *program, char *ID,
+      t_axe_expression index, t_axe_expression data);
 
 #endif

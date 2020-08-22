@@ -22,8 +22,8 @@
 /* create a variable for each `t_axe_declaration' inside
  * the list `variables'. Each new variable will be of type
  * `varType'. */
-extern void set_new_variables(t_program_infos *program
-      , int varType, t_list *variables);
+extern void set_new_variables(
+      t_program_infos *program, int varType, t_list *variables);
 
 /* Given a variable/symbol identifier (ID) this function
  * returns a register location where the value is stored
@@ -38,8 +38,7 @@ extern void set_new_variables(t_program_infos *program
  * only if the flag `genLoad' is set to 1; otherwise it simply reserve
  * a register location for a new variable in the symbol table.
  * If an error occurs, get_symbol_location returns a REG_INVALID errorcode */
-extern int get_symbol_location(t_program_infos *program
-         , char *ID, int genLoad);
+extern int get_symbol_location(t_program_infos *program, char *ID, int genLoad);
 
 /* Generate the instruction to load an `immediate' value into a new register.
  * It returns the new register identifier or REG_INVALID if an error occurs */
@@ -54,7 +53,7 @@ extern int isJumpInstruction(t_axe_instruction *instr);
 /* Returns 1 if `instr` is a unconditional jump instruction (BT, BF) */
 extern int isUnconditionalJump(t_axe_instruction *instr);
 
-/* Returns 1 if `instr` is either the HALT instruction or the RET 
+/* Returns 1 if `instr` is either the HALT instruction or the RET
  * instruction. */
 extern int isHaltOrRetInstruction(t_axe_instruction *instr);
 
