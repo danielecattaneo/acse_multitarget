@@ -70,7 +70,6 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 "-"               { return MINUS; }
 "*"               { return MUL_OP; }
 "/"               { return DIV_OP; }
-"%"               { return MOD_OP; }
 "&"               { return AND_OP; }
 "|"               { return OR_OP; }
 "!"               { return NOT_OP; }
