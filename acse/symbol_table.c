@@ -84,8 +84,8 @@ int getLocation(t_symbol_table *table, char *ID, int *errorcode)
       if (errorcode != NULL)
       {
          (* errorcode) = SY_INVALID_REQUEST;
-         return SY_LOCATION_UNSPECIFIED;
       }
+      return SY_LOCATION_UNSPECIFIED;
    }
 
    /* search for the symbol with the given ID */
@@ -97,8 +97,8 @@ int getLocation(t_symbol_table *table, char *ID, int *errorcode)
       if (errorcode != NULL)
       {
          (* errorcode) = SY_UNDEFINED;
-         return SY_LOCATION_UNSPECIFIED;
       }
+      return SY_LOCATION_UNSPECIFIED;
    }
 
    if (errorcode != NULL)
