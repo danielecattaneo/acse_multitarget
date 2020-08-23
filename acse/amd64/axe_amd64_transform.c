@@ -272,8 +272,10 @@ void insertRegisterAllocationConstraints(t_program_infos *program)
 
          pushInstrInsertionPoint(program, LPREV(cur));
          moveLabel(gen_add_instruction(program, rtmp, REG_0, rdest, CG_DIRECT(0, rdest_dir)), inst);
-         t_axe_instruction *zeroEdx = gen_addi_instruction(program, rEDX, REG_0, 0);
-         setMCRegisterWhitelist(RD(zeroEdx), R_AMD64_EDX, -1);
+         gen_subi_instruction(program, REG_0, rtmp, 0);
+         gen_slt_instruction(program, rEDX);
+         t_axe_instruction *signExpEDX = gen_neg_instruction(program, rEDX, rEDX, CG_DIRECT_ALL);
+         setMCRegisterWhitelist(RD(signExpEDX), R_AMD64_EDX, -1);
          popInstrInsertionPoint(program);
 
          RD_ID(inst) = RS1_ID(inst) = rtmp;
