@@ -165,6 +165,27 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
    return 1;
 }
 
+int translateAMD64_cmp(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
+{
+   if (instr->opcode != SUB && instr->opcode != SUBI)
+      return 0;
+   if (!instr->reg_1 || instr->reg_1->indirect || instr->reg_1->ID != REG_0)
+      return 0;
+   
+   char rsrc1[20];
+   translateAMD64_regValOrPtr(instr->reg_2, rsrc1, 20);
+   
+   if (instr->opcode == SUBI) {
+      fprintf(fp, "\tcmp %s, %d\n", rsrc1, instr->immediate);
+      return 1;
+   }
+
+   char rsrc2[20];
+   translateAMD64_regValOrPtr(instr->reg_3, rsrc2, 20);
+   fprintf(fp, "\tcmp %s, %s\n", rsrc1, rsrc2);
+   return 1;
+}
+
 int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 {
    char address[20];
@@ -225,6 +246,8 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
    }
 
    if (translateAMD64_mov(program, instr, fp))
+      return 1;
+   if (translateAMD64_cmp(program, instr, fp))
       return 1;
 
    char addrBuf[20];
