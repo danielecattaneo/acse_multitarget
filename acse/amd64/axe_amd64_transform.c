@@ -64,8 +64,11 @@ void fixInstrOperands(t_program_infos *program)
 
       pushInstrInsertionPoint(program, LPREV(position));
 
-      if (RS2(instr) && RS2_IND(instr) && RD_IND(instr)) {
-         /* amd64 instructions cannot have more than one indirect operand */
+      /* copy RS2 to another register if:
+       *  - there are more than one indirect operand (amd64 does not allow it)
+       *  - RD and RS2 are the same register (otherwise the ADD which moves
+       *    RS1 to RD would overwrite one of the source regs otherwise) */
+      if (RS2(instr) && ((RS2_IND(instr) && RD_IND(instr)) || (RD_ID(instr) == RS2_ID(instr)))) {
          int tmp = getNewRegister(program);
          moveLabel(gen_add_instruction(program, tmp, REG_0, RS2_ID(instr), 
                CG_DIRECT(0, RS2_IND(instr))), instr);
