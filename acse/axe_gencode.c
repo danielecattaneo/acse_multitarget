@@ -204,8 +204,7 @@ t_axe_instruction * gen_shr_instruction (t_program_infos *program
 t_axe_instruction * gen_neg_instruction (t_program_infos *program
       , int r_dest, int r_source, int flags)
 {
-   return gen_ternary_instruction
-         (program, SUB, r_dest, REG_0, r_source, flags);
+   return gen_ternary_instruction(program, NEG, r_dest, REG_0, r_source, flags);
 }
 
 t_axe_instruction * gen_spcl_instruction (t_program_infos *program
