@@ -19,6 +19,9 @@
  * representation of an instruction */
 extern void debug_printInstruction(t_axe_instruction *instr, FILE *fout);
 
+/* print debug information about the program */
+extern void printProgramInfos(t_program_infos *program, FILE *fout);
+
 /* print debug informations about the control flow graph */
 extern void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose);
 

@@ -53,6 +53,8 @@ t_io_infos * initializeOutputInfos(int argc, char **argv)
 #ifndef NDEBUG
    fprintf(stdout, "Output will be written on file : "
          "\"%s\". \n", result->output_file_name);
+   fprintf(stdout, "The output of the frontend will be written on file:"
+         "\"%s\". \n", "frontend.out");
    fprintf(stdout, "The Symbol Table will be written on file : "
          "\"%s\". \n", "sy_table.out");
    fprintf(stdout, "Intermediate code will be written on file : "
@@ -62,18 +64,21 @@ t_io_infos * initializeOutputInfos(int argc, char **argv)
    fprintf(stdout, "Output of the register allocator "
                    "will be written on file  : \"%s\". \n\n", "regalloc.out");
 
-   result->reg_alloc_output = fopen("regalloc.out", "w");
-   if (result->reg_alloc_output == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "regalloc.out");
+   result->frontend_output = fopen("frontend.out", "w");
    result->cfg_1 = fopen("output.cfg", "w");
    result->cfg_2 = fopen("dataflow.cfg", "w");
+   result->reg_alloc_output = fopen("regalloc.out", "w");
    result->syTable_output = fopen("sy_table.out", "w");
+   if (result->frontend_output == NULL)
+      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "frontend.out");
    if (result->cfg_1 == NULL)
       fprintf( stderr, "WARNING : Unable to create file: %s.\n", "output.cfg");
    if (result->cfg_2 == NULL)
       fprintf( stderr, "WARNING : Unable to create file: %s.\n", "dataflow.cfg");
    if (result->syTable_output == NULL)
       fprintf( stderr, "WARNING : Unable to create file: %s.\n", "sy_table.out");
+   if (result->reg_alloc_output == NULL)
+      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "regalloc.out");
 #endif
 
    return result;
@@ -95,6 +100,7 @@ t_io_infos * allocOutputInfos()
    result->output_file_name = NULL;
    result->input_file = stdin;
 #ifndef NDEBUG
+   result->frontend_output = stdout;
    result->cfg_1 = stdout;
    result->cfg_2 = stdout;
    result->reg_alloc_output = stdout;
@@ -112,6 +118,8 @@ void finalizeOutputInfos(t_io_infos *infos)
    if (infos->input_file != NULL)
       fclose(infos->input_file);
 #ifndef NDEBUG
+   if (infos->frontend_output != NULL)
+      fclose(infos->frontend_output);
    if (infos->cfg_1 != NULL)
       fclose(infos->cfg_1);
    if (infos->cfg_2 != NULL)

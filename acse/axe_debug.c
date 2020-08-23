@@ -254,6 +254,57 @@ void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose)
    fflush(fout);
 }
 
+void printProgramInfos(t_program_infos *program, FILE *fout)
+{
+   fprintf(fout,"**************************\n");
+   fprintf(fout,"          PROGRAM         \n");
+   fprintf(fout,"**************************\n\n");
+
+   fprintf(fout,"-----------\n");
+   fprintf(fout," VARIABLES\n");
+   fprintf(fout,"-----------\n");
+   t_list *cur_var = program->variables;
+   while (cur_var) {
+      t_axe_variable *var = LDATA(cur_var);
+      fprintf(fout, "[%s]\n", var->ID);
+
+      fprintf(fout, "   type = %s", dataTypeToString(var->type));
+      if (var->isArray) {
+         fprintf(fout, ", array size = %d", var->arraySize);
+      } else {
+         fprintf(fout, ", scalar initial value = %d", var->init_val);
+      }
+      fprintf(fout, "\n");
+
+      fprintf(fout, "   label = ");
+      printLabel(var->labelID, 0, fout);
+      fprintf(fout, "\n");
+
+      fprintf(fout, "   location = ");
+      int sy_error;
+      int reg = getLocation(program->sy_table, var->ID, &sy_error);
+      if (reg == SY_LOCATION_UNSPECIFIED)
+         fprintf(fout, "N/A");
+      else
+         fprintf(fout, "R%d", reg);
+      fprintf(fout, "\n");
+
+      cur_var = LNEXT(cur_var);
+   }
+
+   fprintf(fout,"\n--------------\n");
+   fprintf(fout," INSTRUCTIONS\n");
+   fprintf(fout,"--------------\n");
+   t_list *cur_inst = program->instructions;
+   while (cur_inst) {
+      t_axe_instruction *instr = LDATA(cur_inst);
+      debug_printInstruction(instr, fout);
+      fprintf(fout, "\n");
+      cur_inst = LNEXT(cur_inst);
+   }
+
+   fflush(fout);
+}
 
 void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
 {

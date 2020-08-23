@@ -585,6 +585,7 @@ int main (int argc, char **argv)
    
 #ifndef NDEBUG
    fprintf(stdout, "Parsing process completed. \n");
+   printProgramInfos(program, file_infos->frontend_output);
 #endif
 
    /* test if the parsing process completed succesfully */
