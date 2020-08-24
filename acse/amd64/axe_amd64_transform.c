@@ -53,6 +53,14 @@ void fixInstrOperands(t_program_infos *program)
       * form it has with provisions for an immediate operand! */
       if (instr->opcode == MULI)
          continue;
+      
+      /* NEG has the format RD = -RS2
+       * Swap RS1 and RS2 to compensate */
+      if (instr->opcode == NEG) {
+         t_axe_register *rdummy = RS1(instr);
+         RS1(instr) = RS2(instr);
+         RS2(instr) = rdummy;
+      }
 
       /* check if the instruction has at least 2 operands */
       if (!RS1(instr) || RS1_ID(instr) == REG_INVALID)
