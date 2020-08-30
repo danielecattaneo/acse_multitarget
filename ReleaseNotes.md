@@ -80,6 +80,8 @@ Released on 2020-10-03
   used and defined exactly once by the same instruction in the first basic block.
 - Fix a bug where invalid tokens after a valid statement caused parsing to stop
   mid-program without an error.
+- Fix a bug where line numbers were incorrectly counted on lines with C++ style
+  comments.
 - Fix a bug in register allocation materialization where spill store
   instructions were placed one instruction too early in basic blocks without an
   explicit terminator instruction.

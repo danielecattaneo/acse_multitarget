@@ -50,7 +50,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 
 [ \t\f\v]+        { /* Ignore whitespace. */ }
 
-"//"[^\n]*        { ++line_num; /* ignore comment lines */ }
+"//"[^\n]*        { /* ignore comment lines */ }
 "/*"              BEGIN(comment);
 
 <comment>[^*\n]*
