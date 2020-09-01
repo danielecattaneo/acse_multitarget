@@ -472,7 +472,6 @@ static int perform_rotr(int value, int amount, int *carry)
 {
    int result;
    int amount_mask;
-   int inv_mask;
    amount &= 31;
    amount_mask = (1 << amount) - 1;
    result = (unsigned)value >> amount;
