@@ -216,7 +216,8 @@ void setLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
    /* remove all non a-zA-Z0-9_ characters */
    sanitizedName = calloc(strlen(name)+1, 1);
    const char *srcp = name;
-   for (char *dstp = sanitizedName; *srcp; srcp++) {
+   char *dstp;
+   for (dstp = sanitizedName; *srcp; srcp++) {
       if (*srcp == '_' || isalnum(*srcp))
          *dstp++ = *srcp;
    }
@@ -226,8 +227,9 @@ void setLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
    finalName = calloc(allocatedSpace, 1);
    snprintf(finalName, allocatedSpace, "_%s", sanitizedName);
    do {
+      t_list *i;
       ok = 1;
-      for (t_list *i = lmanager->labels; i != NULL; i = LNEXT(i)) {
+      for (i = lmanager->labels; i != NULL; i = LNEXT(i)) {
          t_axe_label *thisLab = LDATA(i);
          if (!thisLab->name || thisLab->labelID == label->labelID)
             continue;
@@ -247,9 +249,11 @@ void setLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
 void setRawLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
       const char *finalName)
 {
+   t_list *i;
+
    /* check the entire list of labels because there might be two
     * label objects with the same ID and they need to be kept in sync */
-   for (t_list *i = lmanager->labels; i != NULL; i = LNEXT(i)) {
+   for (i = lmanager->labels; i != NULL; i = LNEXT(i)) {
       t_axe_label *thisLab = LDATA(i);
 
       if (thisLab->labelID == label->labelID) {

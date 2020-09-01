@@ -144,8 +144,9 @@ void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose)
 void printArrayOfVariables(t_cflow_var **array, int size, FILE *fout)
 {
    int foundVariables = 0;
+   int i;
    
-   for (int i=0; i<size; i++) {
+   for (i=0; i<size; i++) {
       if (!(array[i]))
          continue;
          

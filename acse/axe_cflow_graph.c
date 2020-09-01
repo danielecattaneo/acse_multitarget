@@ -187,6 +187,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
    t_cflow_Node *next_node;
    t_cflow_Node *current_node;
    int modified;
+   int i, def_i, use_i;
 
    /* initialize the local variables */
    modified = 0;
@@ -207,7 +208,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
    /* update the in list */
    cloned_list = cloneList(current_node->out);
    
-   for (int i=0; i<CFLOW_MAX_USES; i++) {
+   for (i=0; i<CFLOW_MAX_USES; i++) {
 #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
       if ((current_node->uses)[i] != NULL && (current_node->uses)[i]->ID != REG_0)
          cloned_list = addVariableToSet
@@ -219,7 +220,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
 #endif
    }
 
-   for (int def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
+   for (def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
       int found = 0;
       #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
          if (!(current_node->defs)[def_i] || (current_node->defs)[def_i]->ID == REG_0)
@@ -229,7 +230,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
             continue;
       #endif
 
-      for (int use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
+      for (use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
          if ((current_node->uses)[use_i]) {
             if ((current_node->uses)[use_i]->ID == (current_node->defs)[def_i]->ID)
                found = 1;
@@ -269,7 +270,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
       cloned_list = cloneList(current_node->out);
       
       /* update the in list */
-      for (int i=0; i<CFLOW_MAX_USES; i++) {
+      for (i=0; i<CFLOW_MAX_USES; i++) {
 #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
          if ((current_node->uses)[i] != NULL && (current_node->uses)[i]->ID != REG_0)
             cloned_list = addVariableToSet
@@ -281,7 +282,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
 #endif
       }
       
-      for (int def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
+      for (def_i = 0; def_i < CFLOW_MAX_DEFS; def_i++) {
          int found = 0;
          #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
             if (!(current_node->defs)[def_i] || (current_node->defs)[def_i]->ID == REG_0)
@@ -291,7 +292,7 @@ int performLivenessOnBlock(t_basic_block *bblock, t_list *out)
                continue;
          #endif
 
-         for (int use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
+         for (use_i = 0; use_i < CFLOW_MAX_USES && !found; use_i++) {
             if ((current_node->uses)[use_i]) {
                if ((current_node->uses)[use_i]->ID == (current_node->defs)[def_i]->ID)
                   found = 1;
@@ -764,6 +765,7 @@ t_cflow_Node * allocNode
       (t_cflow_Graph *graph, t_axe_instruction *instr)
 {
    t_cflow_Node *result;
+   int i;
 
    /* test the preconditions */
    if (graph == NULL) {
@@ -787,9 +789,9 @@ t_cflow_Node * allocNode
    }
 
    /* initialize result */
-   for (int i=0; i<CFLOW_MAX_DEFS; i++)
+   for (i=0; i<CFLOW_MAX_DEFS; i++)
       result->defs[i] = NULL;
-   for (int i=0; i<CFLOW_MAX_USES; i++)
+   for (i=0; i<CFLOW_MAX_USES; i++)
       result->uses[i] = NULL;
    result->instr = instr;
 

@@ -545,6 +545,7 @@ t_list * updateListOfIntervals(t_list *result
 {
    t_list *current_element;
    t_cflow_var *current_var;
+   int i;
    
    if (current_node == NULL)
       return result;
@@ -571,7 +572,7 @@ t_list * updateListOfIntervals(t_list *result
       current_element = LNEXT(current_element);
    }
 
-   for (int i=0; i<CFLOW_MAX_DEFS; i++) {
+   for (i=0; i<CFLOW_MAX_DEFS; i++) {
       if (current_node->defs[i])
          result = updateVarInterval(current_node->defs[i]->ID, counter, result);
    }

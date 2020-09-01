@@ -475,10 +475,11 @@ t_cflow_Graph * insertLoadAndStoreInstr
       current_nd_element = current_block->nodes;
       while(current_nd_element != NULL)
       {
+         int usei, defi;
          current_node = (t_cflow_Node *) LDATA(current_nd_element);
 
          /* test if we have to insert a load */
-         for (int usei=0; usei<CFLOW_MAX_USES; usei++) {
+         for (usei=0; usei<CFLOW_MAX_USES; usei++) {
             t_cflow_var *use = current_node->uses[usei];
             if ((use != NULL) && (use->ID != REG_0) && (use->ID != VAR_PSW))
             {
@@ -491,7 +492,7 @@ t_cflow_Graph * insertLoadAndStoreInstr
          }
 
          /* test if we have to insert a store */
-         for (int defi=0; defi<CFLOW_MAX_DEFS; defi++) {
+         for (defi=0; defi<CFLOW_MAX_DEFS; defi++) {
             t_cflow_var *def = current_node->defs[defi];
             if ((def != NULL) && (def->ID != REG_0) && (def->ID != VAR_PSW))
             {
@@ -509,10 +510,11 @@ t_cflow_Graph * insertLoadAndStoreInstr
       current_nd_element = getLastElement(current_block->nodes);
       while((current_nd_element != NULL) && (usedVars != NULL))
       {
+         int usei, defi;
          current_node = (t_cflow_Node *) LDATA(current_nd_element);
 
          /* test if we have to insert a store */
-         for (int usei=0; usei<CFLOW_MAX_USES; usei++) {
+         for (usei=0; usei<CFLOW_MAX_USES; usei++) {
             t_cflow_var *use = current_node->uses[usei];
             if ((use != NULL) && (use->ID != REG_0) && (use->ID != VAR_PSW))
             {
@@ -525,7 +527,7 @@ t_cflow_Graph * insertLoadAndStoreInstr
          }
 
          /* test if we have to insert a store */
-         for (int defi=0; defi<CFLOW_MAX_DEFS; defi++) {
+         for (defi=0; defi<CFLOW_MAX_DEFS; defi++) {
             t_cflow_var *def = current_node->defs[defi];
             if ((def != NULL) && (def->ID != REG_0) && (def->ID != VAR_PSW))
             {

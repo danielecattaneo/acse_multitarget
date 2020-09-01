@@ -586,7 +586,7 @@ int asm_writeObjectFile(t_translation_infos *infos, char *output_file)
    }
 
    /* print the trailer informations */
-   //DOES NOTHING
+   /* DOES NOTHING */
 
    /* close the file and return */
    errorcode = fclose(fp);
