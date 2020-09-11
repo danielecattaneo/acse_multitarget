@@ -2,7 +2,7 @@
 
 ## ACSE 1.2.0
 
-Released on 2020-10-03
+Released on 2020-09-14
 
 ### New Features
 
