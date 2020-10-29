@@ -23,10 +23,10 @@
 #define ASM_INVALID_MEMORY_OFFSET -1
 
 /* opcodes pseudo-M68000 */
-#define ADD_OP	0
+#define ADD_OP 0
 #define SUB_OP 1
-#define ANDL_OP 2	
-#define ORL_OP 3	
+#define ANDL_OP 2 
+#define ORL_OP 3  
 #define EORL_OP  4
 #define ANDB_OP 5
 #define ORB_OP 6
@@ -86,6 +86,7 @@
 #define STORE_OP 60
 #define READ_OP 61
 #define WRITE_OP 62
+#define XPSW_OP 63
 #define INVALID_OPCODE -1
 
 /* error codes */
@@ -106,13 +107,13 @@
 #define ASM_UNKNOWN_ERROR 14
 
 /* instruction formats */
-#define ASM_FORMAT_TER	0
-#define ASM_FORMAT_BIN	1
-#define ASM_FORMAT_UNR	2
-#define ASM_FORMAT_JMP	3
-#define ASM_FORMAT_NULL	4
+#define ASM_FORMAT_TER  0
+#define ASM_FORMAT_BIN  1
+#define ASM_FORMAT_UNR  2
+#define ASM_FORMAT_JMP  3
+#define ASM_FORMAT_NULL 4
 
 /* data formats */
-#define ASM_WORD	0
+#define ASM_WORD  0
 #define ASM_SPACE 1
 #endif

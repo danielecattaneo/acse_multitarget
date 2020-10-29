@@ -54,7 +54,7 @@ static void finalizeLabels(t_list *labels);
 int getInstructionOrDataIndex(t_translation_infos *infos
       , void *target)
 {
-   t_list	*target_element;
+   t_list   *target_element;
    int position;
 
    /* the list is empty */
@@ -423,11 +423,17 @@ t_asm_label * findLabel(t_translation_infos *infos, char *ID, int *asm_errorcode
    t_list *label_element;
    
    /* preconditions */
-   if (infos == NULL && asm_errorcode != NULL)
-      (*asm_errorcode) = ASM_NOT_INITIALIZED_INFO;
+   if (infos == NULL) {
+      if (asm_errorcode)
+         *asm_errorcode = ASM_NOT_INITIALIZED_INFO;
+      return NULL;
+   }
    
-   if (ID == NULL && asm_errorcode != NULL)
-      (*asm_errorcode) = ASM_INVALID_LABEL_FOUND;
+   if (ID == NULL) {
+      if (asm_errorcode)
+         *asm_errorcode = ASM_INVALID_LABEL_FOUND;
+      return NULL;
+   }
    
    /* initialize the value of `asm_errorcode' */
    (*asm_errorcode) = ASM_OK;
@@ -580,7 +586,7 @@ int asm_writeObjectFile(t_translation_infos *infos, char *output_file)
    }
 
    /* print the trailer informations */
-   //DOES NOTHING
+   /* DOES NOTHING */
 
    /* close the file and return */
    errorcode = fclose(fp);
@@ -742,6 +748,7 @@ int getBinaryOpcode(int opcode)
       case SNE_OP: return 12;
       case READ_OP: return 13;
       case WRITE_OP: return 14;
+      case XPSW_OP: return 15;
       case BT_OP: return 0;
       case BF_OP: return 1;
       case BHI_OP: return 2;

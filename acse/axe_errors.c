@@ -121,8 +121,10 @@ void printMessage(const char *msg)
 
 void notifyError(int axe_errorcode)
 {
+   assert(axe_errorcode != AXE_OK);
    errorcode = axe_errorcode;
-   checkConsistency();
+   printErrorMessage(errorcode);
+   abortProgram();
 }
 
 void checkConsistency()

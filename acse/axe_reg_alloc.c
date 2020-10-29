@@ -9,8 +9,10 @@
 
 #include "axe_reg_alloc.h"
 #include "reg_alloc_constants.h"
+#include "axe_target_info.h"
 #include "axe_debug.h"
 #include "axe_errors.h"
+#include "axe_utils.h"
 
 extern int errorcode;
 
@@ -247,7 +249,6 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
    int max_var_ID;
    int counter;
 
-
    /* Check preconditions: the cfg must exist */
    if (graph == NULL)
       notifyError(AXE_INVALID_CFLOW_GRAPH);
@@ -260,9 +261,9 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
    /* initialize the register allocator informations */
    /* Reserve a few registers (RA_MIN_REG_NUM) to handle spills */
    result->regNum = NUM_REGISTERS - RA_MIN_REG_NUM;
-   max_var_ID = getLength(graph->cflow_variables);
 
    /* retrieve the max identifier from each live interval */
+   max_var_ID = 0;
    current_cflow_var = graph->cflow_variables;
    while (current_cflow_var != NULL)
    {
@@ -271,28 +272,25 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
       assert(cflow_var != NULL);
       
       /* update the value of max_var_ID */
-      max_var_ID = (max_var_ID < cflow_var->ID)? cflow_var->ID : max_var_ID;
+      max_var_ID = MAX(max_var_ID, cflow_var->ID);
 
       /* retrieve the next variable */
       current_cflow_var = LNEXT(current_cflow_var);
    }
-      
-   /* update the value of `result->varNum' with the correct var. identifier */
-   result->varNum = max_var_ID;
+   result->varNum = max_var_ID + 1; /* +1 to count R0 */
 
    /* Assuming there are some variables to associate to regs,
     * allocate space for the binding array, and initialize it */
    
    /*alloc memory for the array of bindings */
-   result->bindings = (int *) _AXE_ALLOC_FUNCTION
-         (sizeof(int) * (result->varNum + 1) );
+   result->bindings = (int *)_AXE_ALLOC_FUNCTION(sizeof(int) * result->varNum);
    
    /* test if an error occurred */
    if (result->bindings == NULL)
       notifyError(AXE_OUT_OF_MEMORY);
       
    /* initialize the array of bindings */
-   for(counter = 0; counter <= result->varNum; counter++)
+   for (counter = 0; counter < result->varNum; counter++)
       result->bindings[counter] = RA_REGISTER_INVALID;
 
    /* Liveness analysis: compute the list of live intervals */
@@ -304,7 +302,6 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
    {
       if (insertListOfIntervals(result, intervals) != RA_OK)
       {
-         finalizeRegAlloc(result);
          notifyError(AXE_REG_ALLOC_ERROR);
       }
 
@@ -512,8 +509,8 @@ t_list *updateVarInterval( int id, int counter, t_list *intervals )
     t_live_interval *interval_found;
     t_live_interval pattern;
 
-    if (id == RA_EXCLUDED_VARIABLE)
-        return NULL;
+    if (id == RA_EXCLUDED_VARIABLE || id == VAR_PSW)
+        return intervals;
     
     pattern.varID = id;
     /* search for the current live interval */
@@ -548,6 +545,7 @@ t_list * updateListOfIntervals(t_list *result
 {
    t_list *current_element;
    t_cflow_var *current_var;
+   int i;
    
    if (current_node == NULL)
       return result;
@@ -574,8 +572,10 @@ t_list * updateListOfIntervals(t_list *result
       current_element = LNEXT(current_element);
    }
 
-   if (current_node->def)
-       result = updateVarInterval(current_node->def->ID, counter, result);
+   for (i=0; i<CFLOW_MAX_DEFS; i++) {
+      if (current_node->defs[i])
+         result = updateVarInterval(current_node->defs[i]->ID, counter, result);
+   }
 
    return result;
 }

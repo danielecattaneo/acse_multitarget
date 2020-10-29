@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <math.h>
 #include "asm_struct.h"
 #include "collections.h"
@@ -24,27 +23,28 @@ extern int num_error;
 %}
 
 %x comment
-%s DATA
 %option noyywrap
 
-DIGIT	[0-9]
-ID	[a-zA-Z_][a-zA-Z0-9_]*
+DIGIT [0-9]
+HEX_DIGIT   [0-9A-Fa-f]
+ID [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
-[ \t\f\v]+		{ /* Ignore whitespace. */ }
-"/*"                    {  BEGIN(comment); return BEGIN_COMMENT; }
-<comment>[^*]*          {  return COMMENT; }
-<comment>"*"+[^*/]*     {  return COMMENT; }
-<comment>"*"+"/"        {  BEGIN(INITIAL); return END_COMMENT; }
+[ \t\f\v]+     { /* Ignore whitespace. */ }
+"/*"                    { BEGIN(comment); }
+<comment>[^*\n]*
+<comment>[^*\n]*\n      { ++line_num; }
+<comment>"*"+[^*/\n]*   
+<comment>"*"+[^*/\n]*\n { ++line_num; }
+<comment>"*"+"/"        { BEGIN(INITIAL); }
 
 
-"("		{ return LPAR; }
-")"		{ return RPAR; }
+"("      { return LPAR; }
+")"      { return RPAR; }
 "["    { return LSQUARE; }
 "]"    { return RSQUARE; }
-":"		{ return COLON; }
-"#"		{ return BEGIN_IMMEDIATE; }
-"-"      { return MINUS; }
+":"      { return COLON; }
+"#"      { return BEGIN_IMMEDIATE; }
 
 "add"|"ADD"        { yylval.opcode = ADD_OP; return OPCODE3; }
 "sub"|"SUB"        { yylval.opcode = SUB_OP; return OPCODE3; }
@@ -92,6 +92,7 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 "sne"|"SNE"        { yylval.opcode = SNE_OP; return OPCODEI; }
 "read"|"READ"      { yylval.opcode = READ_OP; return OPCODEI; }
 "write"|"WRITE"    { yylval.opcode = WRITE_OP; return OPCODEI; }
+"xpsw"|"XPSW"      { yylval.opcode = XPSW_OP; return OPCODEI; }
 "halt"|"HALT"      { yylval.opcode = HALT_OP; return HALT; }
 "bt"|"BT"          { yylval.opcode = BT_OP; return CCODE; }
 "bf"|"BF"          { yylval.opcode = BF_OP; return CCODE; }
@@ -110,15 +111,17 @@ ID	[a-zA-Z_][a-zA-Z0-9_]*
 "bgt"|"BGT"        { yylval.opcode = BGT_OP; return CCODE; }
 "ble"|"BLE"        { yylval.opcode = BLE_OP; return CCODE; }
 
-".data"|".DATA"            BEGIN(DATA); {line_num++; }
-".text"|".TEXT"            BEGIN(INITIAL); {line_num++; }
-<DATA>".word"|".WORD"		{return _WORD;}
-<DATA>".space"|".SPACE"    {return _SPACE;}
+".data"|".DATA"    return _DATA;
+".text"|".TEXT"    return _TEXT;
+".word"|".WORD"    return _WORD;
+".space"|".SPACE"  return _SPACE;
 
-["R"|"r"]{DIGIT}+  { yylval.immediate = atoi(&yytext[1]); return REG; }
+["R"|"r"]{DIGIT}+ { yylval.immediate = atoi(&yytext[1]); return REG; }
 
-\n						{ /* DOES NOTHING */ }
-{DIGIT}+          { yylval.immediate = atoi(yytext); return IMM; };
-{ID}              { yylval.svalue = strdup(yytext); return ETI; };
-.						{ return(yytext[0]); num_error++; }
+\n                { line_num++; }
+[-]?({DIGIT}+|"0x"{HEX_DIGIT}+) { char *end = NULL;
+                                  yylval.immediate = strtol(yytext, &end, 0);
+                                  return IMM; }
+{ID}              { yylval.svalue = strdup(yytext); return ETI; }
+.                 { return(yytext[0]); num_error++; }
 %%

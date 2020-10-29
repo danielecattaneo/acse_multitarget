@@ -20,9 +20,6 @@ static t_axe_expression handle_bin_comparison_Imm
          (int val1, int val2, int condition);
 
 
-static t_axe_expression normalize(t_program_infos *program,
-                                  t_axe_expression exp);
-
 t_axe_expression handle_bin_numeric_op (t_program_infos *program
          , t_axe_expression exp1, t_axe_expression exp2, int binop)
 {
@@ -36,9 +33,6 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
    {
       return handle_bin_numeric_op_Imm(exp1.value, exp2.value, binop);
    }
-
-   exp1 = normalize(program, exp1);
-   exp2 = normalize(program, exp2);
    
    /* at first we have to ask for a free register
    * where to store the result of the operation. */
@@ -53,7 +47,15 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
                              , exp1.value, exp2.value); break;
          case ANDB : gen_andbi_instruction (program, output_register
                               , exp1.value, exp2.value); break;
+         case ANDL : gen_andli_instruction (program, output_register
+                              , exp1.value, exp2.value); break;
          case ORB  : gen_orbi_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case ORL  : gen_orli_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case EORB  : gen_eorbi_instruction (program, output_register
+                             , exp1.value, exp2.value); break;
+         case EORL  : gen_eorli_instruction (program, output_register
                              , exp1.value, exp2.value); break;
          case SUB : gen_subi_instruction (program, output_register
                              , exp1.value, exp2.value); break;
@@ -85,7 +87,15 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
                               , exp2.value, exp1.value); break;
          case ANDB :  gen_andbi_instruction (program, output_register
                               , exp2.value, exp1.value); break;
+         case ANDL :  gen_andli_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
          case ORB  :  gen_orbi_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case ORL  :  gen_orli_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case EORB  :  gen_eorbi_instruction (program, output_register
+                              , exp2.value, exp1.value); break;
+         case EORL  :  gen_eorli_instruction (program, output_register
                               , exp2.value, exp1.value); break;
          case SUB :
                   gen_subi_instruction (program, output_register
@@ -151,7 +161,19 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
          case ANDB :  gen_andb_instruction (program, output_register
                               , exp1.value, exp2.value, CG_DIRECT_ALL);
                      break;
+         case ANDL :  gen_andl_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
          case ORB :  gen_orb_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case ORL :  gen_orl_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case EORB :  gen_eorb_instruction (program, output_register
+                              , exp1.value, exp2.value, CG_DIRECT_ALL);
+                     break;
+         case EORL :  gen_eorl_instruction (program, output_register
                               , exp1.value, exp2.value, CG_DIRECT_ALL);
                      break;
          case SUB :  gen_sub_instruction (program, output_register
@@ -185,11 +207,20 @@ t_axe_expression handle_bin_numeric_op_Imm
    {
       case ADD : return create_expression ((val1 + val2), IMMEDIATE);
       case ANDB : return create_expression ((val1 & val2), IMMEDIATE);
+      case ANDL : return create_expression ((val1 && val2), IMMEDIATE);
       case ORB  : return create_expression ((val1 | val2), IMMEDIATE);
+      case ORL  : return create_expression ((val1 || val2), IMMEDIATE);
+      case EORB  : return create_expression ((val1 ^ val2), IMMEDIATE);
+      case EORL  : return create_expression (((!!val1) != (!!val2)), IMMEDIATE);
       case SUB : return create_expression ((val1 - val2), IMMEDIATE);
       case MUL : return create_expression ((val1 * val2), IMMEDIATE);
       case SHL : return create_expression ((val1 << val2), IMMEDIATE);
-      case SHR : return create_expression ((val1 >> val2), IMMEDIATE);
+      case SHR:
+         /* the C language does not guarantee a right shift of a signed value
+          * is an arithmetic shift, so we have to make sure it is */
+         return create_expression((val1 >> val2) | 
+               (val1 < 0 ? (((1 << val2) - 1) << MAX(32 - val2, 0)) : 0), 
+               IMMEDIATE);
       case DIV :
          if (val2 == 0){
             printWarningMessage(WARN_DIVISION_BY_ZERO);
@@ -220,16 +251,6 @@ t_axe_expression handle_bin_comparison_Imm
    return create_expression (0, INVALID_EXPRESSION);
 }
 
-t_axe_expression normalize(t_program_infos *program, t_axe_expression exp)
-{
-   if (exp.expression_type ==  IMMEDIATE && !is_int16(exp.value))
-   {
-      int tmp_reg = gen_load_immediate(program, exp.value);
-      return create_expression(tmp_reg, REGISTER);
-   }
-   return exp;
-}
-
 t_axe_expression handle_binary_comparison (t_program_infos *program
          , t_axe_expression exp1, t_axe_expression exp2, int condition)
 {
@@ -243,9 +264,6 @@ t_axe_expression handle_binary_comparison (t_program_infos *program
       return handle_bin_comparison_Imm
                   (exp1.value, exp2.value, condition);
    }
-
-   exp1 = normalize(program, exp1);
-   exp2 = normalize(program, exp2);
                      
    /* at first we have to ask for a free register
    * where to store the result of the comparison. */

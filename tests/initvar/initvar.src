@@ -1,0 +1,13 @@
+int a=10, b=20;
+
+if (a) {
+    write(1001);     /* should execute this statement */
+} else {
+    write(1002);     /* should NOT execute this statement */
+}
+
+write(a);
+write(b);
+a=9;
+write(a);
+write(b);

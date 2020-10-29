@@ -20,6 +20,8 @@
 #include "axe_struct.h"
 #include "axe_engine.h"
 #include "symbol_table.h"
+#include "axe_target_asm_print.h"
+#include "axe_target_transform.h"
 #include "axe_errors.h"
 #include "collections.h"
 #include "axe_expressions.h"
@@ -35,7 +37,6 @@
 #ifndef NDEBUG
 #  include "axe_debug.h"
 #endif
-
 
 
 /* global variables */
@@ -84,8 +85,8 @@ t_cflow_Graph *graph;      /* An instance of a control flow graph. This instance
                             * will be generated starting from `program' and will
                             * be used during the register allocation process */
 
-t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan"
-                            * algorythm */
+t_reg_allocator *RA;       /* Register allocator. It implements the "Linear
+                            * scan" algorithm */
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
@@ -114,13 +115,13 @@ extern int yyerror(const char* errmsg);
 =========================================================================*/
 %start program
 
+%token EOF_TOK /* end of file */
 %token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE
-%token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP
+%token SEMI PLUS MINUS MUL_OP DIV_OP
 %token AND_OP OR_OP NOT_OP
 %token ASSIGN LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ
 %token ANDAND OROR
 %token COMMA
-%token FOR
 %token RETURN
 %token READ
 %token WRITE
@@ -153,7 +154,7 @@ extern int yyerror(const char* errmsg);
 %left SHL_OP SHR_OP
 %left MINUS PLUS
 %left MUL_OP DIV_OP
-%right NOT
+%right NOT_OP
 
 /*=========================================================================
                          BISON GRAMMAR
@@ -165,8 +166,8 @@ extern int yyerror(const char* errmsg);
       1. declarations (zero or more);
       2. A list of instructions. (at least one instruction!).
  * When the rule associated with the non-terminal `program' is executed,
- * the parser notify it to the `program' singleton instance. */
-program  : var_declarations statements
+ * the parser notifies it to the `program' singleton instance. */
+program  : var_declarations statements EOF_TOK
          {
             /* Notify the end of the program. Once called
              * the function `set_end_Program' - if necessary -
@@ -316,8 +317,8 @@ if_statement   : if_stmt
                }
                | if_stmt ELSE
                {
-                  /* reserve a new label that points to the address where to jump if
-                   * `exp' is verified */
+                  /* reserve a new label that points to the address where to
+                   * jump if `exp' is verified */
                   $2 = newLabel(program);
    
                   /* exit from the if-else */
@@ -375,7 +376,8 @@ while_statement  : WHILE
                       * block */
                      $1.label_end = newLabel(program);
 
-                     /* if `exp' returns FALSE, jump to the label $1.label_end */
+                     /* if `exp' returns FALSE, jump to the label 
+                      * $1.label_end */
                      gen_beq_instruction (program, $1.label_end, 0);
                   }
                   code_block
@@ -440,13 +442,12 @@ read_statement : READ LPAR IDENTIFIER RPAR
             
 write_statement : WRITE LPAR exp RPAR 
             {
-   
                int location;
 
                if ($3.expression_type == IMMEDIATE)
                {
-                  /* load `immediate' into a new register. Returns the new register
-                   * identifier or REG_INVALID if an error occurs */
+                  /* load `immediate' into a new register. Returns the new
+                   * register identifier or REG_INVALID if an error occurs */
                   location = gen_load_immediate(program, $3.value);
                }
                else
@@ -484,92 +485,65 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
                      /* free the memory associated with the IDENTIFIER */
                      free($1);
    }
-   | NOT_OP NUMBER   {  if ($2 == 0)
-                           $$ = create_expression (1, IMMEDIATE);
-                        else
-                           $$ = create_expression (0, IMMEDIATE);
-   }
-   | NOT_OP IDENTIFIER  {
-                           int identifier_location;
-                           int output_register;
-   
-                           /* get the location of the symbol with the given ID */
-                           identifier_location =
-                                 get_symbol_location(program, $2, 0);
+   | NOT_OP exp {
+               if ($2.expression_type == IMMEDIATE)
+               {
+                  /* IMMEDIATE (constant) expression: compute the value at
+                   * compile-time and place the result in a new IMMEDIATE
+                   * expression */
+                  $$ = create_expression(!($2.value), IMMEDIATE);
+               }
+               else
+               {
+                  /* REGISTER expression: generate the code that will compute
+                   * the result at compile time */
 
-                           /* generate a NOT instruction. In order to do this,
-                            * at first we have to ask for a free register where
-                            * to store the result of the NOT instruction. */
-                           output_register = getNewRegister(program);
+                  /* Reserve a new register for the result */
+                  int output_register = getNewRegister(program);
 
-                           /* Now we are able to generate a NOT instruction */
-                           gen_notl_instruction (program, output_register
-                                 , identifier_location);
+                  /* Generate a NOTL instruction which will store the negated
+                   * logic value into the register we reserved */
+                  gen_notl_instruction(program, output_register, $2.value);
+                  
+                  /* Return a REGISTER expression with the result register */
+                  $$ = create_expression(output_register, REGISTER);
+               }
+   }
+   | exp AND_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, ANDB); }
+   | exp OR_OP exp  { $$ = handle_bin_numeric_op(program, $1, $3, ORB); }
+   | exp PLUS exp   { $$ = handle_bin_numeric_op(program, $1, $3, ADD); }
+   | exp MINUS exp  { $$ = handle_bin_numeric_op(program, $1, $3, SUB); }
+   | exp MUL_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, MUL); }
+   | exp DIV_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, DIV); }
+   | exp LT exp     { $$ = handle_binary_comparison(program, $1, $3, _LT_); }
+   | exp GT exp     { $$ = handle_binary_comparison(program, $1, $3, _GT_); }
+   | exp EQ exp     { $$ = handle_binary_comparison(program, $1, $3, _EQ_); }
+   | exp NOTEQ exp  { $$ = handle_binary_comparison(program, $1, $3, _NOTEQ_); }
+   | exp LTEQ exp   { $$ = handle_binary_comparison(program, $1, $3, _LTEQ_); }
+   | exp GTEQ exp   { $$ = handle_binary_comparison(program, $1, $3, _GTEQ_); }
+   | exp SHL_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, SHL); }
+   | exp SHR_OP exp { $$ = handle_bin_numeric_op(program, $1, $3, SHR); }
+   | exp ANDAND exp { $$ = handle_bin_numeric_op(program, $1, $3, ANDL); }
+   | exp OROR exp   { $$ = handle_bin_numeric_op(program, $1, $3, ORL); }
+   | LPAR exp RPAR  { $$ = $2; }
+   | MINUS exp {
+                  if ($2.expression_type == IMMEDIATE)
+                  {
+                     $$ = $2;
+                     $$.value = - ($$.value);
+                  }
+                  else
+                  {
+                     t_axe_expression exp_r0;
 
-                           $$ = create_expression (output_register, REGISTER);
-
-                           /* free the memory associated with the IDENTIFIER */
-                           free($2);
-   }
-   | exp AND_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ANDB);
-   }
-   | exp OR_OP exp      {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ORB);
-   }
-   | exp PLUS exp       {
-                           $$ = handle_bin_numeric_op(program, $1, $3, ADD);
-   }
-   | exp MINUS exp      {
-                           $$ = handle_bin_numeric_op(program, $1, $3, SUB);
-   }
-   | exp MUL_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, MUL);
-   }
-   | exp DIV_OP exp     {
-                           $$ = handle_bin_numeric_op(program, $1, $3, DIV);
-   }
-   | exp LT exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _LT_);
-   }
-   | exp GT exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _GT_);
-   }
-   | exp EQ exp      {
-                        $$ = handle_binary_comparison (program, $1, $3, _EQ_);
-   }
-   | exp NOTEQ exp   {
-                        $$ = handle_binary_comparison (program, $1, $3, _NOTEQ_);
-   }
-   | exp LTEQ exp    {
-                        $$ = handle_binary_comparison (program, $1, $3, _LTEQ_);
-   }
-   | exp GTEQ exp    {
-                        $$ = handle_binary_comparison (program, $1, $3, _GTEQ_);
-   }
-   | exp SHL_OP exp  {  $$ = handle_bin_numeric_op(program, $1, $3, SHL); }
-   | exp SHR_OP exp  {  $$ = handle_bin_numeric_op(program, $1, $3, SHR); }
-   | exp ANDAND exp  {  $$ = handle_bin_numeric_op(program, $1, $3, ANDL); }
-   | exp OROR exp    {  $$ = handle_bin_numeric_op(program, $1, $3, ORL); }
-   | LPAR exp RPAR   { $$ = $2; }
-   | MINUS exp       {
-                        if ($2.expression_type == IMMEDIATE)
-                        {
-                           $$ = $2;
-                           $$.value = - ($$.value);
-                        }
-                        else
-                        {
-                           t_axe_expression exp_r0;
-
-                           /* create an expression for regisrer REG_0 */
-                           exp_r0.value = REG_0;
-                           exp_r0.expression_type = REGISTER;
-                           
-                           $$ = handle_bin_numeric_op
-                                 (program, exp_r0, $2, SUB);
-                        }
-                     }
+                     /* create an expression for register REG_0 */
+                     exp_r0.value = REG_0;
+                     exp_r0.expression_type = REGISTER;
+                     
+                     $$ = handle_bin_numeric_op
+                           (program, exp_r0, $2, SUB);
+                  }
+               }
 ;
 
 %%
@@ -586,10 +560,17 @@ int main (int argc, char **argv)
    
 #ifndef NDEBUG
    fprintf(stdout, "Parsing process completed. \n");
+   printProgramInfos(program, file_infos->frontend_output);
 #endif
 
    /* test if the parsing process completed succesfully */
    checkConsistency();
+
+   /* do not attach a line number to the instructions generated by the
+    * transformations that follow. */
+   line_num = -1;
+
+   doTargetSpecificTransformations(program);
    
 #ifndef NDEBUG
    fprintf(stdout, "Creating a control flow graph. \n");
@@ -631,7 +612,7 @@ int main (int argc, char **argv)
     * informations stored into the control flow graph */
    RA = initializeRegAlloc(graph);
       
-   /* execute the linear scan algorythm */
+   /* execute the linear scan algorithm */
    execute_linear_scan(RA);
       
 #ifndef NDEBUG
@@ -643,7 +624,8 @@ int main (int argc, char **argv)
 #endif
    /* apply changes to the program informations by using the informations
    * of the register allocation process */
-   updateProgramInfos(program, graph, RA);
+   materializeRegisterAllocation(program, graph, RA);
+   updateProgramInfos(program, graph);
 
 #ifndef NDEBUG
    fprintf(stdout, "Writing the assembly file... \n");

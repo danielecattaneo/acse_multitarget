@@ -43,7 +43,7 @@ extern int setLocation(t_symbol_table *table, char *ID, int reg);
 extern int getLocation(t_symbol_table *table, char *ID, int *errorcode);
 
 /* get the type associated with the symbol with ID as identifier */
-extern int getTypeFromID(t_symbol_table *table, char *ID, int type);
+extern int getTypeFromID(t_symbol_table *table, char *ID);
 
 /* initialize the symbol table */
 extern t_symbol_table * initialize_sy_table();
@@ -54,11 +54,11 @@ extern int finalize_sy_table(t_symbol_table *table);
 /* given a register identifier (location), it returns the ID of the variable
  * stored inside the register `location'. This function returns NULL
  * if the location is an invalid location. */
-extern char * getIDfromLocation(t_symbol_table *table
-            , int location, int *errorcode);
+extern char *getIDfromLocation(
+      t_symbol_table *table, int location, int *errorcode);
 
 #ifndef NDEBUG
-/* This function print out to the file `fout' the content of the
+/* This function prints out to the file `fout' the content of the
  * symbol table given as input. The resulting text is formatted in
  * the following way: <ID> -- <TYPE> -- <REGISTER> */
 extern void printSymbolTable(t_symbol_table *table, FILE *fout);

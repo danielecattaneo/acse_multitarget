@@ -12,6 +12,7 @@
 bin
 tests/*/*.asm
 tests/*/*.bin
+tests/*/frontend.out
 tests/*/dataflow.cfg
 tests/*/output.cfg
 tests/*/regalloc.out

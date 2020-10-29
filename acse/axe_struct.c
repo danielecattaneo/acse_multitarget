@@ -110,9 +110,17 @@ t_axe_label * alloc_label(int value)
 
    /* initialize the internal value of `result' */
    result->labelID = value;
+   result->name = NULL;
 
    /* return the just initialized new instance of `t_axe_label' */
    return result;
+}
+
+void free_label(t_axe_label *lab)
+{
+   if (lab->name)
+      _AXE_FREE_FUNCTION(lab->name);
+   _AXE_FREE_FUNCTION(lab);
 }
 
 t_axe_declaration * alloc_declaration
@@ -186,6 +194,9 @@ void free_Instruction(t_axe_instruction *inst)
       _AXE_FREE_FUNCTION(inst->reg_3);
    if (inst->address != NULL)
       _AXE_FREE_FUNCTION(inst->address);
+   if (inst->user_comment != NULL) {
+      _AXE_FREE_FUNCTION(inst->user_comment);
+   }
 
    _AXE_FREE_FUNCTION(inst);
 }

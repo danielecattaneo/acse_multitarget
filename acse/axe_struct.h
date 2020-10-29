@@ -25,6 +25,8 @@
 typedef struct t_axe_label
 {
    int labelID;      /* label identifier */
+   char *name;       /* Name of the label. If NULL, the name will be 
+                      * automatically generated in the form L<ID>. */
 } t_axe_label;
 
 typedef struct t_axe_register
@@ -59,10 +61,10 @@ typedef struct t_axe_variable
                             * of the variable inside the data segment */
 } t_axe_variable;
 
-/* a simbolic assembly instruction */
+/* a symbolic assembly instruction */
 typedef struct t_axe_instruction
 {
-   int opcode;                   /* instruction opcode (for example: AXE_ADD ) */
+   int opcode;                   /* instruction opcode (for example: ADD) */
    t_axe_register *reg_1;        /* destination register */
    t_axe_register *reg_2;        /* first source register */
    t_axe_register *reg_3;        /* second source register */
@@ -99,8 +101,8 @@ typedef struct t_axe_expression
 typedef struct t_axe_declaration
 {
    int isArray;           /* must be TRUE if the current variable is an array */
-   int arraySize;         /* the size of the array. This information is useful only
-                           * if the field `isArray' is TRUE */
+   int arraySize;         /* the size of the array. This information is useful
+                           * only if the field `isArray' is TRUE */
    int init_val;          /* initial value of the current variable. */
    char *ID;              /* variable identifier (should never be a NULL pointer
                            * or an empty string "") */
@@ -115,36 +117,39 @@ typedef struct t_while_statement
 } t_while_statement;
 
 /* create a label */
-extern t_axe_label * alloc_label(int value);
+extern t_axe_label *alloc_label(int value);
+
+/* free a label */
+extern void free_label(t_axe_label *lab);
 
 /* create an expression */
-extern t_axe_expression create_expression (int value, int type);
+extern t_axe_expression create_expression(int value, int type);
 
 /* create an instance that will mantain infos about a while statement */
 extern t_while_statement create_while_statement();
 
 /* create an instance of `t_axe_register' */
-extern t_axe_register * alloc_register(int ID, int indirect);
+extern t_axe_register *alloc_register(int ID, int indirect);
 
 /* create an instance of `t_axe_instruction' */
-extern t_axe_instruction * alloc_instruction(int opcode);
+extern t_axe_instruction *alloc_instruction(int opcode);
 
 /* create an instance of `t_axe_address' */
-extern t_axe_address * alloc_address(int type, int address, t_axe_label *label);
+extern t_axe_address *alloc_address(int type, int address, t_axe_label *label);
 
 /* create an instance of `t_axe_data' */
-extern t_axe_data * alloc_data(int directiveType, int value, t_axe_label *label);
+extern t_axe_data *alloc_data(int directiveType, int value, t_axe_label *label);
 
 /* create an instance of `t_axe_variable' */
-extern t_axe_variable * alloc_variable
-      (char *ID, int type, int isArray, int arraySize, int init_val);
+extern t_axe_variable *alloc_variable(
+      char *ID, int type, int isArray, int arraySize, int init_val);
 
 /* finalize an instance of `t_axe_variable' */
-extern void free_variable (t_axe_variable *variable);
+extern void free_variable(t_axe_variable *variable);
 
 /* create an instance of `t_axe_variable' */
-extern t_axe_declaration * alloc_declaration
-      (char *ID, int isArray, int arraySize, int init_val);
+extern t_axe_declaration *alloc_declaration(
+      char *ID, int isArray, int arraySize, int init_val);
 
 /* finalize an instruction info. */
 extern void free_Instruction(t_axe_instruction *inst);

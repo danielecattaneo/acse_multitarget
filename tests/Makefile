@@ -1,13 +1,12 @@
-asm="$(CURDIR)"/../bin/asm
-acse="$(CURDIR)"/../bin/acse
-export asm acse
-dirs:=arrays sum dowhile fact mult_table power \
-	  semi assign arrays arrays2 misc shift
+dirs:=arrays sum dowhile fact mult_table power binop not initvar largeimm \
+      semi assign arrays2 misc shift spilltest
 
-test :
-	for i in $(dirs); do $(MAKE) -C "$$i" -f "../Makefile.test" ; done
+test: $(dirs)
 
-.PHONY : test clean
+$(dirs):
+	$(MAKE) -C $@ -f ../Makefile.test
 
-clean :
-	for i in $(dirs); do $(MAKE) -C "$$i" -f "../Makefile.test" clean ; done
+.PHONY: test clean $(dirs)
+
+clean:
+	for i in $(dirs); do $(MAKE) -C $$i -f ../Makefile.test clean ; done

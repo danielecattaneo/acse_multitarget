@@ -43,7 +43,7 @@ extern t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph);
 /* finalize all the data structure associated with the given register allocator */
 extern void finalizeRegAlloc(t_reg_allocator *RA);
 
-/* execute the register allocation algorythm (Linear Scan) */
+/* execute the register allocation algorithm (Linear Scan) */
 extern int execute_linear_scan(t_reg_allocator *RA);
 
 #endif

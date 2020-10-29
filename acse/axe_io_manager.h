@@ -20,6 +20,7 @@ typedef struct t_io_infos
    char *output_file_name;
    FILE *input_file;
 #ifndef NDEBUG
+   FILE *frontend_output;
    FILE *cfg_1;
    FILE *cfg_2;
    FILE *reg_alloc_output;

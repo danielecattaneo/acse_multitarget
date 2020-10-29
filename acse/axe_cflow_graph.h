@@ -11,6 +11,7 @@
 #define _AXE_CFLOW_GRAPH_H
 
 #include <stdio.h>
+#include "cflow_constants.h"
 #include "axe_struct.h"
 #include "collections.h"
 
@@ -20,7 +21,8 @@ extern int cflow_errorcode;
 /* a variable of the intermediate code */
 typedef struct t_cflow_var
 {
-   int ID;   /* variable identifier */
+   int ID;   /* Variable identifier. Negative IDs are reserved for artificial 
+              * variables which are not part of the code */
 } t_cflow_var;
 
 /* A Node exists only in a basic block. It defines a list of
@@ -28,8 +30,8 @@ typedef struct t_cflow_var
  * inside the code */
 typedef struct t_cflow_Node
 {
-   t_cflow_var *def;        /* A variable that is defined by this node */
-   t_cflow_var *uses[3];    /* set of variables that will be used by this node */
+   t_cflow_var *defs[CFLOW_MAX_DEFS];  /* set of variables defined by this node */
+   t_cflow_var *uses[CFLOW_MAX_USES];  /* set of variables that will be used by this node */
    t_axe_instruction *instr;  /* a pointer to the instruction associated
                                * with this node */
    t_list *in;             /* variables that are live-in the current node */
@@ -56,28 +58,27 @@ typedef struct t_cflow_Graph
 
 /* functions that are used in order to allocate/deallocate instances
  * of basic blocks, instruction nodes and flow graphs */
-extern t_cflow_Node * allocNode
-      (t_cflow_Graph *graph, t_axe_instruction *instr);
+extern t_cflow_Node *allocNode(t_cflow_Graph *graph, t_axe_instruction *instr);
 extern void finalizeNode(t_cflow_Node *node);
-extern t_basic_block * allocBasicBlock();
+extern t_basic_block *allocBasicBlock();
 extern void finalizeBasicBlock(t_basic_block *block);
-extern t_cflow_Graph * allocGraph();
+extern t_cflow_Graph *allocGraph();
 extern void finalizeGraph(t_cflow_Graph *graph);
 
 /* working with basic blocks */
 extern void setPred(t_basic_block *block, t_basic_block *pred);
 extern void setSucc(t_basic_block *block, t_basic_block *succ);
 extern void insertNode(t_basic_block *block, t_cflow_Node *node);
-extern void insertNodeBefore(t_basic_block *block
-      , t_cflow_Node *before_node, t_cflow_Node *new_node);
-extern void insertNodeAfter(t_basic_block *block
-      , t_cflow_Node *after_node, t_cflow_Node *new_node);
-extern t_list * getLiveINVars(t_basic_block *bblock);
-extern t_list * getLiveOUTVars(t_basic_block *bblock);
+extern void insertNodeBefore(
+      t_basic_block *block, t_cflow_Node *before_node, t_cflow_Node *new_node);
+extern void insertNodeAfter(
+      t_basic_block *block, t_cflow_Node *after_node, t_cflow_Node *new_node);
+extern t_list *getLiveINVars(t_basic_block *bblock);
+extern t_list *getLiveOUTVars(t_basic_block *bblock);
 
 /* working with the control flow graph */
 extern void insertBlock(t_cflow_Graph *graph, t_basic_block *block);
-extern t_cflow_Graph * createFlowGraph(t_list *instructions);
+extern t_cflow_Graph *createFlowGraph(t_list *instructions);
 
 /* dataflow analysis */
 extern void performLivenessAnalysis(t_cflow_Graph *graph);

@@ -23,16 +23,17 @@ t_translation_infos *infos;
 /* functions declared into assembler.y */
 char * AsmErrorToString(int errorcode);
 
-%}
+int yylex(void);
+int yyerror(const char* errmsg);
 
-%expect 3
+%}
       
 %union{
-	char *svalue;
-	int immediate;
-	int opcode;
-	t_asm_address *address;
-	t_asm_data *dataVal;
+   char *svalue;
+   int immediate;
+   int opcode;
+   t_asm_address *address;
+   t_asm_data *dataVal;
    t_asm_instruction *instr;
    t_asm_label *label;
    t_asm_register *reg;
@@ -47,6 +48,8 @@ char * AsmErrorToString(int errorcode);
 %token <opcode> CCODE
 %token <opcode> HALT
 %token <opcode> NOP
+%token _DATA
+%token _TEXT
 %token _WORD
 %token _SPACE
 %token <immediate>REG
@@ -55,39 +58,30 @@ char * AsmErrorToString(int errorcode);
 %token LSQUARE
 %token RSQUARE
 %token COLON
-%token MINUS
 %token BEGIN_IMMEDIATE
-%token BEGIN_COMMENT
-%token END_COMMENT
-%token <svalue> COMMENT
 %token <svalue> ETI
 %token <immediate> IMM
 
 %type <dataVal> data_value
+%type <dataVal> data_value_words
 %type <reg> register
 %type <immediate> immediate
 %type <address> address
-%type <svalue> comment
 %type <label> label_decl
 %type <instr> instr
 
 %%
 
-asm :       asm data_segm instruction_segm { /* DOES NOTHING */}
-            | data_segm instruction_segm     { /* DOES NOTHING */}
-            | instruction_segm               { /* DOES NOTHING */}
+asm :       asm _DATA data_segm _TEXT instruction_segm { /* DOES NOTHING */}
+            | _DATA data_segm _TEXT instruction_segm   { /* DOES NOTHING */}
+            | _TEXT instruction_segm                   { /* DOES NOTHING */}
 ;
 
-instruction_segm :   instruction_segm instruction   { line_num++; }
-                     | instruction                  { line_num++; }
+instruction_segm :   instruction_segm instruction   { }
+                     | instruction                  { }
 ;
 
-instruction :  instr comment           { /* DOES NOTHING */}
-            | label_decl instr comment {
-               /* assign the label to the current instruction */
-               $1->data = (void *) $2;
-            }
-            | instr            { /* DOES NOTHING */}
+instruction : instr            { /* DOES NOTHING */}
             | label_decl instr {
                /* assign the label to the current instruction */
                $1->data = (void *) $2;
@@ -284,36 +278,15 @@ instr : OPCODE3 register REG register  {
       }
 ;
 
-data_segm : data_segm data_def   { line_num++; }
-            | data_def comment   { line_num++; }
-            | data_def           { line_num++; }
+data_segm : data_segm data_def   { }
+            | data_def           { }
 ;
 
 data_def : label_decl data_value {
-                  int asm_errorcode;
-
-                  /* insert data into the data segment */
-                  asm_errorcode = addData(infos, $2);
-                  if (asm_errorcode != ASM_OK)
-                  {
-                     /* an error occurred */
-                     yyerror(AsmErrorToString(asm_errorcode));
-                  }
-
                   /* assign the label to the current block of data */
                   $1->data = (void *) $2;
          }
-         | data_value {
-                  int asm_errorcode;
-
-                  /* insert data into the data segment */
-                  asm_errorcode = addData(infos, $1);
-                  if (asm_errorcode != ASM_OK)
-                  {
-                     /* an error occurred */
-                     yyerror(AsmErrorToString(asm_errorcode));
-                  }
-         }
+         | data_value { }
 ;
 
 label_decl : ETI COLON {
@@ -359,21 +332,13 @@ label_decl : ETI COLON {
          }
 ;
 
-data_value : _WORD IMM {
-               /* create an instance of `t_asm_data' */
-               $$ = allocData(ASM_WORD, $2);
+data_value: _WORD data_value_words {
+               /* propagate the location of the first word */
+               $$ = $2;
+            }
+            | _SPACE IMM {
+               int asm_errorcode;
 
-               /* $$ shouldn't be a NULL pointer */
-               if ($$ == NULL)
-               {
-                  /* an out of memory occurred */
-                  yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
-               
-                  /* stop the parser */
-                  YYABORT;
-               }
-           }
-           | _SPACE IMM {
                /* create an instance of `t_asm_data' */
                $$ = allocData(ASM_SPACE, $2);
 
@@ -386,9 +351,66 @@ data_value : _WORD IMM {
                   /* stop the parser */
                   YYABORT;
                }
-           }
+
+               /* insert data into the data segment */
+               asm_errorcode = addData(infos, $$);
+               if (asm_errorcode != ASM_OK)
+               {
+                  /* an error occurred */
+                  yyerror(AsmErrorToString(asm_errorcode));
+               }
+            }
 ;
-		
+
+data_value_words:
+   data_value_words IMM
+   {
+      int asm_errorcode;
+      /* create an instance of `t_asm_data' */
+      t_asm_data *data = allocData(ASM_WORD, $2);
+      if (!data)
+      {
+         /* an out of memory occurred */
+         yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
+      
+         /* stop the parser */
+         YYABORT;
+      }
+      /* insert data into the data segment */
+      asm_errorcode = addData(infos, data);
+      if (asm_errorcode != ASM_OK)
+      {
+         /* an error occurred */
+         yyerror(AsmErrorToString(asm_errorcode));
+      }
+      /* propagate the location of the first word */
+      $$ = $1;
+   }
+   | IMM
+   {
+      int asm_errorcode;
+      /* create an instance of `t_asm_data' */
+      t_asm_data *data = allocData(ASM_WORD, $1);
+      if (!data)
+      {
+         /* an out of memory occurred */
+         yyerror(AsmErrorToString(ASM_OUT_OF_MEMORY));
+      
+         /* stop the parser */
+         YYABORT;
+      }
+      /* insert data into the data segment */
+      asm_errorcode = addData(infos, data);
+      if (asm_errorcode != ASM_OK)
+      {
+         /* an error occurred */
+         yyerror(AsmErrorToString(asm_errorcode));
+      }
+      /* propagate the location of the first word */
+      $$ = data;
+   }
+;
+      
 register : REG {
                /* alloc memory for a register info. */
                $$ = allocRegister($1, 0);
@@ -420,7 +442,6 @@ register : REG {
 ;
 
 immediate : BEGIN_IMMEDIATE IMM { $$ = $2; }
-          | BEGIN_IMMEDIATE MINUS IMM {$$ = - $3; }
 ;
 
 address  : ETI {
@@ -484,17 +505,13 @@ address  : ETI {
          }
 ;
 
-comment  : BEGIN_COMMENT COMMENT END_COMMENT { }
-;
-
-
 %%
-		 
+       
 int yyerror(const char* errmsg)
 {
-	fprintf(stdout, "line %d , error: %s \n", line_num, errmsg);
-	num_error++;
-	return 0;
+   fprintf(stdout, "line %d , error: %s \n", line_num, errmsg);
+   num_error++;
+   return 0;
 }
 
 int main (int argc, char **argv)
@@ -502,11 +519,11 @@ int main (int argc, char **argv)
    int errorcode;
    char *filename;
    FILE *input_file;
-	extern FILE *yyin;
+   extern FILE *yyin;
 
    argc--;
    argv++;
-	
+   
    if (argc > 0)
    {
       input_file = fopen(argv[0], "r");
@@ -519,12 +536,12 @@ int main (int argc, char **argv)
    }
    else
       yyin = stdin;
-	
+   
    if (argc <= 1)
       filename = "output.o";
    else
       filename = argv[1];
-	
+   
 #ifndef NDEBUG
    fprintf(stdout, "Initializing the assembler data structures.\n");
 #endif
@@ -559,7 +576,7 @@ int main (int argc, char **argv)
 #ifndef NDEBUG
    fprintf(stdout, "Parsing complete. \n");
 #endif
-	
+   
    /* test if the parsing job found some errors */
    if (num_error == 0)
    {
