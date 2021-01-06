@@ -12,6 +12,9 @@
 #include "reg_alloc_constants.h"
 #include "cflow_constants.h"
 
+#define LABEL_WIDTH (3*2)
+#define INSTR_WIDTH (3*7)
+
 static void printArrayOfVariables(t_cflow_var **array, int size, FILE *fout);
 static void printListOfVariables(t_list *variables, FILE *fout);
 static void printCFlowGraphVariable(t_cflow_var *var, FILE *fout);
@@ -19,6 +22,7 @@ static void printBBlockInfos(t_basic_block *block, FILE *fout, int verbose);
 static void printLiveIntervals(t_list *intervals, FILE *fout);
 static void printBindings(int *bindings, int numVars, FILE *fout);
 static void printLabel(t_axe_label *label, int printInline, FILE *fout);
+static off_t printFormPadding(off_t formBegin, int formSize, FILE *fout);
 
 void printBindings(int *bindings, int numVars, FILE *fout)
 {
@@ -309,19 +313,21 @@ void printProgramInfos(t_program_infos *program, FILE *fout)
 
 void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
 {
+   off_t formBegin = ftello(fout);
+
    /* preconditions */
    if (fout == NULL)
       return;
    
    if (instr == NULL)
    {
-      fprintf(fout, "[NULL] \n");
+      fprintf(fout, "[NULL]\n");
       return;
    }
 
    if (instr->labelID != NULL)
       printLabel(instr->labelID, 1, fout);
-   fprintf(fout, "\t");
+   formBegin = printFormPadding(formBegin, LABEL_WIDTH, fout);
    
    switch(instr->opcode)
    {
@@ -424,7 +430,8 @@ void debug_printInstruction(t_axe_instruction *instr, FILE *fout)
    }
 
    if (instr->user_comment) {
-      fprintf(fout, "\t/* %s */", instr->user_comment);
+      printFormPadding(formBegin, INSTR_WIDTH, fout);
+      fprintf(fout, "/* %s */", instr->user_comment);
    }
 }
 
@@ -450,4 +457,18 @@ void printLabel(t_axe_label *label, int printInline, FILE *fout)
       else
          fprintf(fout, "%s (ID=%d)", label->name, label->labelID);
    }
+}
+
+off_t printFormPadding(off_t formBegin, int formSize, FILE *fout)
+{
+   off_t currentLoc = ftello(fout);
+   off_t padding = formSize - (currentLoc - formBegin);
+   if (padding > 1) {
+      off_t i;
+      for (i = 0; i < padding - 1; i++) {
+         putc(' ', fout);
+      }
+   }
+   putc(' ', fout);
+   return ftello(fout);
 }
