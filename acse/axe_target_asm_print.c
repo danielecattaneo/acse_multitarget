@@ -10,6 +10,9 @@
 
 #include "axe_target_asm_print.h"
 
+#define LABEL_WIDTH (3*2)
+#define INSTR_WIDTH (3*7)
+
 extern int errorcode;
 
 /* print out a label to the file `fp' */
@@ -26,6 +29,8 @@ static void translateDataSegment(t_program_infos *program, FILE *fp);
 
 /* Translate all the instructions within the code segment */
 static void translateCodeSegment(t_program_infos *program, FILE *fp);
+
+static off_t printFormPadding(off_t formBegin, int formSize, FILE *fout);
 
 
 void writeAssembly(t_program_infos *program, char *output_file)
@@ -76,18 +81,17 @@ void writeAssembly(t_program_infos *program, char *output_file)
 /* translate each instruction in his assembler symbolic representation */
 int translateInstruction(t_program_infos *program, t_axe_instruction *current_instruction, FILE *fp)
 {
+   off_t lastFormBegin = ftello(fp);
    if (current_instruction->labelID != NULL)
    {
       printLabel(current_instruction->labelID, fp);
-      fprintf(fp, ":\t");
+      fprintf(fp, ":");
+      lastFormBegin = printFormPadding(lastFormBegin, LABEL_WIDTH, fp);
    }
    else
    {
       /* create a string identifier for the label */
-      if (fprintf(fp, "\t") < 0)
-      {
-         return 1;
-      }
+      lastFormBegin = printFormPadding(lastFormBegin, LABEL_WIDTH, fp);
    }
 
    /* print the opcode */
@@ -152,7 +156,8 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *current_in
 
    if (current_instruction->user_comment)
    {
-      fprintf(fp, "\t\t/* %s */", current_instruction->user_comment);
+      printFormPadding(lastFormBegin, INSTR_WIDTH, fp);
+      fprintf(fp, "/* %s */", current_instruction->user_comment);
    }
 
    if (fprintf(fp, "\n") < 0) {
@@ -186,7 +191,8 @@ void translateCodeSegment(t_program_infos *program, FILE *fp)
    /* write the .text directive */
    if (current_element != NULL)
    {
-      if (fprintf(fp, "\t.text\n") < 0)
+      printFormPadding(ftello(fp), LABEL_WIDTH, fp);
+      if (fprintf(fp, ".text\n") < 0)
       {
          _error = fclose(fp);
          if (_error == EOF)
@@ -243,7 +249,8 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    /* write the .data directive */
    if (current_element != NULL)
    {
-      if (fprintf(fp, "\t.data\n") < 0)
+      printFormPadding(ftello(fp), LABEL_WIDTH, fp);
+      if (fprintf(fp, ".data\n") < 0)
       {
          _error = fclose(fp);
          if (_error == EOF)
@@ -255,6 +262,8 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
    /* iterate all the elements inside the data segment */
    while (current_element != NULL)
    {
+      off_t lastFormBegin = ftello(fp);
+
       /* retrieve the current data element */
       current_data = (t_axe_data *) LDATA(current_element);
 
@@ -266,12 +275,9 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
             && ((current_data->labelID)->labelID != LABEL_UNSPECIFIED) )
       {
          printLabel(current_data->labelID, fp);
-         fprintf_error = fprintf(fp, ":\t");
+         fprintf_error = fprintf(fp, ":");
       }
-      else
-      {
-         fprintf_error = fprintf(fp, "\t");
-      }
+      printFormPadding(lastFormBegin, LABEL_WIDTH, fp);
 
       /* test if an error occurred while executing the `fprintf' function */
       if (fprintf_error < 0)
@@ -468,4 +474,17 @@ void printRegister(t_axe_register *reg, FILE *fp)
    }
 }
 
+off_t printFormPadding(off_t formBegin, int formSize, FILE *fout)
+{
+   off_t currentLoc = ftello(fout);
+   off_t padding = formSize - (currentLoc - formBegin);
+   if (padding > 1) {
+      off_t i;
+      for (i = 0; i < padding - 1; i++) {
+         putc(' ', fout);
+      }
+   }
+   putc(' ', fout);
+   return ftello(fout);
+}
 
