@@ -5,6 +5,7 @@
  * axe_debug.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Debug print utility functions
  */
 
 #ifndef _AXE_DEBUG_H

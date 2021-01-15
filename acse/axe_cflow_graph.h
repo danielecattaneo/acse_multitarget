@@ -5,6 +5,7 @@
  * axe_cflow_graph.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Control-Flow-Graph generation and related analyses
  */
 
 #ifndef _AXE_CFLOW_GRAPH_H

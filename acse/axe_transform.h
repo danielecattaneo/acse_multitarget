@@ -5,6 +5,8 @@
  * axe_transform.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Transformation passes used to generate LOAD and STOREs to memory for
+ * scalar variables and to perform register allocation.
  */
 
 #ifndef _AXE_TRANSFORM_H

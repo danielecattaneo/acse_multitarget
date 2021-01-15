@@ -5,6 +5,7 @@
  * symbol_table.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Internal functions for managing t_symbol_table.
  */
 
 #ifndef _SYMBOL_TABLE_H

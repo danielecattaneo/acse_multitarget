@@ -5,6 +5,7 @@
  * axe_errors.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Error handling
  */
 
 #ifndef _AXE_ERRORS_H

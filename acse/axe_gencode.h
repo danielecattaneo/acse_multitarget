@@ -5,6 +5,8 @@
  * axe_gencode.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Code generation functions. See also axe_utils.h for gen_load_immediate()
+ * and gen_move_immediate().
  */
 
 #ifndef _AXE_GENCODE_H
@@ -65,6 +67,10 @@ extern t_axe_instruction *gen_store_instruction(
  * or a number (numeric address) */
 extern t_axe_instruction *gen_mova_instruction(
       t_program_infos *program, int r_dest, t_axe_label *label, int address);
+
+/* 
+ * STATUS REGISTER TEST INSTRUCTIONS
+ */
 
 /* A SGE instruction tests the content of the STATUS REGISTER. To be more
  * specific, a SGE instruction sets to #1 the content of the register
@@ -253,6 +259,7 @@ extern t_axe_instruction *gen_notl_instruction(
  * R1 <-- ~R2. */
 extern t_axe_instruction *gen_notb_instruction(
       t_program_infos *program, int r_dest, int r_source1);
+
 /*----------------------------------------------------
  *                   TERNARY OPERATIONS
  *---------------------------------------------------*/
@@ -377,6 +384,7 @@ extern t_axe_instruction *gen_neg_instruction(
 /* This instruction is reserved for future implementation. */
 extern t_axe_instruction *gen_spcl_instruction(t_program_infos *program,
       int r_dest, int r_source1, int r_source2, int flags);
+
 /*----------------------------------------------------
  *                   JUMP INSTRUCTIONS
  *---------------------------------------------------*/

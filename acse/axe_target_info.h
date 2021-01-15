@@ -4,6 +4,8 @@
  * 
  * axe_target_info.h
  * Formal Languages & Compilers Machine, 2007-2020
+ * 
+ * Properties of the target machine
  */
 
 #ifndef _AXE_TARGET_INFO_H

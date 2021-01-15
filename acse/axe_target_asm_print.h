@@ -4,6 +4,8 @@
  * 
  * axe_target_asm_print.h
  * Formal Languages & Compilers Machine, 2007-2020
+ * 
+ * Generation of the output assembly program.
  */
 
 #ifndef _AXE_TARGET_ASM_PRINT_H

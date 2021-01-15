@@ -4,7 +4,9 @@
  * 
  * axe_engine.h
  * Formal Languages & Compilers Machine, 2007/2008
- * 
+ *
+ * Contains t_program_infos and some functions for label management
+ * (reserve, fix, assign) 
  */
 
 #ifndef _AXE_ENGINE_H

@@ -5,6 +5,7 @@
  * axe_io_manager.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * File stream management
  */
 
 #ifndef _AXE_IO_MANAGER_H

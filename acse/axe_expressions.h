@@ -5,6 +5,7 @@
  * axe_expressions.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Support functions for t_axe_expressions.
  */
 
 #ifndef _AXE_EXPRESSIONS_H

@@ -5,6 +5,7 @@
  * axe_reg_alloc.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Register allocation pass
  */
 
 #ifndef _AXE_REG_ALLOC_H

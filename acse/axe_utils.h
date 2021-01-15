@@ -5,6 +5,8 @@
  * axe_utils.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Contains important functions to access the list of symbols and other
+ * utility functions and macros.
  */
 
 #ifndef _AXE_UTILS_H

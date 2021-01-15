@@ -5,6 +5,7 @@
  * axe_labels.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Internal functions for label management.
  */
 
 #ifndef _AXE_LABELS_H

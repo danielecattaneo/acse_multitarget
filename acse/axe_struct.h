@@ -5,6 +5,7 @@
  * axe_struct.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * Fundamental data structures
  */
 
 #ifndef _AXE_STRUCT_H

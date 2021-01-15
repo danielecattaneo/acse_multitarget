@@ -4,6 +4,9 @@
  * 
  * axe_target_transform.h
  * Formal Languages & Compilers Machine, 2007-2020
+ * 
+ * Transformation passes used to abstract machine-dependent details from the
+ * intermediate representation
  */
 
 #ifndef _AXE_TARGET_TRANSFORM_H

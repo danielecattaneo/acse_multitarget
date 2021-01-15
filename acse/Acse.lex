@@ -11,7 +11,6 @@
  * 
  * Acse.lex
  * Formal Languages & Compilers Machine, 2007/2008
- * 
  */
 
 #include <string.h>

@@ -4,7 +4,8 @@
  * 
  * axe_array.h
  * Formal Languages & Compilers Machine, 2007/2008
- * 
+ *
+ * Code generation for array management (load/store)
  */
 
 #ifndef _AXE_ARRAY_H

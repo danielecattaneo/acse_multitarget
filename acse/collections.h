@@ -5,6 +5,8 @@
  * collections.h
  * Formal Languages & Compilers Machine, 2007/2008
  * 
+ * A double-linked list. `prev' pointer of first element and `next' pointer of
+ * last element are NULL.
  */
 
 #ifndef _COLLECTIONS_H
