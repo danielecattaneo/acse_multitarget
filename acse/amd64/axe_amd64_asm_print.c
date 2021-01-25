@@ -186,6 +186,30 @@ int translateAMD64_cmp(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
    return 1;
 }
 
+int translateAMD64_test(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
+{
+   if (!instr->reg_1 || instr->reg_1->indirect)
+      return 0;
+   if (instr->opcode != ANDB && instr->opcode != ANDBI)
+      return 0;
+   if (!((instr->reg_1->ID == REG_0) ||
+       (instr->opcode == ANDB && instr->reg_1->ID == instr->reg_2->ID && instr->reg_1->ID == instr->reg_3->ID && !instr->reg_3->indirect)))
+      return 0;
+   
+   char rsrc1[20];
+   translateAMD64_regValOrPtr(instr->reg_2, rsrc1, 20);
+   
+   if (instr->opcode == ANDBI) {
+      fprintf(fp, "\ttest %s, %d\n", rsrc1, instr->immediate);
+      return 1;
+   }
+
+   char rsrc2[20];
+   translateAMD64_regValOrPtr(instr->reg_3, rsrc2, 20);
+   fprintf(fp, "\ttest %s, %s\n", rsrc1, rsrc2);
+   return 1;
+}
+
 int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 {
    char address[20];
@@ -248,6 +272,8 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
    if (translateAMD64_mov(program, instr, fp))
       return 1;
    if (translateAMD64_cmp(program, instr, fp))
+      return 1;
+   if (translateAMD64_test(program, instr, fp))
       return 1;
 
    char addrBuf[20];
