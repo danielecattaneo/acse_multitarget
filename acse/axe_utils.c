@@ -286,6 +286,10 @@ int isMoveInstruction(t_axe_instruction *instr, t_axe_register **outDest,
    if (outSrcReg) *outSrcReg = NULL;
    if (outSrcAddr) *outSrcAddr = NULL;
 
+   /* by definition you can't load anything into R0  */
+   if (instr->reg_1 && instr->reg_1->ID == REG_0)
+      return 0;
+
    if (instr->opcode == MOVA) {
       if (outSrcAddr)
          *outSrcAddr = instr->address;
