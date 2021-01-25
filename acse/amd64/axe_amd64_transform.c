@@ -48,6 +48,22 @@ void fixInstrOperands(t_program_infos *program)
       if (isMoveInstruction(instr, NULL, NULL, NULL, NULL))
          continue;
 
+      if (RD(instr) && RD_ID(instr) == REG_0) {
+         /* SUB instructions with R0 destination can be encoded as amd64 cmp
+          * instructions, so leave them be */
+         if ((instr->opcode == SUB || instr->opcode == SUBI) && !RD_IND(instr))
+               continue;
+         
+         /* Otherwise replace R0 with another register */
+         int tmp = getNewRegister(program);
+         if (RD_IND(instr)) {
+            pushInstrInsertionPoint(program, LPREV(position));
+            gen_addi_instruction(program, tmp, REG_0, 0);
+            popInstrInsertionPoint(program);
+         }
+         RD_ID(instr) = tmp;
+      }
+
       /* For some strange reason, the IMUL x86_64 instruction DOES have a form
       * with an immediate, a source and a destination. In fact, it's the only
       * form it has with provisions for an immediate operand! */
