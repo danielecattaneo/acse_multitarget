@@ -137,8 +137,8 @@ int translateAMD64_mov(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
       return 0;
 
    if (srcAddr) {
-      char flabel[20];
-      translateLabelOrAddress(instr->address, flabel, 20);
+      char flabel[80];
+      translateLabelOrAddress(instr->address, flabel, 80);
       if (instr->address->type == ADDRESS_TYPE) {
          fprintf(fp, "\tmov %s, %s\n", translateAMD64_regName_64bit(dest->ID), flabel);
       } else {
@@ -212,8 +212,8 @@ int translateAMD64_test(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 
 int translateAMD64_acseLOAD_acseSTORE(t_program_infos *p, t_axe_instruction *instr, FILE *fp)
 {
-   char address[20];
-   translateLabelOrAddress(instr->address, address, 20);
+   char address[80];
+   translateLabelOrAddress(instr->address, address, 80);
    const char *reg = translateAMD64_regName(instr->reg_1->ID);
 
    if (instr->opcode == STORE) {
@@ -260,8 +260,8 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
       return 1;
 
    if (instr->labelID) {
-      char labelBuffer[20];
-      translateLabel(instr->labelID, labelBuffer, 20);
+      char labelBuffer[80];
+      translateLabel(instr->labelID, labelBuffer, 80);
       fprintf(fp, "%s:\n", labelBuffer);
    }
 
@@ -276,7 +276,6 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
    if (translateAMD64_test(program, instr, fp))
       return 1;
 
-   char addrBuf[20];
    char rDstBuf[20];
    char rSrcBuf[20];
 
@@ -290,9 +289,10 @@ int translateInstruction(t_program_infos *program, t_axe_instruction *instr, FIL
       translateAMD64_regValOrPtr(rSrc, rSrcBuf, 20);
    }
 
+   char addrBuf[80];
    t_axe_address *addr = instr->address;
    if (addr)
-      translateLabelOrAddress(addr, addrBuf, 20);
+      translateLabelOrAddress(addr, addrBuf, 80);
 
    switch (instr->opcode) {
       case BF:
