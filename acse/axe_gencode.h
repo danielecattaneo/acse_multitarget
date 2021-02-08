@@ -401,13 +401,15 @@ extern t_axe_instruction *gen_bt_instruction(
 extern t_axe_instruction *gen_bf_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
 
-/* create a "branch on higher than" instruction. */
+/* create an unsigned "branch on higher than" instruction. According to the
+ * value of the status register, the branch will be taken if the expression
+ * ~(C + Z) is TRUE. */
 extern t_axe_instruction *gen_bhi_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
 
-/* create a "branch on less than" instruction. According to the value
- * of the status register, the branch will be taken if the expression
- * (~C.~Z) is TRUE. */
+/* create an unsigned "branch on less than (or equal)" instruction. According
+ * to the value of the status register, the branch will be taken if the
+ * expression (C + Z) is TRUE. */
 extern t_axe_instruction *gen_bls_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
 
@@ -416,7 +418,7 @@ extern t_axe_instruction *gen_bls_instruction(
 extern t_axe_instruction *gen_bcc_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
 
-/* create a "branch on carry clear" instruction. If the bit `C' of the
+/* create a "branch on carry set" instruction. If the bit `C' of the
  * status register is set, then the branch is taken. */
 extern t_axe_instruction *gen_bcs_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
@@ -463,7 +465,7 @@ extern t_axe_instruction *gen_bge_instruction(
 extern t_axe_instruction *gen_blt_instruction(
       t_program_infos *program, t_axe_label *label, int addr);
 
-/* create a "branch on less than" instruction. According to the value
+/* create a "branch on greater than" instruction. According to the value
  * of the status register, the branch will be taken if the expression
  * (N.V.~Z + ~N.~V.~Z) is TRUE. */
 extern t_axe_instruction *gen_bgt_instruction(
