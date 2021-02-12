@@ -66,7 +66,9 @@ extern int errorcode;   /* this variable is used to test if an error is found
                          * one or more syntax errors or because something went
                          * wrong in the machine internal state), the errorcode
                          * is set to a value that is different from `AXE_OK'. */
-                         
+extern const char *errormsg; /* When errorcode is not equal to AXE_OK,
+                         * this variable may be set to an error message to print
+                         * if desired. */
 
 extern int cflow_errorcode;   /* As for `errorcode' this value is used to
                         * test if an error occurs during the creation process of
@@ -91,7 +93,7 @@ t_io_infos *file_infos;    /* input and output files used by the compiler */
 
 
 extern int yylex(void);
-extern int yyerror(const char* errmsg);
+extern void yyerror(const char*);
 
 %}
 %expect 1
@@ -644,9 +646,9 @@ int main (int argc, char **argv)
 /*=========================================================================
                                  YYERROR
 =========================================================================*/
-int yyerror(const char* errmsg)
+void yyerror(const char* msg)
 {
    errorcode = AXE_SYNTAX_ERROR;
-   
-   return 0;
+   free((void *)errormsg);
+   errormsg = strdup(msg);
 }

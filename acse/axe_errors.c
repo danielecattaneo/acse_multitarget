@@ -16,6 +16,7 @@ extern int num_warning;
 extern int num_error;
 extern int line_num;
 extern int errorcode;
+extern const char *errormsg;
 extern int cflow_errorcode;
 
 
@@ -106,6 +107,9 @@ static void printErrorMessage(int errorcode)
    
    /* print out to the standard error the error message */
    printMessage(msg);
+   /* print the custom error message if it exists */
+   if (errormsg)
+      fprintf(stderr, "%s\n", errormsg);
 
    /* update the value of num_error */
    num_error++;
@@ -114,7 +118,7 @@ static void printErrorMessage(int errorcode)
 void printMessage(const char *msg)
 {
    if (line_num != -1)
-      fprintf(stderr, "\nAt line %d , %s.\n", line_num, msg);
+      fprintf(stderr, "\nAt line %d, %s.\n", line_num, msg);
    else
       fprintf(stderr, "%s.\n", msg);
 }

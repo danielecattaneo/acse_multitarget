@@ -17,6 +17,7 @@
 
 /* global variable errorcode */
 int errorcode;
+const char *errormsg = NULL;
 /* global line number (defined in Acse.y) */
 extern int line_num;
 /* last line number inserted in an instruction as a comment */
