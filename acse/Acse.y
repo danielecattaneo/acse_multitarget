@@ -37,7 +37,6 @@
 #  include "axe_debug.h"
 #endif
 
-
 /* global variables */
 int line_num;        /* this variable will keep track of the
                       * source code line number. Every time that a newline
