@@ -18,7 +18,6 @@ test : $(objects)
 .PHONY : clean test 
 
 clean :
-	rm -f *.out
-	rm -f *.cfg
+	rm -f *.log
 	rm -f *.asm
 	rm -f *.o

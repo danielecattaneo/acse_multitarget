@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <strings.h>
 #include "axe_io_manager.h"
 
 static t_io_infos * allocOutputInfos();
@@ -16,6 +17,15 @@ static t_io_infos * allocOutputInfos();
 t_io_infos * initializeOutputInfos(int argc, char **argv)
 {
    t_io_infos *result;
+#ifndef NDEBUG
+   char *basename;
+   int lastDot, i, max_fn;
+   char *frontend_out_fn;
+   char *symbol_table_out_fn;
+   char *cfg_out_fn;
+   char *data_flow_out_fn;
+   char *regalloc_out_fn;
+#endif
 
    /* create a new instance of `t_io_infos' */
    result = allocOutputInfos();
@@ -51,34 +61,62 @@ t_io_infos * initializeOutputInfos(int argc, char **argv)
       result->output_file_name = "output.asm";
 
 #ifndef NDEBUG
-   fprintf(stdout, "Output will be written on file : "
-         "\"%s\". \n", result->output_file_name);
-   fprintf(stdout, "The output of the frontend will be written on file:"
-         "\"%s\". \n", "frontend.out");
-   fprintf(stdout, "The Symbol Table will be written on file : "
-         "\"%s\". \n", "sy_table.out");
-   fprintf(stdout, "Intermediate code will be written on file : "
-         "\"%s\". \n", "output.cfg");
-   fprintf(stdout, "control/dataflow informations will "
-                   "be written on file : \"%s\". \n", "dataflow.cfg");
-   fprintf(stdout, "Output of the register allocator "
-                   "will be written on file  : \"%s\". \n\n", "regalloc.out");
+   basename = strdup(result->output_file_name);
+   lastDot = -1;
+   for (i = 0; basename[i] != '\0'; i++) {
+      if (basename[i] == '.')
+         lastDot = i;
+   }
+   if (lastDot >= 0)
+      basename[lastDot] = '\0';
 
-   result->frontend_output = fopen("frontend.out", "w");
-   result->cfg_1 = fopen("output.cfg", "w");
-   result->cfg_2 = fopen("dataflow.cfg", "w");
-   result->reg_alloc_output = fopen("regalloc.out", "w");
-   result->syTable_output = fopen("sy_table.out", "w");
+   max_fn = strlen(basename) + 24;
+   frontend_out_fn = calloc(max_fn, sizeof(char));
+   snprintf(frontend_out_fn, max_fn, "%s_frontend.log", basename);
+   symbol_table_out_fn = calloc(max_fn, sizeof(char));
+   snprintf(symbol_table_out_fn, max_fn, "%s_symbol_table.log", basename);
+   cfg_out_fn = calloc(max_fn, sizeof(char));
+   snprintf(cfg_out_fn, max_fn, "%s_control_flow.log", basename);
+   data_flow_out_fn = calloc(max_fn, sizeof(char));
+   snprintf(data_flow_out_fn, max_fn, "%s_data_flow.log", basename);
+   regalloc_out_fn = calloc(max_fn, sizeof(char));
+   snprintf(regalloc_out_fn, max_fn, "%s_reg_alloc.log", basename);
+
+   fprintf(stdout, "Output will be written on file: "
+         "\"%s\". \n", result->output_file_name);
+   fprintf(stdout, "The output of the frontend will be written on file: "
+         "\"%s\". \n", frontend_out_fn);
+   fprintf(stdout, "The Symbol Table will be written on file: "
+         "\"%s\". \n", symbol_table_out_fn);
+   fprintf(stdout, "Intermediate code will be written on file: "
+         "\"%s\". \n", cfg_out_fn);
+   fprintf(stdout, "control/dataflow informations will "
+                   "be written on file: \"%s\". \n", data_flow_out_fn);
+   fprintf(stdout, "Output of the register allocator "
+                   "will be written on file: \"%s\". \n\n", regalloc_out_fn);
+
+   result->frontend_output = fopen(frontend_out_fn, "w");
+   result->cfg_1 = fopen(cfg_out_fn, "w");
+   result->cfg_2 = fopen(data_flow_out_fn, "w");
+   result->reg_alloc_output = fopen(regalloc_out_fn, "w");
+   result->syTable_output = fopen(symbol_table_out_fn, "w");
    if (result->frontend_output == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "frontend.out");
+      fprintf(stderr, "WARNING : Unable to create file: %s.\n", frontend_out_fn);
    if (result->cfg_1 == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "output.cfg");
+      fprintf(stderr, "WARNING : Unable to create file: %s.\n", cfg_out_fn);
    if (result->cfg_2 == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "dataflow.cfg");
+      fprintf(stderr, "WARNING : Unable to create file: %s.\n", data_flow_out_fn);
    if (result->syTable_output == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "sy_table.out");
+      fprintf(stderr, "WARNING : Unable to create file: %s.\n", symbol_table_out_fn);
    if (result->reg_alloc_output == NULL)
-      fprintf( stderr, "WARNING : Unable to create file: %s.\n", "regalloc.out");
+      fprintf(stderr, "WARNING : Unable to create file: %s.\n", regalloc_out_fn);
+
+   free(basename);
+   free(frontend_out_fn);
+   free(symbol_table_out_fn);
+   free(cfg_out_fn);
+   free(data_flow_out_fn);
+   free(regalloc_out_fn);
 #endif
 
    return result;
