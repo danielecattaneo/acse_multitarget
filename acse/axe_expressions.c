@@ -7,6 +7,7 @@
  * 
  */
 
+#include <limits.h>
 #include "axe_expressions.h"
 #include "axe_gencode.h"
 #include "axe_errors.h"
@@ -224,8 +225,9 @@ t_axe_expression handle_bin_numeric_op_Imm
       case DIV :
          if (val2 == 0){
             printWarningMessage(WARN_DIVISION_BY_ZERO);
+            return create_expression(INT_MAX, IMMEDIATE);
          }
-         return create_expression ((val1 / val2), IMMEDIATE);
+         return create_expression((val1 / val2), IMMEDIATE);
       default :
          notifyError(AXE_INVALID_EXPRESSION);
    }
