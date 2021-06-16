@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 #include "asm_engine.h"
 #include "asm_debug.h"
 
@@ -174,9 +175,9 @@ int translateData(t_translation_infos *infos
 int translateInstruction(t_translation_infos *infos
       , t_asm_instruction *inst, FILE *fp)
 {
-   int instruction;
-   int pattern;
-   int func;
+   uint32_t instruction;
+   uint32_t pattern;
+   uint32_t func;
    
    /* preconditions */
    if (inst == NULL)
@@ -201,17 +202,17 @@ int translateInstruction(t_translation_infos *infos
    }
    else if (inst->format == ASM_FORMAT_BIN)
    {
-      pattern = (1 << 30);
+      pattern = ((uint32_t)1 << 30);
    }
    else if  (   (inst->format == ASM_FORMAT_UNR)
             || (inst->format == ASM_FORMAT_NULL) )
    {
-      pattern = (1 << 31);
+      pattern = ((uint32_t)1 << 31);
    }
    else
    {
       assert(inst->format == ASM_FORMAT_JMP);
-      pattern = (3 << 30);
+      pattern = ((uint32_t)3 << 30);
    }
    
    /* update the instruction format value */
@@ -237,20 +238,20 @@ int translateInstruction(t_translation_infos *infos
       if ((inst->reg_3)->indirect)
          func = func + 8;
       
-      instruction = instruction + ( ((inst->reg_1)->ID) << 21);
-      instruction = instruction + ( ((inst->reg_2)->ID) << 16);
-      instruction = instruction + ( ((inst->reg_3)->ID) << 11);
+      instruction = instruction + ((uint32_t)((inst->reg_1)->ID) << 21);
+      instruction = instruction + ((uint32_t)((inst->reg_2)->ID) << 16);
+      instruction = instruction + ((uint32_t)((inst->reg_3)->ID) << 11);
       instruction = instruction + func;
    }
    else if (inst->format == ASM_FORMAT_BIN)
    {
-      instruction = instruction + ( ((inst->reg_1)->ID) << 21);
-      instruction = instruction + ( ((inst->reg_2)->ID) << 16);
+      instruction = instruction + ((uint32_t)((inst->reg_1)->ID) << 21);
+      instruction = instruction + ((uint32_t)((inst->reg_2)->ID) << 16);
       instruction = instruction + ( inst->immediate & 0x0000FFFF);
    }
    else if (inst->format == ASM_FORMAT_UNR)
    {
-      instruction = instruction + ( ((inst->reg_1)->ID) << 21);
+      instruction = instruction + ((uint32_t)((inst->reg_1)->ID) << 21);
       if ((inst->address)->label != NULL)
       {
          int destinationIndex;
