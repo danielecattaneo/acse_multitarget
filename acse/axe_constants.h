@@ -90,6 +90,7 @@
 
 /* WARNINGS */
 #define WARN_DIVISION_BY_ZERO 1
+#define WARN_INVALID_SHIFT_AMOUNT 2
 
 /* SIM errorcodes */
 #define AXE_OK 0

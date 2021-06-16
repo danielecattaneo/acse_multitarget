@@ -43,6 +43,9 @@ void printWarningMessage(int warningcode)
    switch (warningcode)
    {
       case WARN_DIVISION_BY_ZERO : msg = "warning: division by zero"; break;
+      case WARN_INVALID_SHIFT_AMOUNT: 
+            msg = "warning: shift amount is less than 0 or greater than 31";
+            break;
       default : msg = "<invalid warning>"; break;
    }
    

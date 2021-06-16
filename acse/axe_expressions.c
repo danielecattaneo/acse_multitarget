@@ -26,7 +26,6 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
 {
    int output_register;
 
-
    /* we have to test if one (or both) of
    * the two operands is an immediate value */
    if (  (exp2.expression_type == IMMEDIATE)
@@ -62,10 +61,16 @@ t_axe_expression handle_bin_numeric_op (t_program_infos *program
                              , exp1.value, exp2.value); break;
          case MUL : gen_muli_instruction (program, output_register
                              , exp1.value, exp2.value); break;
-         case SHL : gen_shli_instruction (program, output_register
-                             , exp1.value, exp2.value); break;
-         case SHR : gen_shri_instruction (program, output_register
-                             , exp1.value, exp2.value); break;
+         case SHL :
+               if (exp2.value < 0 || exp2.value > 31)
+                  printWarningMessage(WARN_INVALID_SHIFT_AMOUNT);
+               gen_shli_instruction (program, output_register, exp1.value, 
+                     exp2.value); break;
+         case SHR : 
+               if (exp2.value < 0 || exp2.value > 31)
+                  printWarningMessage(WARN_INVALID_SHIFT_AMOUNT);
+               gen_shri_instruction (program, output_register, exp1.value, 
+                     exp2.value); break;
          case DIV :
                if (exp2.value == 0){
                   printWarningMessage(WARN_DIVISION_BY_ZERO);
@@ -215,8 +220,18 @@ t_axe_expression handle_bin_numeric_op_Imm
       case EORL  : return create_expression (((!!val1) != (!!val2)), IMMEDIATE);
       case SUB : return create_expression ((val1 - val2), IMMEDIATE);
       case MUL : return create_expression ((val1 * val2), IMMEDIATE);
-      case SHL : return create_expression ((val1 << val2), IMMEDIATE);
+      /* SHL, SHR, DIV need special handling to avoid undefined behavior */
+      case SHL:
+         if (val2 < 0 || val2 > 31) {
+            printWarningMessage(WARN_INVALID_SHIFT_AMOUNT);
+            val2 = MAX(0, MIN(val2, 31));
+         }
+         return create_expression ((val1 << val2), IMMEDIATE);
       case SHR:
+         if (val2 < 0 || val2 > 31) {
+            printWarningMessage(WARN_INVALID_SHIFT_AMOUNT);
+            val2 = MAX(0, MIN(val2, 31));
+         }
          /* the C language does not guarantee a right shift of a signed value
           * is an arithmetic shift, so we have to make sure it is */
          return create_expression((val1 >> val2) | 

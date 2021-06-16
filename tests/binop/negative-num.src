@@ -31,7 +31,7 @@ write(a >> b);
 
 /* should all print -1, flags NZVC=1001 (except when constant folding) */
 b = 40;
-write((-100) >> 40);
+write((-100) >> 31);
 write((-100) >> b);
-write(a >> 40);
+write(a >> 31);
 write(a >> b);
