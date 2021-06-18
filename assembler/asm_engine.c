@@ -107,8 +107,8 @@ int getInstructionOrDataIndex(t_translation_infos *infos
          {
             /* precondition always verified */
             assert(current_data->value > 0);
-            counter += (current_data->value / ASM_ALIGMENT_SIZE)
-                  + (((current_data->value % ASM_ALIGMENT_SIZE) > 0)? 1: 0);
+            counter += (current_data->value * ASM_WORD_SIZE / ASM_ALIGMENT_SIZE)
+                  + ((((current_data->value * ASM_WORD_SIZE) % ASM_ALIGMENT_SIZE) > 0)? 1: 0);
          }
 
          current_elem = LNEXT(current_elem);
@@ -137,32 +137,19 @@ int translateData(t_translation_infos *infos
    }
    else if (data->dataType == ASM_SPACE)
    {
-      char *zero_val;
+      static const char zero_val[ASM_WORD_SIZE] = { 0 };
+      int i;
 
       /* preconditions: data->value must be >= 0 */
       if (data->value < 0)
          return ASM_INVALID_DATA_FORMAT;
 
-      /* force alignment to 4 bytes */
-      if (data->value % ASM_WORD_SIZE != 0)
-         data->value = data->value + (data->value % ASM_WORD_SIZE);
-
-      /* initialize the value `zero_val' */
-      zero_val = _ASM_ALLOC_FUNCTION(sizeof(char) * data->value);
-      if (zero_val == NULL)
-         return ASM_OUT_OF_MEMORY;
-
-      /* set the block of memory to zero */
-      memset(zero_val, 0, data->value);
-      
       /* postcondition: print on file the coded data */
-      if (fwrite(zero_val, data->value, 1, fp) != 1)
-      {
-         _ASM_FREE_FUNCTION(zero_val);
-         return ASM_FWRITE_ERROR;
+      for (i = 0; i < data->value; i++) {
+         if (fwrite(zero_val, ASM_WORD_SIZE, 1, fp) != 1)
+            return ASM_FWRITE_ERROR;
       }
 
-      _ASM_FREE_FUNCTION(zero_val);
       return ASM_OK;
    }
    

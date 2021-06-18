@@ -14,6 +14,7 @@
 #include "symbol_table.h"
 #include "axe_errors.h"
 #include "axe_gencode.h"
+#include "axe_target_info.h"
 
 /* global variable errorcode */
 int errorcode;
@@ -417,8 +418,9 @@ void addVariable(t_program_infos *program, t_axe_variable *variable)
    {
       if (variable->isArray)
       {
-         new_data_info = alloc_data
-               (DIR_SPACE, (variable->arraySize * 4), variable->labelID);
+         int sizeofElem = 4 / TARGET_PTR_GRANULARITY;
+         new_data_info = alloc_data(DIR_SPACE, variable->arraySize * sizeofElem,
+               variable->labelID);
          
          if (new_data_info == NULL)
             notifyError(AXE_OUT_OF_MEMORY);
