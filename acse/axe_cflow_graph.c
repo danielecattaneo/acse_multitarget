@@ -389,7 +389,7 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
    }
 
    /* alloc memory for a variable information */
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_cflow_var));
+   result = malloc(sizeof(t_cflow_var));
    if (result == NULL) {
       cflow_errorcode = CFLOW_OUT_OF_MEMORY;
       return NULL;
@@ -410,7 +410,7 @@ t_cflow_var * allocVariable (t_cflow_Graph *graph, int identifier)
    }
    else
    {
-      _AXE_FREE_FUNCTION(result);
+      free(result);
       result = (t_cflow_var *) LDATA(elementFound);
       assert(result != NULL);
       assert(result->ID == identifier);
@@ -619,7 +619,7 @@ t_cflow_Graph * allocGraph()
 {
    t_cflow_Graph *result;
 
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_cflow_Graph));
+   result = malloc(sizeof(t_cflow_Graph));
    if (result == NULL) {
       cflow_errorcode = CFLOW_OUT_OF_MEMORY;
       return NULL;
@@ -634,7 +634,7 @@ t_cflow_Graph * allocGraph()
    /* test if an error occurred */
    if (result->endingBlock == NULL) {
       cflow_errorcode = CFLOW_OUT_OF_MEMORY;
-      _AXE_FREE_FUNCTION(result);
+      free(result);
       return NULL;
    }
 
@@ -678,7 +678,7 @@ void finalizeGraph(t_cflow_Graph *graph)
          current_variable = (t_cflow_var *) LDATA(current_element);
 
          if (current_variable != NULL)
-            _AXE_FREE_FUNCTION(current_variable);
+            free(current_variable);
 
          /* retrieve the next variable in the list */
          current_element = LNEXT(current_element);
@@ -687,7 +687,7 @@ void finalizeGraph(t_cflow_Graph *graph)
       freeList(graph->cflow_variables);
    }
 
-   _AXE_FREE_FUNCTION(graph);
+   free(graph);
 }
 
 /* allocate memory for a basic block */
@@ -695,7 +695,7 @@ t_basic_block * allocBasicBlock()
 {
    t_basic_block *result;
    
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_basic_block));
+   result = malloc(sizeof(t_basic_block));
    if (result == NULL)
    {
       cflow_errorcode = CFLOW_OUT_OF_MEMORY;
@@ -742,7 +742,7 @@ void finalizeBasicBlock(t_basic_block *block)
    freeList(block->nodes);
    
    /* free the memory associated with this basic block */
-   _AXE_FREE_FUNCTION(block);
+   free(block);
 }
 
 /* free the memory associated with a node of the graph */
@@ -758,7 +758,7 @@ void finalizeNode(t_cflow_Node *node)
       freeList(node->out);
 
    /* free the current node */
-   _AXE_FREE_FUNCTION(node);
+   free(node);
 }
 
 t_cflow_Node * allocNode
@@ -780,7 +780,7 @@ t_cflow_Node * allocNode
    }
 
    /* create a new instance of type `t_cflow_node' */
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_cflow_Node));
+   result = malloc(sizeof(t_cflow_Node));
 
    /* test if an error occurred */
    if (result == NULL) {
@@ -800,7 +800,7 @@ t_cflow_Node * allocNode
 
    /* test if an error occurred */
    if (cflow_errorcode != CFLOW_OK) {
-      _AXE_FREE_FUNCTION(result);
+      free(result);
       return NULL;
    }
 

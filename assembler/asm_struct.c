@@ -13,7 +13,7 @@ t_asm_register * allocRegister(int ID, int indirect)
 {
    t_asm_register *result;
    
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_asm_register));
+   result = malloc(sizeof(t_asm_register));
    
    /* test the out of memory condition */
    if (result == NULL)
@@ -31,7 +31,7 @@ t_asm_address * allocAddress(int displacement, t_asm_label *label)
 {
    t_asm_address *result;
    
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_asm_address));
+   result = malloc(sizeof(t_asm_address));
    
    /* test the out of memory condition */
    if (result == NULL)
@@ -52,7 +52,7 @@ t_asm_label * allocLabel(char *ID, void *data)
 {
    t_asm_label *result;
    
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_asm_label));
+   result = malloc(sizeof(t_asm_label));
    
    /* test the out of memory condition */
    if (result == NULL)
@@ -70,7 +70,7 @@ t_asm_instruction * allocInstruction(int opcode)
 {
    t_asm_instruction *result;
    
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_asm_instruction));
+   result = malloc(sizeof(t_asm_instruction));
    
    /* test the out of memory condition */
    if (result == NULL)
@@ -221,7 +221,7 @@ t_asm_data * allocData(int dataType, int value)
 {
    t_asm_data *result;
    
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_asm_data));
+   result = malloc(sizeof(t_asm_data));
 
    /* test the out of memory condition */
    if (result == NULL)
@@ -243,20 +243,20 @@ void freeInstruction(t_asm_instruction *inst)
    
    /* free memory */
    if (inst->reg_1 != NULL)
-      _ASM_FREE_FUNCTION(inst->reg_1);
+      free(inst->reg_1);
    if (inst->reg_2 != NULL)
-      _ASM_FREE_FUNCTION(inst->reg_2);
+      free(inst->reg_2);
    if (inst->reg_3 != NULL)
-      _ASM_FREE_FUNCTION(inst->reg_3);
+      free(inst->reg_3);
    if (inst->address != NULL)
-      _ASM_FREE_FUNCTION(inst->address);
+      free(inst->address);
    
-   _ASM_FREE_FUNCTION(inst);
+   free(inst);
 }
 
 /* finalize a data info. */
 void freeData(t_asm_data *data)
 {
    if (data != NULL)
-      _ASM_FREE_FUNCTION(data);
+      free(data);
 }

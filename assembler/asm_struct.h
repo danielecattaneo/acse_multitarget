@@ -16,13 +16,6 @@
 #include <assert.h>
 #include "asm_constants.h"
 
-#ifndef _ASM_ALLOC_FUNCTION
-#define _ASM_ALLOC_FUNCTION malloc
-#endif
-#ifndef _ASM_FREE_FUNCTION
-#define _ASM_FREE_FUNCTION free
-#endif
-
 #define t_asm_comment char
 
 typedef struct t_asm_register

@@ -16,13 +16,6 @@
 #include <assert.h>
 #include "axe_constants.h"
 
-#ifndef _AXE_ALLOC_FUNCTION
-#  define _AXE_ALLOC_FUNCTION malloc
-#endif
-#ifndef _AXE_FREE_FUNCTION
-#  define _AXE_FREE_FUNCTION free
-#endif
-
 typedef struct t_axe_label
 {
    int labelID;      /* label identifier */

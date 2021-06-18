@@ -39,13 +39,6 @@
 /* set an integer value as the data associated to this list item. */
 #define SET_INTDATA(item, _data)    ((item)->data = INTDATA(_data))
 
-#ifndef _ALLOC_FUNCTION
-#  define _ALLOC_FUNCTION malloc
-#endif
-#ifndef _FREE_FUNCTION
-#  define _FREE_FUNCTION free
-#endif
-
 
 /* a list element */
 typedef struct t_list

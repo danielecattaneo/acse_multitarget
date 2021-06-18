@@ -202,7 +202,7 @@ t_list * addFreeRegister(t_list *registers, int regID, int position)
    int *element;
 
    /* Allocate memory space for the reg id */
-   element = (int *) _AXE_ALLOC_FUNCTION(sizeof(int));
+   element = (int *) malloc(sizeof(int));
    if (element == NULL)
       notifyError(AXE_OUT_OF_MEMORY);
 
@@ -230,7 +230,7 @@ int assignRegister(t_reg_allocator *RA)
    /* Get the name of the first free register */
    regID = (* ((int *) LDATA(RA->freeRegisters)));
    /* Free the space allocated to hold the register id */
-   _AXE_FREE_FUNCTION(LDATA(RA->freeRegisters));
+   free(LDATA(RA->freeRegisters));
    /* Remove the structure from the free registers list */
    RA->freeRegisters = removeFirst(RA->freeRegisters);
 
@@ -254,7 +254,7 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
       notifyError(AXE_INVALID_CFLOW_GRAPH);
 
    /* allocate memory for a new instance of `t_reg_allocator' */
-   result = (t_reg_allocator *) _AXE_ALLOC_FUNCTION(sizeof(t_reg_allocator));
+   result = (t_reg_allocator *) malloc(sizeof(t_reg_allocator));
    if (result == NULL)
       notifyError(AXE_OUT_OF_MEMORY);
    
@@ -283,7 +283,7 @@ t_reg_allocator * initializeRegAlloc(t_cflow_Graph *graph)
     * allocate space for the binding array, and initialize it */
    
    /*alloc memory for the array of bindings */
-   result->bindings = (int *)_AXE_ALLOC_FUNCTION(sizeof(int) * result->varNum);
+   result->bindings = (int *)malloc(sizeof(int) * result->varNum);
    
    /* test if an error occurred */
    if (result->bindings == NULL)
@@ -357,7 +357,7 @@ void finalizeRegAlloc(t_reg_allocator *RA)
 
    /* Free memory used for the variable/register bindings */
    if (RA->bindings != NULL)
-      _AXE_FREE_FUNCTION(RA->bindings);
+      free(RA->bindings);
    if (RA->freeRegisters != NULL)
    {
       t_list *current_element;
@@ -365,14 +365,14 @@ void finalizeRegAlloc(t_reg_allocator *RA)
       current_element = RA->freeRegisters;
       while (current_element != NULL)
       {
-         _AXE_FREE_FUNCTION(LDATA(current_element));
+         free(LDATA(current_element));
          current_element = LNEXT(current_element);
       }
 
       freeList(RA->freeRegisters);
    }
 
-   _AXE_FREE_FUNCTION(RA);
+   free(RA);
 }
 
 /*
@@ -385,7 +385,7 @@ t_live_interval * allocLiveInterval
    t_live_interval *result;
 
    /* create a new instance of `t_live_interval' */
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_live_interval));
+   result = malloc(sizeof(t_live_interval));
    if (result == NULL)
       notifyError(AXE_OUT_OF_MEMORY);
 
@@ -407,7 +407,7 @@ void finalizeLiveInterval (t_live_interval *interval)
       return;
 
    /* finalize the current interval */
-   _AXE_FREE_FUNCTION(interval);
+   free(interval);
 }
 
 /*

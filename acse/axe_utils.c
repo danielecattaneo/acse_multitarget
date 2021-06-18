@@ -44,7 +44,7 @@ static void free_new_variables(t_list *variables)
    {
       current_decl = (t_axe_declaration *)LDATA(current_element);
       if (current_decl != NULL)
-         _AXE_FREE_FUNCTION(current_decl);
+         free(current_decl);
 
       current_element = LNEXT(current_element);
    }
@@ -103,7 +103,7 @@ void set_new_variables(t_program_infos *program, int varType, t_list *variables)
          get_symbol_location(program, current_decl->ID, 0);
 
       /* free the memory associated with the current declaration */
-      _AXE_FREE_FUNCTION(current_decl);
+      free(current_decl);
 
       /* update the value of `current_element' */
       current_element = LNEXT(current_element);

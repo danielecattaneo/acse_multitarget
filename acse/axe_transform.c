@@ -297,7 +297,7 @@ t_tempLabel * allocTempLabel(t_axe_label *labelID, int regID)
    }
 
    /* create a new temp-label */
-   result = _AXE_ALLOC_FUNCTION(sizeof(t_tempLabel));
+   result = malloc(sizeof(t_tempLabel));
    if (result == NULL) {
       errorcode = AXE_OUT_OF_MEMORY;
       return NULL;
@@ -313,7 +313,7 @@ t_tempLabel * allocTempLabel(t_axe_label *labelID, int regID)
 void freeTempLabel(t_tempLabel *tempLabel)
 {
    if (tempLabel != NULL)
-      _AXE_FREE_FUNCTION(tempLabel);
+      free(tempLabel);
 }
 
 void finalizeListOfTempLabels(t_list *tempLabels)

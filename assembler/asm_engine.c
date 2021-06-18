@@ -344,7 +344,7 @@ t_translation_infos * initStructures(int *errorcode)
    t_translation_infos *result;
    
    /* allocate memory for an instance of `t_translation_infos' */
-   result = _ASM_ALLOC_FUNCTION(sizeof(t_translation_infos));
+   result = malloc(sizeof(t_translation_infos));
    
    /* test the out of memory condition */
    if (result == NULL)
@@ -522,7 +522,7 @@ int finalizeStructures(t_translation_infos *infos)
    finalizeLabels(infos->labels);
    
    /* free the memory block associated with `infos' */
-   _ASM_FREE_FUNCTION(infos);
+   free(infos);
    
    return ASM_OK;
 }
@@ -773,7 +773,7 @@ void finalizeLabels(t_list *labels)
       {
          if (current_label->ID != NULL)
             free(current_label->ID);
-         _ASM_FREE_FUNCTION(current_label);
+         free(current_label);
       }
       
       current_element = LNEXT(current_element);

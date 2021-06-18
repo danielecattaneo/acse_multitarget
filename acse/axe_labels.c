@@ -129,7 +129,7 @@ t_axe_label_manager * initialize_label_manager()
 
    /* create an instance of `t_axe_label_manager' */
    result = (t_axe_label_manager *)
-         _AXE_ALLOC_FUNCTION (sizeof(t_axe_label_manager));
+         malloc (sizeof(t_axe_label_manager));
 
    if (result == NULL)
       notifyError(AXE_OUT_OF_MEMORY);
@@ -172,7 +172,7 @@ void finalize_label_manager(t_axe_label_manager *lmanager)
    /* free the memory associated to the list of labels */
    freeList(lmanager->labels);
 
-   _AXE_FREE_FUNCTION(lmanager);
+   free(lmanager);
 }
 
 t_axe_label * assign_label(t_axe_label_manager *lmanager)

@@ -163,7 +163,7 @@ t_program_infos * allocProgramInfos()
 
    /* initialize the local variable `result' */
    result = (t_program_infos *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_program_infos));
+         malloc(sizeof(t_program_infos));
 
    /* verify if an error occurred during the memory allocation
     * process */
@@ -480,7 +480,7 @@ void finalizeProgramInfos(t_program_infos *program)
    if (program->sy_table != NULL)
       finalize_sy_table(program->sy_table);
 
-   _AXE_FREE_FUNCTION(program);
+   free(program);
 }
 
 t_axe_label * getLabelFromVariableID(t_program_infos *program, char *ID)
@@ -515,7 +515,7 @@ void finalizeVariables(t_list *variables)
          if (current_var->ID != NULL)
             free(current_var->ID);
          
-         _AXE_FREE_FUNCTION(current_var);
+         free(current_var);
       }
       
       current_element = LNEXT(current_element);

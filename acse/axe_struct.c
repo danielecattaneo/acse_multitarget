@@ -27,7 +27,7 @@ t_axe_register * alloc_register(int ID, int indirect)
 
    /* create an instance of `t_axe_register' */
    result = (t_axe_register *)
-            _AXE_ALLOC_FUNCTION(sizeof(t_axe_register));
+            malloc(sizeof(t_axe_register));
    
    /* check the postconditions */
    if (result == NULL)
@@ -47,7 +47,7 @@ t_axe_instruction * alloc_instruction(int opcode)
    t_axe_instruction *result;
 
    /* create an instance of `t_axe_data' */
-   result = (t_axe_instruction *) _AXE_ALLOC_FUNCTION(sizeof(t_axe_instruction));
+   result = (t_axe_instruction *) malloc(sizeof(t_axe_instruction));
    
    /* check the postconditions */
    if (result == NULL)
@@ -73,7 +73,7 @@ t_axe_data * alloc_data(int directiveType, int value, t_axe_label *label)
    t_axe_data *result;
 
    /* create an instance of `t_axe_data' */
-   result = (t_axe_data *) _AXE_ALLOC_FUNCTION(sizeof(t_axe_data));
+   result = (t_axe_data *) malloc(sizeof(t_axe_data));
    
    /* check the postconditions */
    if (result == NULL)
@@ -106,7 +106,7 @@ t_axe_label * alloc_label(int value)
 
    /* create an instance of t_axe_label */
    result = (t_axe_label *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_axe_label));
+         malloc(sizeof(t_axe_label));
 
    /* initialize the internal value of `result' */
    result->labelID = value;
@@ -119,8 +119,8 @@ t_axe_label * alloc_label(int value)
 void free_label(t_axe_label *lab)
 {
    if (lab->name)
-      _AXE_FREE_FUNCTION(lab->name);
-   _AXE_FREE_FUNCTION(lab);
+      free(lab->name);
+   free(lab);
 }
 
 t_axe_declaration * alloc_declaration
@@ -130,7 +130,7 @@ t_axe_declaration * alloc_declaration
 
    /* allocate memory for the new declaration */
    result = (t_axe_declaration *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_axe_declaration));
+         malloc(sizeof(t_axe_declaration));
 
    /* check the postconditions */
    if (result == NULL)
@@ -149,7 +149,7 @@ t_axe_declaration * alloc_declaration
 /* finalize an instance of `t_axe_variable' */
 void free_variable (t_axe_variable *variable)
 {
-   _AXE_FREE_FUNCTION(variable);
+   free(variable);
 }
 
 /* create and initialize an instance of `t_axe_variable' */
@@ -160,7 +160,7 @@ t_axe_variable * alloc_variable
 
    /* allocate memory for the new variable */
    result = (t_axe_variable *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_axe_variable));
+         malloc(sizeof(t_axe_variable));
 
    /* check the postconditions */
    if (result == NULL)
@@ -187,25 +187,25 @@ void free_Instruction(t_axe_instruction *inst)
    
    /* free memory */
    if (inst->reg_1 != NULL)
-      _AXE_FREE_FUNCTION(inst->reg_1);
+      free(inst->reg_1);
    if (inst->reg_2 != NULL)
-      _AXE_FREE_FUNCTION(inst->reg_2);
+      free(inst->reg_2);
    if (inst->reg_3 != NULL)
-      _AXE_FREE_FUNCTION(inst->reg_3);
+      free(inst->reg_3);
    if (inst->address != NULL)
-      _AXE_FREE_FUNCTION(inst->address);
+      free(inst->address);
    if (inst->user_comment != NULL) {
-      _AXE_FREE_FUNCTION(inst->user_comment);
+      free(inst->user_comment);
    }
 
-   _AXE_FREE_FUNCTION(inst);
+   free(inst);
 }
 
 /* finalize a data info. */
 void free_Data(t_axe_data *data)
 {
    if (data != NULL)
-      _AXE_FREE_FUNCTION(data);
+      free(data);
 }
 
 t_axe_address * alloc_address(int type, int address, t_axe_label *label)
@@ -213,7 +213,7 @@ t_axe_address * alloc_address(int type, int address, t_axe_label *label)
    t_axe_address *result;
 
    result = (t_axe_address *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_axe_address));
+         malloc(sizeof(t_axe_address));
 
    if (result == NULL)
       return NULL;

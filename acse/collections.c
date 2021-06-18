@@ -29,7 +29,7 @@ t_list * removeFirst(t_list *list)
    if (list != NULL)
       SET_PREV(list, NULL);
    
-   _FREE_FUNCTION(first_elem);
+   free(first_elem);
 
    /* postconditions: return the new head of the list */
    return list;
@@ -193,7 +193,7 @@ void freeList(t_list *list)
    freeList(LNEXT(list));
    
    /* deallocate memory for the current element of the list */
-   _FREE_FUNCTION(list);
+   free(list);
 }
 
 t_list * newElement(void *data)
@@ -201,7 +201,7 @@ t_list * newElement(void *data)
    t_list * result;
    
    /* create an instance of t_list in memory */
-   result = (t_list *) _ALLOC_FUNCTION(sizeof(t_list));
+   result = (t_list *)malloc(sizeof(t_list));
 
    /* verify the out of memory condition */
    if (result == NULL)
@@ -250,7 +250,7 @@ extern t_list * removeElementLink(t_list *list, t_list *element)
       if (LNEXT(element) != NULL)
          SET_PREV(LNEXT(element), LPREV(element));
       
-      _FREE_FUNCTION(element);
+      free(element);
    }
    else
    {
@@ -267,7 +267,7 @@ extern t_list * removeElementLink(t_list *list, t_list *element)
       else
          list = NULL;
       
-      _FREE_FUNCTION(element);
+      free(element);
    }
    
    /* return the new top of the list */

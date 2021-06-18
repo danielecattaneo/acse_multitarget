@@ -128,9 +128,9 @@ t_io_infos * allocOutputInfos()
 
    /* Allocate memory for an instance of `t_output_infos' */
    result = (t_io_infos *)
-         _AXE_ALLOC_FUNCTION(sizeof(t_io_infos));
+         malloc(sizeof(t_io_infos));
 
-   /* test if _AXE_ALLOC_FUNCTION returned a null pointer */
+   /* test if malloc returned a null pointer */
    if (result == NULL)
       return NULL;
       
@@ -168,5 +168,5 @@ void finalizeOutputInfos(t_io_infos *infos)
       fclose(infos->syTable_output);
 #endif
 
-   _AXE_FREE_FUNCTION(infos);
+   free(infos);
 }
