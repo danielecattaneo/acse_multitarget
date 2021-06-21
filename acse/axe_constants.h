@@ -11,11 +11,10 @@
 #define _AXE_CONSTANTS_H
 
 /* registers */
-
 #define REG_INVALID -1
 #define REG_0 0
 
-/* opcodes pseudo-M68000 */
+/* MACE opcodes */
 #define ADD 0
 #define SUB 1
 #define ANDL 2
@@ -92,7 +91,7 @@
 #define WARN_DIVISION_BY_ZERO 1
 #define WARN_INVALID_SHIFT_AMOUNT 2
 
-/* SIM errorcodes */
+/* errorcodes */
 #define AXE_OK 0
 #define AXE_OUT_OF_MEMORY 1
 #define AXE_PROGRAM_NOT_INITIALIZED 2
