@@ -71,8 +71,11 @@ Alternatively, you can add a test to the `tests` directory by following these
 steps:
 
 1. Create a new directory inside `tests`. You can choose whatever directory
-   name you wish.
+   name you wish, as long as it is not `test`.
 2. Move the source code files to be compiled inside the directory you have
    created. The extension of these files **must** be `.src`.
-3. Open the `tests/Makefile` file and add your directory at the end of the
-   `dirs` variable (which is declared in the very first line of the file).
+3. Run the command `make tests` to compile all tests, included the one you have
+   just added.
+   
+The `make tests` command only runs the ACSE compiler and the assembler, you
+will have to invoke the MACE simulator manually.

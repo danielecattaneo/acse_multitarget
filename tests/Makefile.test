@@ -5,19 +5,23 @@ objects=$(patsubst %.src,%.o,$(wildcard *.src))
 asm_file=$(wildcard $(ASM)*)
 acse_file=$(wildcard $(ACSE)*)
 
-test : $(objects)
+.PHONY: test
+ifeq (,$(wildcard _NO_TEST_))
+# the '_NO_TEST_' file does not exist
+test: $(objects)
+else
+# the '_NO_TEST_' file does exist
+test:
+	@echo 'info: tests in directory "$(notdir $(shell pwd))" skipped'
+endif
 
 %.o: %.asm $(asm_file)
 	$(ASM) $< $@
 
+.PRECIOUS: %.asm
 %.asm: %.src $(acse_file)
 	$(ACSE) $< $@
 
-.PRECIOUS : %.asm
-
-.PHONY : clean test 
-
+.PHONY: clean 
 clean :
-	rm -f *.log
-	rm -f *.asm
-	rm -f *.o
+	rm -f *.log *.asm *.o
