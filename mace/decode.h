@@ -57,10 +57,10 @@ Formats
    0001 SUB
    0010 ANDL
    0011 ORL
-    0100 EORL
+   0100 EORL
    0101 ANDB
    0110 ORB
-    0111 EORB
+   0111 EORB
    1000 MUL
    1001 DIV
    1010 SHL
@@ -118,7 +118,7 @@ func bits
    1100 SNE
    1101 READ
    1110 WRITE
-   1111
+   1111 XPSW
 
 11 ccode [dest] addr
    Branch to:
