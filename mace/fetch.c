@@ -28,10 +28,10 @@ static int perform_rotl(int value, int amount, int *carry);
 static int perform_rotr(int value, int amount, int *carry);
 
 /* returns next pc, negative values are error codes, 0 is correct termination */
-int fetch_execute(unsigned int *code, int pc)
+int fetch_execute(int pc)
 {
    int result;
-   decoded_instr *instr = decode(code[pc]);
+   decoded_instr *instr = decode(mem[pc]);
    switch (instr->format) {
       case TER: result = executeTER(instr); break;
       case BIN: result = executeBIN(instr); break;

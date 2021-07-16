@@ -20,13 +20,11 @@ int main(int argc, char **argv)
 {
    FILE *fp;                  /* pointer to the object file    */
    int len = 0;               /* length of the object file   */
-   unsigned int *code = NULL; /* pointer to the code block */
    int lcode = 0;             /* length of the code block         */
-   int mmgmt = BASIC;         /* memory management */
    int i;
    int breakat = -1; /* break execution at instruction # */
    int count = 0;    /* iterations counter    */
-   pc = 0;           /* PC register is set ot zero in the beginning */
+   pc = 0;           /* PC register is set at zero in the beginning */
 #ifdef DEBUG
    decoded_instr *current_instr;
 #endif
@@ -51,9 +49,7 @@ int main(int argc, char **argv)
    }
 
    for (i = 1; i < argc - 1; i++) {
-      if (strcmp(argv[i], "segmented") == 0)
-         mmgmt = SEGMENTED;
-      else if (strcmp(argv[i], "break") == 0) {
+      if (strcmp(argv[i], "break") == 0) {
          char *error;
 
          /* read the next argument as a base-10 number */
@@ -74,11 +70,6 @@ int main(int argc, char **argv)
       }
    }
 
-#ifdef DEBUG
-   fprintf(stderr, "Running with %s memory \n",
-         (mmgmt == BASIC) ? "BASIC" : "SEGMENTED");
-#endif
-
    /* initialize registers and memory */
    for (i = 0; i < NREGS; i++)
       reg[i] = 0;
@@ -98,17 +89,10 @@ int main(int argc, char **argv)
          MEMSIZE, len);
 #endif
 
-   if (mmgmt == BASIC) {
-      /* single memory area for both code and data */
-      if (len > MEMSIZE) {
-         fprintf(stderr, "Out of memory.\n");
-         return MEM_FAULT;
-      }
-
-      code = (unsigned int *)mem;
-   } else {
-      /* allocate a separate memory area just for the code */
-      code = (unsigned int *)malloc(sizeof(unsigned int) * len);
+   /* single memory area for both code and data */
+   if (len > MEMSIZE) {
+      fprintf(stderr, "Out of memory.\n");
+      return MEM_FAULT;
    }
 
    /* load the machine code into memory */
@@ -121,14 +105,14 @@ int main(int argc, char **argv)
    lcode = len - 5; /* compute the number of instructions by subtracting the
                        length of the header (which is = 5 in 4 bytes
                        instructions, = 20 in bytes) */
-   fread(code, 4, lcode, fp);
+   fread(mem, 4, lcode, fp);
 #ifdef DEBUG
    fprintf(stderr, "Starting execution.\n");
    print_regs(stderr);
    print_psw(stderr);
    print_Memory_Dump(stderr, lcode);
    if (pc < lcode) {
-      current_instr = decode(code[0]);
+      current_instr = decode(mem[0]);
       print(stderr, current_instr);
       free(current_instr);
       fflush(stderr);
@@ -137,7 +121,7 @@ int main(int argc, char **argv)
 
    /* decode and execute each instruction */
    for (pc = 0; pc < lcode && pc >= 0;) {
-      pc = fetch_execute(code, pc);
+      pc = fetch_execute(pc);
 
 #ifdef DEBUG
       print_regs(stderr);
@@ -160,7 +144,7 @@ int main(int argc, char **argv)
          return OK;
 
 #ifdef DEBUG
-      current_instr = decode(code[pc]);
+      current_instr = decode(mem[pc]);
       fprintf(stderr, "\n\n");
       print(stderr, current_instr);
       free(current_instr);

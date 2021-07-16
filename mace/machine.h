@@ -107,9 +107,6 @@ enum term {
    BREAK
 };
 
-/* Execution modes */
-enum modes { BASIC, SEGMENTED };
-
 /* Internal memory */
 extern int reg[NREGS];
 

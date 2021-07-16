@@ -9,6 +9,6 @@
 #ifndef _FETCH_H
 #define _FETCH_H
 
-int fetch_execute(unsigned int *code, int pc);
+int fetch_execute(int pc);
 
 #endif /* _FETCH_H */
