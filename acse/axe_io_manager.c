@@ -8,7 +8,7 @@
  */
 
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include "axe_io_manager.h"
 
 static t_io_infos * allocOutputInfos();
