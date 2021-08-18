@@ -1,5 +1,31 @@
 # Release Notes
 
+## ACSE 1.2.1
+
+Released on 2021-09-13
+
+### New Features
+
+- Now almost every header file in acse has a comment describing its purpose.
+- Strings passed to `yyerror()` are now displayed rather than discarded.
+- Improved formatting of the acse logs and the assembly printout.
+- Changed file extension of the acse logs to `.log` from `.cfg` and `.out`.
+- The name of the acse log files is now determined from the name of the input
+  source code file to be compiled.
+- Show a warning when the source code contains a shift amount that is too large.
+
+### Bug Fixes
+
+- Fixed documentation of the `gen_bhi_instruction()`, `gen_bls_instruction()`,
+  `gen_bcs_instruction()`, and `gen_bgt_instruction()` functions.
+- Acse no longer crashes when the source code contains a division by zero in a
+  constant expression.
+- Fixed semantics of the `.SPACE` assembler directive to take a number of words
+  rather than a number of bytes.
+- Removed `SEGMENTED` mode from MACE, as it did not properly load the data
+  segment of executables.
+- Other minor fixes to documentation and comments.
+
 ## ACSE 1.2.0
 
 Released on 2020-09-14
