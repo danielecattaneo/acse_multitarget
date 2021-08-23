@@ -216,7 +216,7 @@ void printGraphInfos(t_cflow_Graph *graph, FILE *fout, int verbose)
                 "       variables of the intermediate language. \n");
 #if CFLOW_ALWAYS_LIVEIN_R0 == (1)
    fprintf(fout,"       Variable \'R0\' (that refers to the \n"
-                "       physical register \'RO\') is always \n"
+                "       physical register \'R0\') is always \n"
                 "       considered LIVE-IN for each node of \n"
                 "       a basic block. \n"
                 "       Thus, in the following control flow graph, \n"
