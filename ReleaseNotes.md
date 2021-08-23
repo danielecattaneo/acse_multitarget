@@ -168,7 +168,7 @@ Released on 2019-12-31
 
 Released on 2019-11-21
 
-- Replace deprecated bash option `-a` with the equivalent `-e`.
+- Replaced deprecated bash option `-a` with the equivalent `-e`.
 
 ## ACSE 1.1.3
 
@@ -185,33 +185,68 @@ Released on 2017-12-14
 
 **Changes to asm:**
       
-- Fixed parsing of the `EORL`/`EORLI`/`EORB`/`EORBI` instruction (which were
+- Fixed parsing of `EORL`/`EORLI`/`EORB`/`EORBI` instructions (which were
   incorrectly spelled as `XOR*`)
 
 **Changes to mace:**
 
 - Sign-extend immediate operands in a platform-independent way.
-- Code cleanup and logic fixes to `ADD`, `SUB`
+- Code cleanup and logic fixes to `ADD` and `SUB` instructions.
 
 ## ACSE 1.1.1
 
 Released on 2016-02-02
 
-- Removed references to `malloc.h` to fix build on recent systems
+- Removed references to `malloc.h` to fix build on recent systems.
 
 **Changes to acse:**
 
-- Introduced new `gen_move_immediate` and `gen_load_immediate` functions to
-  allow loading arbitrary sized integers into registers easily.
-- Fixed implementation of `gen_shl_instruction` and `gen_shr_instruction`.
+- Modified the `gen_load_immediate()` function to correctly handle
+  arbitrarily-sized integers.
+- Introduced the new `gen_move_immediate()` function.
+- Fixed implementation of `gen_shl_instruction()` and `gen_shr_instruction()`.
 
 **Changes to asm:**
 
-- Fixed handling of absolute addresses
+- Fixed handling of absolute addresses.
 
 ## ACSE 1.1.0
 
 Released on 2008-12-27
 
-First public release
+**Changes to acse:**
+
+- Renamed the following functions to increase clarity of the code:
+  - `reserveLabel()` to `newLabel()`
+  - `reserveLabelID()` to `newLabelID()`
+  - `fixLabel()` to `assignLabel()`
+  - `fixLabelID()` to `assignLabelID()`
+  - `perform_bin_numeric_op()` to `handle_bin_numeric_op()`
+  - `perform_binary_comparison()` to `handle_binary_comparison()`
+  - `load_immediate()` to `gen_load_immediate()`
+- Correctly handle invalid tokens.
+- Minor fixes to the Control Flow Graph (CFG) generation algorithm.
+- Minor fixes to the register allocator.
+- Translate all Italian comments to English.
+- Corrections to the documentation and comments.
+
+**Changes to asm:**
+
+- Fixed parsing of comments in assembly listings.
+
+**Changes to mace:**
+
+- Fix PSW updating behavior of unary instructions to conform to the specification.
+
+
+**Other changes:**
+
+- Introduced unified Makefile for tests.
+- Minor code cleanup across the project.
+
+## ACSE 1.0.0
+
+Released on 2008-01-07
+
+First public release.
 
