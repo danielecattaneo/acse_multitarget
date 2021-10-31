@@ -12,7 +12,15 @@ else
 	NASMFLAGS+=-f elf64
 endif
 
+.PHONY: test
+ifeq (,$(wildcard _NO_TEST_))
+# the '_NO_TEST_' file does not exist
 test: $(executables)
+else
+# the '_NO_TEST_' file does exist
+test:
+	@echo 'info: tests in directory "$(notdir $(shell pwd))" skipped'
+endif
 
 %: %.o
 	$(CC) $< $(runtime) $(CFLAGS) -o $@
