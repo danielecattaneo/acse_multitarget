@@ -1,0 +1,83 @@
+int a, b;
+
+/* should all print -1 */
+a = -1;
+b = 31;
+write(-1 >> 31);
+write(-1 >> b);
+write(a >> 31);
+write(a >> b);
+
+b = 32;
+write(-1 >> 32);
+write(-1 >> b);
+write(a >> 32);
+write(a >> b);
+
+b = 33;
+write(-1 >> 33);
+write(-1 >> b);
+write(a >> 33);
+write(a >> b);
+
+/* should all print 0 */
+a = 1073741824;
+b = 31;
+write(1073741824 >> 31);
+write(1073741824 >> b);
+write(a >> 31);
+write(a >> b);
+
+b = 32;
+write(1073741824 >> 32);
+write(1073741824 >> b);
+write(a >> 32);
+write(a >> b);
+
+b = 33;
+write(1073741824 >> 33);
+write(1073741824 >> b);
+write(a >> 33);
+write(a >> b);
+
+/* should all print -2147483648 */
+a = -1;
+b = 31;
+write(-1 << 31);
+write(-1 << b);
+write(a << 31);
+write(a << b);
+
+/* should all print 0 */
+b = 32;
+write(-1 << 32);
+write(-1 << b);
+write(a << 32);
+write(a << b);
+
+b = 33;
+write(-1 << 33);
+write(-1 << b);
+write(a << 33);
+write(a << b);
+
+/* should all print -2147483648 */
+a = 1;
+b = 31;
+write(1 << 31);
+write(1 << b);
+write(a << 31);
+write(a << b);
+
+/* should all print 0 */
+b = 32;
+write(1 << 32);
+write(1 << b);
+write(a << 32);
+write(a << b);
+
+b = 33;
+write(1 << 33);
+write(1 << b);
+write(a << 33);
+write(a << b);
