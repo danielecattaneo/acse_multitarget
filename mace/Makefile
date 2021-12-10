@@ -1,4 +1,5 @@
-project = ../bin/mace
+bindir = ../bin
+project = $(bindir)/mace
 override CFLAGS += 
 override LDFLAGS +=
 
@@ -17,8 +18,8 @@ all: $(project)
 
 -include $(deps)
 
-$(project): $(object)
-	$(CC) $(LDFLAGS) $^ -o $@
+$(project): $(object) $(bindir)
+	$(CC) $(LDFLAGS) $(object) -o $@
 
 $(objdir)/%.o: %.c
 	$(CC) $(CFLAGS) -MMD -c $< -o $@
@@ -26,6 +27,9 @@ $(objdir)/%.o: %.c
 $(object): | $(objdir)
 
 $(objdir):
+	mkdir -p $@
+
+$(bindir):
 	mkdir -p $@
 
 verify:

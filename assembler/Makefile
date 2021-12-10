@@ -1,4 +1,5 @@
-project = ../bin/asm
+bindir = ../bin
+project = $(bindir)/asm
 BISON ?= bison
 FLEX ?= flex
 override CFLAGS += 
@@ -24,8 +25,8 @@ all: $(project)
 
 -include $(deps)
 
-$(project): $(object)
-	$(CC) $(LDFLAGS) $^ -o $@
+$(project): $(object) $(bindir)
+	$(CC) $(LDFLAGS) $(object) -o $@
 
 $(objdir)/%.o: %.c
 	$(CC) $(CFLAGS) -MMD -c $< -o $@
@@ -45,6 +46,9 @@ $(derived_c_src): | $(objdir)
 $(object): | $(objdir)
 
 $(objdir):
+	mkdir -p $@
+
+$(bindir):
 	mkdir -p $@
 
 clean:

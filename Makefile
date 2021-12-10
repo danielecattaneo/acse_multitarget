@@ -2,10 +2,7 @@ objects = executor asm compiler
 dirs:=mace assembler acse tests
 
 
-all : bin $(objects)
-
-bin :
-	mkdir -p bin
+all : $(objects)
 
 tests : 
 	cd ./tests && $(MAKE)
