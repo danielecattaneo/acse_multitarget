@@ -298,7 +298,7 @@ def print_words(it, comment=None):
     for i, ii in zip(it, count()):
         if ii % 4 == 0 and ii != 0:
             tmp += '\n' + INDENT + '.WORD'
-        tmp += ' %11s' % hex(i)
+        tmp += ' %11s' % hex(int32(i))
     if comment:
         if len(tmp) + len(comment) + len(' /*  */') > 80:
             tmp = INDENT + '/* ' + comment + ' */\n' + tmp

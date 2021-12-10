@@ -119,7 +119,7 @@ TestTernOrBinData:
       .WORD        -0x1 -0x80000000  0x7fffffff -0x7fffffff
       .WORD         0x0         0x1
       /* expected flags */
-      .WORD  0x955a9180  0x3888a1a0  0x84081987  0x8b4b004b
+      .WORD -0x6aa56e80  0x3888a1a0 -0x7bf7e679 -0x74b4ffb5
       .WORD      0x2492
 
       .WORD     0x3060a
@@ -149,15 +149,15 @@ TestTernOrBinData:
 
       .WORD     0x30604
       .WORD  0x55555555  0x55555555 /* input 0 */
-      .WORD  0x55555555  0xaaaaaaaa /* input 1 */
-      .WORD  0xaaaaaaaa  0x55555555 /* input 2 */
-      .WORD  0xaaaaaaaa  0xaaaaaaaa /* input 3 */
+      .WORD  0x55555555 -0x55555556 /* input 1 */
+      .WORD -0x55555556  0x55555555 /* input 2 */
+      .WORD -0x55555556 -0x55555556 /* input 3 */
       /* outputs of andb */
       .WORD  0x55555555         0x0         0x0 -0x55555556
       .WORD  0x55555555        -0x1        -0x1 -0x55555556 /* outputs of orb */
       /* outputs of eorb */
       .WORD         0x0        -0x1        -0x1         0x0
-      .WORD  0x88808440      0x4884 /* expected flags */
+      .WORD -0x777f7bc0      0x4884 /* expected flags */
 
       .WORD     0x1060c
       .WORD         0x0         0x0 /* input 0 */
@@ -176,7 +176,7 @@ TestTernOrBinData:
       .WORD         0x0         0x0         0x0  0x34fb5e38
       .WORD -0x34fb5e38  0x7fffffff -0x80000000 -0x80000000
       .WORD  0x7fffffff -0x80000000  0x3fffffff    -0x18001
-      .WORD  0xa8080444      0xa080 /* expected flags */
+      .WORD -0x57f7fbbc      0xa080 /* expected flags */
 
       .WORD     0x1060b
       .WORD         0x0        -0x1 /* input 0 */
@@ -194,7 +194,7 @@ TestTernOrBinData:
       .WORD         0x0   0x69f6bc7  -0x69f6bc7 -0x40000000
       .WORD  0x20000000 -0x80000000     0x354f1    -0x354f1
       .WORD    -0x354f1     0x354f1        -0x1
-      .WORD  0x80a08804       0x808 /* expected flags */
+      .WORD -0x7f5f77fc       0x808 /* expected flags */
 
       .WORD     0x40637
       .WORD         0x0        -0x1 /* input 0 */
@@ -230,17 +230,17 @@ TestTernOrBinData:
       .WORD  0x79fedcba        0x21 /* input 30 */
       .WORD  0x79fedcba  0x7fffffff /* input 31 */
       .WORD  0x79fedcba   0x8000000 /* input 32 */
-      .WORD  0xabcdef97        -0x1 /* input 33 */
-      .WORD  0xabcdef97         0x0 /* input 34 */
-      .WORD  0xabcdef97         0x1 /* input 35 */
-      .WORD  0xabcdef97         0x2 /* input 36 */
-      .WORD  0xabcdef97        0x10 /* input 37 */
-      .WORD  0xabcdef97        0x1e /* input 38 */
-      .WORD  0xabcdef97        0x1f /* input 39 */
-      .WORD  0xabcdef97        0x20 /* input 40 */
-      .WORD  0xabcdef97        0x21 /* input 41 */
-      .WORD  0xabcdef97  0x7fffffff /* input 42 */
-      .WORD  0xabcdef97   0x8000000 /* input 43 */
+      .WORD -0x54321069        -0x1 /* input 33 */
+      .WORD -0x54321069         0x0 /* input 34 */
+      .WORD -0x54321069         0x1 /* input 35 */
+      .WORD -0x54321069         0x2 /* input 36 */
+      .WORD -0x54321069        0x10 /* input 37 */
+      .WORD -0x54321069        0x1e /* input 38 */
+      .WORD -0x54321069        0x1f /* input 39 */
+      .WORD -0x54321069        0x20 /* input 40 */
+      .WORD -0x54321069        0x21 /* input 41 */
+      .WORD -0x54321069  0x7fffffff /* input 42 */
+      .WORD -0x54321069   0x8000000 /* input 43 */
       .WORD        -0x1        -0x1 /* input 44 */
       .WORD        -0x1         0x0 /* input 45 */
       .WORD        -0x1         0x1 /* input 46 */
@@ -314,12 +314,12 @@ TestTernOrBinData:
       .WORD        -0x1        -0x1        -0x1
       /* expected flags */
       .WORD  0x44444444    0x100444    0x555550  0x55551110
-      .WORD  0x89999885  0x99888888  0x49999999  0x44444444
-      .WORD  0x11180044  0x80044458  0x44445889  0x59998188
-      .WORD  0x99988444  0x44444599  0x44444444  0x81118084
-      .WORD  0x98010880  0x90180188  0x18999818  0x99998989
-      .WORD  0x44489989  0x44444444   0x9000909  0x99009099
-      .WORD  0x80090099   0x9809999  0x99999898      0x8998
+      .WORD -0x7666677b -0x66777778  0x49999999  0x44444444
+      .WORD  0x11180044 -0x7ffbbba8  0x44445889  0x59998188
+      .WORD -0x66677bbc  0x44444599  0x44444444 -0x7eee7f7c
+      .WORD -0x67fef780 -0x6fe7fe78  0x18999818 -0x66667677
+      .WORD  0x44489989  0x44444444   0x9000909 -0x66ff6f67
+      .WORD -0x7ff6ff67   0x9809999 -0x66666768      0x8998
 
       .WORD     0x10506
       .WORD         0x0         0x0 /* input 0 */
@@ -355,7 +355,7 @@ TestTernOrBinData:
       .WORD -0x55555556         0x0 /* input 6 */
       .WORD        -0x1         0x0 /* input 7 */
       /* outputs of notb */
-      .WORD  0xffffffff  0xfffffffe  0xaaaaaaaa  0x80000000
+      .WORD        -0x1        -0x2 -0x55555556 -0x80000000
       .WORD  0x7fffffff  0x7ffffffe  0x55555555         0x0
       .WORD  0x40008888 /* expected flags */
 
@@ -710,21 +710,21 @@ TestTernOrBinData:
 TestBranchAndCondData:
       .WORD       0x160 /* number of tests */
       /* flags */
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
-      .WORD  0x76543210  0xfedcba98  0x76543210  0xfedcba98
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
+      .WORD  0x76543210  -0x1234568  0x76543210  -0x1234568
       .WORD      0x4444      0x4444  0x44004400    0x440044
       .WORD  0x44444400  0x44440044        0x44      0x4400
       .WORD    0x440044  0x44004400  0x44440000  0x44440000
       /* rd or branch taken */
-      .WORD  0xcc33f0f0      0xffff  0xfafa0505  0xf3fc0c03
-      .WORD   0xf0f33cc  0xaaaa5555  0xcccc3333  0xff0000ff
-      .WORD  0xcc33f0f0  0xf3fc0c03   0xf0f33cc
+      .WORD -0x33cc0f10      0xffff  -0x505fafb  -0xc03f3fd
+      .WORD   0xf0f33cc -0x5555aaab -0x3333cccd   -0xffff01
+      .WORD -0x33cc0f10  -0xc03f3fd   0xf0f33cc
 
       /*   Expected Behavior:
        *   Instr.     Inputs:                          Outputs:         
