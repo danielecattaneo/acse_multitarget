@@ -196,57 +196,130 @@ TestTernOrBinData:
       .WORD    -0x354f1     0x354f1        -0x1
       .WORD  0x80a08804       0x808 /* expected flags */
 
-      .WORD     0x2060c
-      .WORD         0x0         0x0 /* input 0 */
-      .WORD  0x55555555         0x0 /* input 1 */
-      .WORD -0x55555556         0x0 /* input 2 */
-      .WORD        -0x1         0x0 /* input 3 */
-      .WORD         0x0         0x1 /* input 4 */
-      .WORD  0x55555555         0x1 /* input 5 */
-      .WORD -0x55555556         0x1 /* input 6 */
-      .WORD        -0x1         0x1 /* input 7 */
-      .WORD         0x0        0x1f /* input 8 */
-      .WORD  0x55555555        0x1f /* input 9 */
-      .WORD -0x55555556        0x1f /* input 10 */
-      .WORD        -0x1        0x1f /* input 11 */
+      .WORD     0x40637
+      .WORD         0x0        -0x1 /* input 0 */
+      .WORD         0x0         0x0 /* input 1 */
+      .WORD         0x0         0x1 /* input 2 */
+      .WORD         0x0         0x2 /* input 3 */
+      .WORD         0x0        0x10 /* input 4 */
+      .WORD         0x0        0x1e /* input 5 */
+      .WORD         0x0        0x1f /* input 6 */
+      .WORD         0x0        0x20 /* input 7 */
+      .WORD         0x0        0x21 /* input 8 */
+      .WORD         0x0  0x7fffffff /* input 9 */
+      .WORD         0x0   0x8000000 /* input 10 */
+      .WORD  0x55555555        -0x1 /* input 11 */
+      .WORD  0x55555555         0x0 /* input 12 */
+      .WORD  0x55555555         0x1 /* input 13 */
+      .WORD  0x55555555         0x2 /* input 14 */
+      .WORD  0x55555555        0x10 /* input 15 */
+      .WORD  0x55555555        0x1e /* input 16 */
+      .WORD  0x55555555        0x1f /* input 17 */
+      .WORD  0x55555555        0x20 /* input 18 */
+      .WORD  0x55555555        0x21 /* input 19 */
+      .WORD  0x55555555  0x7fffffff /* input 20 */
+      .WORD  0x55555555   0x8000000 /* input 21 */
+      .WORD  0x79fedcba        -0x1 /* input 22 */
+      .WORD  0x79fedcba         0x0 /* input 23 */
+      .WORD  0x79fedcba         0x1 /* input 24 */
+      .WORD  0x79fedcba         0x2 /* input 25 */
+      .WORD  0x79fedcba        0x10 /* input 26 */
+      .WORD  0x79fedcba        0x1e /* input 27 */
+      .WORD  0x79fedcba        0x1f /* input 28 */
+      .WORD  0x79fedcba        0x20 /* input 29 */
+      .WORD  0x79fedcba        0x21 /* input 30 */
+      .WORD  0x79fedcba  0x7fffffff /* input 31 */
+      .WORD  0x79fedcba   0x8000000 /* input 32 */
+      .WORD  0xabcdef97        -0x1 /* input 33 */
+      .WORD  0xabcdef97         0x0 /* input 34 */
+      .WORD  0xabcdef97         0x1 /* input 35 */
+      .WORD  0xabcdef97         0x2 /* input 36 */
+      .WORD  0xabcdef97        0x10 /* input 37 */
+      .WORD  0xabcdef97        0x1e /* input 38 */
+      .WORD  0xabcdef97        0x1f /* input 39 */
+      .WORD  0xabcdef97        0x20 /* input 40 */
+      .WORD  0xabcdef97        0x21 /* input 41 */
+      .WORD  0xabcdef97  0x7fffffff /* input 42 */
+      .WORD  0xabcdef97   0x8000000 /* input 43 */
+      .WORD        -0x1        -0x1 /* input 44 */
+      .WORD        -0x1         0x0 /* input 45 */
+      .WORD        -0x1         0x1 /* input 46 */
+      .WORD        -0x1         0x2 /* input 47 */
+      .WORD        -0x1        0x10 /* input 48 */
+      .WORD        -0x1        0x1e /* input 49 */
+      .WORD        -0x1        0x1f /* input 50 */
+      .WORD        -0x1        0x20 /* input 51 */
+      .WORD        -0x1        0x21 /* input 52 */
+      .WORD        -0x1  0x7fffffff /* input 53 */
+      .WORD        -0x1   0x8000000 /* input 54 */
       /* outputs of shr */
-      .WORD         0x0  0x55555555 -0x55555556        -0x1
-      .WORD         0x0  0x2aaaaaaa -0x2aaaaaab        -0x1
-      .WORD         0x0         0x0        -0x1        -0x1
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0  0x55555555
+      .WORD  0x55555555  0x2aaaaaaa  0x15555555      0x5555
+      .WORD         0x1         0x0         0x0         0x0
+      .WORD         0x0         0x0  0x79fedcba  0x79fedcba
+      .WORD  0x3cff6e5d  0x1e7fb72e      0x79fe         0x1
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0 -0x54321069 -0x54321069 -0x2a190835
+      .WORD -0x150c841b     -0x5433        -0x2        -0x1
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1
       /* outputs of shl */
-      .WORD         0x0  0x55555555 -0x55555556        -0x1
-      .WORD         0x0 -0x55555556  0x55555554        -0x2
-      .WORD         0x0 -0x80000000         0x0 -0x80000000
-      .WORD  0x98148804  0x88049854  0x95849184 /* expected flags */
-
-      .WORD     0x20610
-      .WORD         0x0         0x0 /* input 0 */
-      .WORD  0xabcdef97         0x0 /* input 1 */
-      .WORD  0x79fedcba         0x0 /* input 2 */
-      .WORD        -0x1         0x0 /* input 3 */
-      .WORD         0x0         0x4 /* input 4 */
-      .WORD  0xabcdef97         0x4 /* input 5 */
-      .WORD  0x79fedcba         0x4 /* input 6 */
-      .WORD        -0x1         0x4 /* input 7 */
-      .WORD         0x0        0x10 /* input 8 */
-      .WORD  0xabcdef97        0x10 /* input 9 */
-      .WORD  0x79fedcba        0x10 /* input 10 */
-      .WORD        -0x1        0x10 /* input 11 */
-      .WORD         0x0        0x1f /* input 12 */
-      .WORD  0xabcdef97        0x1f /* input 13 */
-      .WORD  0x79fedcba        0x1f /* input 14 */
-      .WORD        -0x1        0x1f /* input 15 */
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0  0x55555555
+      .WORD  0x55555555 -0x55555556  0x55555554  0x55550000
+      .WORD  0x40000000 -0x80000000         0x0         0x0
+      .WORD         0x0         0x0  0x79fedcba  0x79fedcba
+      .WORD  -0xc02468c -0x18048d18 -0x23460000 -0x80000000
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0 -0x54321069 -0x54321069  0x579bdf2e
+      .WORD -0x50c841a4 -0x10690000 -0x40000000 -0x80000000
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD        -0x1        -0x1        -0x2        -0x4
+      .WORD    -0x10000 -0x40000000 -0x80000000         0x0
+      .WORD         0x0         0x0         0x0
       /* outputs of rotl */
-      .WORD         0x0 -0x54321069  0x79fedcba        -0x1
-      .WORD         0x0 -0x43210686 -0x60123459        -0x1
-      .WORD         0x0 -0x10685433 -0x23458602        -0x1
-      .WORD         0x0 -0x2a190835  0x3cff6e5d        -0x1
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0 -0x55555556
+      .WORD  0x55555555 -0x55555556  0x55555555  0x55555555
+      .WORD  0x55555555 -0x55555556  0x55555555 -0x55555556
+      .WORD -0x55555556  0x55555555  0x3cff6e5d  0x79fedcba
+      .WORD  -0xc02468c -0x18048d17 -0x23458602 -0x618048d2
+      .WORD  0x3cff6e5d  0x79fedcba  -0xc02468c  0x3cff6e5d
+      .WORD  0x79fedcba -0x2a190835 -0x54321069  0x579bdf2f
+      .WORD -0x50c841a2 -0x10685433 -0x150c841b -0x2a190835
+      .WORD -0x54321069  0x579bdf2f -0x2a190835 -0x54321069
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1
       /* outputs of rotr */
-      .WORD         0x0 -0x54321069  0x79fedcba        -0x1
-      .WORD         0x0  0x7abcdef9 -0x58601235        -0x1
-      .WORD         0x0 -0x10685433 -0x23458602        -0x1
-      .WORD         0x0  0x579bdf2f  -0xc02468c        -0x1
-      .WORD  0x99848084  0x91949894  0x99048084  0x99049994 /* expected flags */
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0 -0x55555556
+      .WORD  0x55555555 -0x55555556  0x55555555  0x55555555
+      .WORD  0x55555555 -0x55555556  0x55555555 -0x55555556
+      .WORD -0x55555556  0x55555555  -0xc02468c  0x79fedcba
+      .WORD  0x3cff6e5d -0x618048d2 -0x23458602 -0x18048d17
+      .WORD  -0xc02468c  0x79fedcba  0x3cff6e5d  -0xc02468c
+      .WORD  0x79fedcba  0x579bdf2f -0x54321069 -0x2a190835
+      .WORD -0x150c841b -0x10685433 -0x50c841a2  0x579bdf2f
+      .WORD -0x54321069 -0x2a190835  0x579bdf2f -0x54321069
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1
+      /* expected flags */
+      .WORD  0x44444444    0x100444    0x555550  0x55551110
+      .WORD  0x89999885  0x99888888  0x49999999  0x44444444
+      .WORD  0x11180044  0x80044458  0x44445889  0x59998188
+      .WORD  0x99988444  0x44444599  0x44444444  0x81118084
+      .WORD  0x98010880  0x90180188  0x18999818  0x99998989
+      .WORD  0x44489989  0x44444444   0x9000909  0x99009099
+      .WORD  0x80090099   0x9809999  0x99999898      0x8998
 
       .WORD     0x10506
       .WORD         0x0         0x0 /* input 0 */
@@ -392,62 +465,226 @@ TestTernOrBinData:
        *      div  0x499602d2     -0x1616  - - - -     -0x354f1  1 0 0 0
        *      div -0x499602d2     -0x1616  - - - -      0x354f1  0 0 0 0
        *      div -0x80000000  0x7fffffff  - - - -         -0x1  1 0 0 0
+       *      shr         0x0        -0x1  - - - -          0x0  0 1 0 0
        *      shr         0x0         0x0  - - - -          0x0  0 1 0 0
-       *      shr  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
-       *      shr -0x55555556         0x0  - - - -  -0x55555556  1 0 0 0
-       *      shr        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *      shr         0x0         0x1  - - - -          0x0  0 1 0 0
-       *      shr  0x55555555         0x1  - - - -   0x2aaaaaaa  0 0 0 1
-       *      shr -0x55555556         0x1  - - - -  -0x2aaaaaab  1 0 0 0
-       *      shr        -0x1         0x1  - - - -         -0x1  1 0 0 1
+       *      shr         0x0         0x2  - - - -          0x0  0 1 0 0
+       *      shr         0x0        0x10  - - - -          0x0  0 1 0 0
+       *      shr         0x0        0x1e  - - - -          0x0  0 1 0 0
        *      shr         0x0        0x1f  - - - -          0x0  0 1 0 0
+       *      shr         0x0        0x20  - - - -          0x0  0 1 0 0
+       *      shr         0x0        0x21  - - - -          0x0  0 1 0 0
+       *      shr         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shr         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *      shr  0x55555555        -0x1  - - - -   0x55555555  0 0 0 0
+       *      shr  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
+       *      shr  0x55555555         0x1  - - - -   0x2aaaaaaa  0 0 0 1
+       *      shr  0x55555555         0x2  - - - -   0x15555555  0 0 0 0
+       *      shr  0x55555555        0x10  - - - -       0x5555  0 0 0 0
+       *      shr  0x55555555        0x1e  - - - -          0x1  0 0 0 0
        *      shr  0x55555555        0x1f  - - - -          0x0  0 1 0 1
-       *      shr -0x55555556        0x1f  - - - -         -0x1  1 0 0 0
+       *      shr  0x55555555        0x20  - - - -          0x0  0 1 0 1
+       *      shr  0x55555555        0x21  - - - -          0x0  0 1 0 1
+       *      shr  0x55555555  0x7fffffff  - - - -          0x0  0 1 0 1
+       *      shr  0x55555555   0x8000000  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba        -0x1  - - - -   0x79fedcba  0 0 0 0
+       *      shr  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
+       *      shr  0x79fedcba         0x1  - - - -   0x3cff6e5d  0 0 0 0
+       *      shr  0x79fedcba         0x2  - - - -   0x1e7fb72e  0 0 0 1
+       *      shr  0x79fedcba        0x10  - - - -       0x79fe  0 0 0 1
+       *      shr  0x79fedcba        0x1e  - - - -          0x1  0 0 0 1
+       *      shr  0x79fedcba        0x1f  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba        0x20  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba        0x21  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba  0x7fffffff  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba   0x8000000  - - - -          0x0  0 1 0 1
+       *      shr  0xabcdef97        -0x1  - - - -  -0x54321069  1 0 0 0
+       *      shr  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
+       *      shr  0xabcdef97         0x1  - - - -  -0x2a190835  1 0 0 1
+       *      shr  0xabcdef97         0x2  - - - -  -0x150c841b  1 0 0 1
+       *      shr  0xabcdef97        0x10  - - - -      -0x5433  1 0 0 1
+       *      shr  0xabcdef97        0x1e  - - - -         -0x2  1 0 0 1
+       *      shr  0xabcdef97        0x1f  - - - -         -0x1  1 0 0 0
+       *      shr  0xabcdef97        0x20  - - - -         -0x1  1 0 0 0
+       *      shr  0xabcdef97        0x21  - - - -         -0x1  1 0 0 0
+       *      shr  0xabcdef97  0x7fffffff  - - - -         -0x1  1 0 0 0
+       *      shr  0xabcdef97   0x8000000  - - - -         -0x1  1 0 0 0
+       *      shr        -0x1        -0x1  - - - -         -0x1  1 0 0 0
+       *      shr        -0x1         0x0  - - - -         -0x1  1 0 0 0
+       *      shr        -0x1         0x1  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1         0x2  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1        0x10  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1        0x1e  - - - -         -0x1  1 0 0 1
        *      shr        -0x1        0x1f  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1        0x20  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1        0x21  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1   0x8000000  - - - -         -0x1  1 0 0 1
+       *      shl         0x0        -0x1  - - - -          0x0  0 1 0 0
        *      shl         0x0         0x0  - - - -          0x0  0 1 0 0
-       *      shl  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
-       *      shl -0x55555556         0x0  - - - -  -0x55555556  1 0 0 0
-       *      shl        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *      shl         0x0         0x1  - - - -          0x0  0 1 0 0
-       *      shl  0x55555555         0x1  - - - -  -0x55555556  1 0 0 0
-       *      shl -0x55555556         0x1  - - - -   0x55555554  0 0 0 1
-       *      shl        -0x1         0x1  - - - -         -0x2  1 0 0 1
+       *      shl         0x0         0x2  - - - -          0x0  0 1 0 0
+       *      shl         0x0        0x10  - - - -          0x0  0 1 0 0
+       *      shl         0x0        0x1e  - - - -          0x0  0 1 0 0
        *      shl         0x0        0x1f  - - - -          0x0  0 1 0 0
+       *      shl         0x0        0x20  - - - -          0x0  0 1 0 0
+       *      shl         0x0        0x21  - - - -          0x0  0 1 0 0
+       *      shl         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shl         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0x55555555        -0x1  - - - -   0x55555555  0 0 0 0
+       *      shl  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
+       *      shl  0x55555555         0x1  - - - -  -0x55555556  1 0 0 0
+       *      shl  0x55555555         0x2  - - - -   0x55555554  0 0 0 1
+       *      shl  0x55555555        0x10  - - - -   0x55550000  0 0 0 1
+       *      shl  0x55555555        0x1e  - - - -   0x40000000  0 0 0 1
        *      shl  0x55555555        0x1f  - - - -  -0x80000000  1 0 0 0
-       *      shl -0x55555556        0x1f  - - - -          0x0  0 1 0 1
+       *      shl  0x55555555        0x20  - - - -          0x0  0 1 0 1
+       *      shl  0x55555555        0x21  - - - -          0x0  0 1 0 0
+       *      shl  0x55555555  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shl  0x55555555   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0x79fedcba        -0x1  - - - -   0x79fedcba  0 0 0 0
+       *      shl  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
+       *      shl  0x79fedcba         0x1  - - - -   -0xc02468c  1 0 0 0
+       *      shl  0x79fedcba         0x2  - - - -  -0x18048d18  1 0 0 1
+       *      shl  0x79fedcba        0x10  - - - -  -0x23460000  1 0 0 0
+       *      shl  0x79fedcba        0x1e  - - - -  -0x80000000  1 0 0 0
+       *      shl  0x79fedcba        0x1f  - - - -          0x0  0 1 0 1
+       *      shl  0x79fedcba        0x20  - - - -          0x0  0 1 0 0
+       *      shl  0x79fedcba        0x21  - - - -          0x0  0 1 0 0
+       *      shl  0x79fedcba  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shl  0x79fedcba   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0xabcdef97        -0x1  - - - -  -0x54321069  1 0 0 0
+       *      shl  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
+       *      shl  0xabcdef97         0x1  - - - -   0x579bdf2e  0 0 0 1
+       *      shl  0xabcdef97         0x2  - - - -  -0x50c841a4  1 0 0 0
+       *      shl  0xabcdef97        0x10  - - - -  -0x10690000  1 0 0 1
+       *      shl  0xabcdef97        0x1e  - - - -  -0x40000000  1 0 0 1
+       *      shl  0xabcdef97        0x1f  - - - -  -0x80000000  1 0 0 1
+       *      shl  0xabcdef97        0x20  - - - -          0x0  0 1 0 1
+       *      shl  0xabcdef97        0x21  - - - -          0x0  0 1 0 0
+       *      shl  0xabcdef97  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shl  0xabcdef97   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl        -0x1        -0x1  - - - -         -0x1  1 0 0 0
+       *      shl        -0x1         0x0  - - - -         -0x1  1 0 0 0
+       *      shl        -0x1         0x1  - - - -         -0x2  1 0 0 1
+       *      shl        -0x1         0x2  - - - -         -0x4  1 0 0 1
+       *      shl        -0x1        0x10  - - - -     -0x10000  1 0 0 1
+       *      shl        -0x1        0x1e  - - - -  -0x40000000  1 0 0 1
        *      shl        -0x1        0x1f  - - - -  -0x80000000  1 0 0 1
+       *      shl        -0x1        0x20  - - - -          0x0  0 1 0 1
+       *      shl        -0x1        0x21  - - - -          0x0  0 1 0 0
+       *      shl        -0x1  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shl        -0x1   0x8000000  - - - -          0x0  0 1 0 0
+       *     rotl         0x0        -0x1  - - - -          0x0  0 1 0 0
        *     rotl         0x0         0x0  - - - -          0x0  0 1 0 0
-       *     rotl  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
-       *     rotl  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
-       *     rotl        -0x1         0x0  - - - -         -0x1  1 0 0 0
-       *     rotl         0x0         0x4  - - - -          0x0  0 1 0 0
-       *     rotl  0xabcdef97         0x4  - - - -  -0x43210686  1 0 0 0
-       *     rotl  0x79fedcba         0x4  - - - -  -0x60123459  1 0 0 1
-       *     rotl        -0x1         0x4  - - - -         -0x1  1 0 0 1
+       *     rotl         0x0         0x1  - - - -          0x0  0 1 0 0
+       *     rotl         0x0         0x2  - - - -          0x0  0 1 0 0
        *     rotl         0x0        0x10  - - - -          0x0  0 1 0 0
-       *     rotl  0xabcdef97        0x10  - - - -  -0x10685433  1 0 0 1
-       *     rotl  0x79fedcba        0x10  - - - -  -0x23458602  1 0 0 0
-       *     rotl        -0x1        0x10  - - - -         -0x1  1 0 0 1
+       *     rotl         0x0        0x1e  - - - -          0x0  0 1 0 0
        *     rotl         0x0        0x1f  - - - -          0x0  0 1 0 0
-       *     rotl  0xabcdef97        0x1f  - - - -  -0x2a190835  1 0 0 1
+       *     rotl         0x0        0x20  - - - -          0x0  0 1 0 0
+       *     rotl         0x0        0x21  - - - -          0x0  0 1 0 0
+       *     rotl         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
+       *     rotl         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *     rotl  0x55555555        -0x1  - - - -  -0x55555556  1 0 0 0
+       *     rotl  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
+       *     rotl  0x55555555         0x1  - - - -  -0x55555556  1 0 0 0
+       *     rotl  0x55555555         0x2  - - - -   0x55555555  0 0 0 1
+       *     rotl  0x55555555        0x10  - - - -   0x55555555  0 0 0 1
+       *     rotl  0x55555555        0x1e  - - - -   0x55555555  0 0 0 1
+       *     rotl  0x55555555        0x1f  - - - -  -0x55555556  1 0 0 0
+       *     rotl  0x55555555        0x20  - - - -   0x55555555  0 0 0 0
+       *     rotl  0x55555555        0x21  - - - -  -0x55555556  1 0 0 0
+       *     rotl  0x55555555  0x7fffffff  - - - -  -0x55555556  1 0 0 0
+       *     rotl  0x55555555   0x8000000  - - - -   0x55555555  0 0 0 0
+       *     rotl  0x79fedcba        -0x1  - - - -   0x3cff6e5d  0 0 0 1
+       *     rotl  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
+       *     rotl  0x79fedcba         0x1  - - - -   -0xc02468c  1 0 0 0
+       *     rotl  0x79fedcba         0x2  - - - -  -0x18048d17  1 0 0 1
+       *     rotl  0x79fedcba        0x10  - - - -  -0x23458602  1 0 0 0
+       *     rotl  0x79fedcba        0x1e  - - - -  -0x618048d2  1 0 0 0
        *     rotl  0x79fedcba        0x1f  - - - -   0x3cff6e5d  0 0 0 1
+       *     rotl  0x79fedcba        0x20  - - - -   0x79fedcba  0 0 0 0
+       *     rotl  0x79fedcba        0x21  - - - -   -0xc02468c  1 0 0 0
+       *     rotl  0x79fedcba  0x7fffffff  - - - -   0x3cff6e5d  0 0 0 1
+       *     rotl  0x79fedcba   0x8000000  - - - -   0x79fedcba  0 0 0 0
+       *     rotl  0xabcdef97        -0x1  - - - -  -0x2a190835  1 0 0 1
+       *     rotl  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
+       *     rotl  0xabcdef97         0x1  - - - -   0x579bdf2f  0 0 0 1
+       *     rotl  0xabcdef97         0x2  - - - -  -0x50c841a2  1 0 0 0
+       *     rotl  0xabcdef97        0x10  - - - -  -0x10685433  1 0 0 1
+       *     rotl  0xabcdef97        0x1e  - - - -  -0x150c841b  1 0 0 1
+       *     rotl  0xabcdef97        0x1f  - - - -  -0x2a190835  1 0 0 1
+       *     rotl  0xabcdef97        0x20  - - - -  -0x54321069  1 0 0 0
+       *     rotl  0xabcdef97        0x21  - - - -   0x579bdf2f  0 0 0 1
+       *     rotl  0xabcdef97  0x7fffffff  - - - -  -0x2a190835  1 0 0 1
+       *     rotl  0xabcdef97   0x8000000  - - - -  -0x54321069  1 0 0 0
+       *     rotl        -0x1        -0x1  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1         0x0  - - - -         -0x1  1 0 0 0
+       *     rotl        -0x1         0x1  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1         0x2  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1        0x10  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1        0x1e  - - - -         -0x1  1 0 0 1
        *     rotl        -0x1        0x1f  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1        0x20  - - - -         -0x1  1 0 0 0
+       *     rotl        -0x1        0x21  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
+       *     rotl        -0x1   0x8000000  - - - -         -0x1  1 0 0 0
+       *     rotr         0x0        -0x1  - - - -          0x0  0 1 0 0
        *     rotr         0x0         0x0  - - - -          0x0  0 1 0 0
-       *     rotr  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
-       *     rotr  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
-       *     rotr        -0x1         0x0  - - - -         -0x1  1 0 0 0
-       *     rotr         0x0         0x4  - - - -          0x0  0 1 0 0
-       *     rotr  0xabcdef97         0x4  - - - -   0x7abcdef9  0 0 0 0
-       *     rotr  0x79fedcba         0x4  - - - -  -0x58601235  1 0 0 1
-       *     rotr        -0x1         0x4  - - - -         -0x1  1 0 0 1
+       *     rotr         0x0         0x1  - - - -          0x0  0 1 0 0
+       *     rotr         0x0         0x2  - - - -          0x0  0 1 0 0
        *     rotr         0x0        0x10  - - - -          0x0  0 1 0 0
-       *     rotr  0xabcdef97        0x10  - - - -  -0x10685433  1 0 0 1
-       *     rotr  0x79fedcba        0x10  - - - -  -0x23458602  1 0 0 1
-       *     rotr        -0x1        0x10  - - - -         -0x1  1 0 0 1
+       *     rotr         0x0        0x1e  - - - -          0x0  0 1 0 0
        *     rotr         0x0        0x1f  - - - -          0x0  0 1 0 0
-       *     rotr  0xabcdef97        0x1f  - - - -   0x579bdf2f  0 0 0 0
+       *     rotr         0x0        0x20  - - - -          0x0  0 1 0 0
+       *     rotr         0x0        0x21  - - - -          0x0  0 1 0 0
+       *     rotr         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
+       *     rotr         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *     rotr  0x55555555        -0x1  - - - -  -0x55555556  1 0 0 1
+       *     rotr  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555         0x1  - - - -  -0x55555556  1 0 0 1
+       *     rotr  0x55555555         0x2  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555        0x10  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555        0x1e  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555        0x1f  - - - -  -0x55555556  1 0 0 1
+       *     rotr  0x55555555        0x20  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555        0x21  - - - -  -0x55555556  1 0 0 1
+       *     rotr  0x55555555  0x7fffffff  - - - -  -0x55555556  1 0 0 1
+       *     rotr  0x55555555   0x8000000  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x79fedcba        -0x1  - - - -   -0xc02468c  1 0 0 1
+       *     rotr  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
+       *     rotr  0x79fedcba         0x1  - - - -   0x3cff6e5d  0 0 0 0
+       *     rotr  0x79fedcba         0x2  - - - -  -0x618048d2  1 0 0 1
+       *     rotr  0x79fedcba        0x10  - - - -  -0x23458602  1 0 0 1
+       *     rotr  0x79fedcba        0x1e  - - - -  -0x18048d17  1 0 0 1
        *     rotr  0x79fedcba        0x1f  - - - -   -0xc02468c  1 0 0 1
+       *     rotr  0x79fedcba        0x20  - - - -   0x79fedcba  0 0 0 0
+       *     rotr  0x79fedcba        0x21  - - - -   0x3cff6e5d  0 0 0 0
+       *     rotr  0x79fedcba  0x7fffffff  - - - -   -0xc02468c  1 0 0 1
+       *     rotr  0x79fedcba   0x8000000  - - - -   0x79fedcba  0 0 0 0
+       *     rotr  0xabcdef97        -0x1  - - - -   0x579bdf2f  0 0 0 0
+       *     rotr  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
+       *     rotr  0xabcdef97         0x1  - - - -  -0x2a190835  1 0 0 1
+       *     rotr  0xabcdef97         0x2  - - - -  -0x150c841b  1 0 0 1
+       *     rotr  0xabcdef97        0x10  - - - -  -0x10685433  1 0 0 1
+       *     rotr  0xabcdef97        0x1e  - - - -  -0x50c841a2  1 0 0 1
+       *     rotr  0xabcdef97        0x1f  - - - -   0x579bdf2f  0 0 0 0
+       *     rotr  0xabcdef97        0x20  - - - -  -0x54321069  1 0 0 0
+       *     rotr  0xabcdef97        0x21  - - - -  -0x2a190835  1 0 0 1
+       *     rotr  0xabcdef97  0x7fffffff  - - - -   0x579bdf2f  0 0 0 0
+       *     rotr  0xabcdef97   0x8000000  - - - -  -0x54321069  1 0 0 0
+       *     rotr        -0x1        -0x1  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1         0x0  - - - -         -0x1  1 0 0 0
+       *     rotr        -0x1         0x1  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1         0x2  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1        0x10  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1        0x1e  - - - -         -0x1  1 0 0 1
        *     rotr        -0x1        0x1f  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1        0x20  - - - -         -0x1  1 0 0 0
+       *     rotr        -0x1        0x21  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
+       *     rotr        -0x1   0x8000000  - - - -         -0x1  1 0 0 0
        *      neg         0x0         0x0  - - - -          0x0  0 1 0 0
        *      neg         0x0         0x1  - - - -         -0x1  1 0 0 1
        *      neg         0x0  0x7fffffff  - - - -  -0x7fffffff  1 0 0 1

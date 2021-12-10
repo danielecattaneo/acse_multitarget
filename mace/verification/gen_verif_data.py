@@ -8,6 +8,7 @@
 from numpy import uint32
 from numpy import int32
 from itertools import *
+import sys
 
 
 INDENT = '      '
@@ -124,45 +125,30 @@ def gen_bin_ter_tests():
             6
         ),
         (
+            list(product(
+                [
+                    0, 
+                    0x55555555,
+                    0x79FEDCBA,
+                    0xABCDEF97,
+                    -1
+                ],
+                [
+                    -1,
+                    0,
+                    1,
+                    2,
+                    16,
+                    30,
+                    31,
+                    32, 
+                    33,
+                    0x7fffffff, 
+                    0x8000000
+                ]
+            )),
             [
-                (0, 0),
-                (0x55555555, 0),
-                (-0x55555556, 0),  # 0xAAAAAAAA
-                (-1, 0),
-                (0, 1),
-                (0x55555555, 1),
-                (-0x55555556, 1),
-                (-1, 1),
-                (0, 31),
-                (0x55555555, 31),
-                (-0x55555556, 31),
-                (-1, 31),
-            ],
-            [
-                fun_shr, fun_shl
-            ],
-            6
-        ),
-        (
-            [
-                (0, 0),
-                (0xABCDEF97, 0),
-                (0x79FEDCBA, 0),
-                (-1, 0),
-                (0, 4),
-                (0xABCDEF97, 4),
-                (0x79FEDCBA, 4),
-                (-1, 4),
-                (0, 16),
-                (0xABCDEF97, 16),
-                (0x79FEDCBA, 16),
-                (-1, 16),
-                (0, 31),
-                (0xABCDEF97, 31),
-                (0x79FEDCBA, 31),
-                (-1, 31),
-            ],
-            [
+                fun_shr, fun_shl,
                 fun_rotl, fun_rotr
             ],
             6
@@ -216,6 +202,9 @@ def gen_bin_ter_tests():
     expected_behavior = []
 
     for set_regs, set_funcs, num_variants in sets:
+        if len(set_regs) > 255 or num_variants > 255 or len(set_funcs) > 255:
+            print('error: test dataset too large!', file=sys.stderr)
+            exit(1)
         header = len(set_regs) + (num_variants << 8) + (len(set_funcs) << 16)
         print_words([header])
         flags = []
@@ -382,22 +371,31 @@ def fun_div(rs1, rs2):
 
 
 def fun_shr(rs1, rs2):
+    rs2 = max(0, min(rs2, 31))
     dest = int32(int32(rs1) >> int32(rs2))
     return dest, dest < 0, dest == 0, 0, (int32(rs1) & (1 << rs2-1) != 0) if rs2 > 0 else 0
 
 
 def fun_shl(rs1, rs2):
-    dest = int32(int32(rs1) << int32(rs2))
-    return dest, dest < 0, dest == 0, 0, (int32(rs1) & (1 << 32-rs2) != 0) if rs2 > 0 else 0
+    rs2 = max(0, rs2)
+    if rs2 < 32:
+        dest = int32(int32(rs1) << int32(rs2))
+        c = (int32(rs1) & (1 << 32-rs2) != 0) if rs2 > 0 else 0
+    else:
+        dest = 0
+        c = int32(rs1) & 1 if rs2 == 32 else 0
+    return dest, dest < 0, dest == 0, 0, c
 
 
 def fun_rotl(rs1, rs2):
+    rs2 = rs2 & 0x1F
     dest = uint32(uint32(rs1) << uint32(rs2)) + \
         uint32(uint32(rs1) >> uint32(32-rs2))
     return int32(dest), int32(dest) < 0, dest == 0, 0, dest & 1 if rs2 > 0 else 0
 
 
 def fun_rotr(rs1, rs2):
+    rs2 = rs2 & 0x1F
     dest = uint32(uint32(rs1) << uint32(32-rs2)) + \
         uint32(uint32(rs1) >> uint32(rs2))
     return int32(dest), int32(dest) < 0, dest == 0, 0, 1 if (dest & 0x80000000) and (rs2 > 0) else 0
