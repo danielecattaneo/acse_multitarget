@@ -38,3 +38,4 @@ verify:
 clean:
 	rm -rf $(objdir)
 	rm -f $(project) $(project:=.exe)
+	$(MAKE) -C verification clean
