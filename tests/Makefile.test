@@ -1,9 +1,14 @@
-ASM=../../bin/asm
-ACSE=../../bin/acse
-objects=$(patsubst %.src,%.o,$(wildcard *.src))
+ASM:=../../bin/asm
+ACSE:=../../bin/acse
+asm_file=$(ASM)
+acse_file=$(ACSE)
 # add .exe at the end on Windows
-asm_file=$(wildcard $(ASM)*)
-acse_file=$(wildcard $(ACSE)*)
+ifeq ($(OS), Windows_NT)
+   asm_file=$(ASM).exe
+   acse_file=$(ACSE).exe
+endif
+
+objects=$(patsubst %.src,%.o,$(wildcard *.src))
 
 .PHONY: test
 ifeq (,$(wildcard _NO_TEST_))
