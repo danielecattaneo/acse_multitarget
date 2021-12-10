@@ -13,7 +13,7 @@
 #include "machine.h"
 
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
-#define SIGN(X) ((X) >= 0 ? 1 : 0)
+#define POSITIVE(X) ((X) >= 0 ? 1 : 0)
 #define MSB(X) (((X) >> 31) & 1)
 
 
@@ -128,7 +128,7 @@ int executeTER(decoded_instr *instr)
          break;
       case SHR:
          *dest = *src1 >> *src2;
-         if (!func_is_unsigned(instr) && !SIGN(old_src1)) {
+         if (!func_is_unsigned(instr) && !POSITIVE(old_src1)) {
             /* Arithmetic shift */
             *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
          } else if (func_is_unsigned(instr)) {
@@ -137,7 +137,7 @@ int executeTER(decoded_instr *instr)
          }
          if (old_src2) {
             if (old_src2 > 32)
-               carryout = (!func_is_unsigned(instr) && !SIGN(old_src1));
+               carryout = (!func_is_unsigned(instr) && !POSITIVE(old_src1));
             else
                carryout = !!(old_src1 & (1 << (old_src2 - 1)));
          }
@@ -215,13 +215,13 @@ int executeBIN(decoded_instr *instr)
          break;
       case SHRI:
          *dest = *src1 >> *src2;
-         if (!SIGN(old_src1)) {
+         if (!POSITIVE(old_src1)) {
             /* Arithmetic shift */
             *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
          }
          if (old_src2) {
             if (old_src2 > 32)
-               carryout = !SIGN(old_src1);
+               carryout = !POSITIVE(old_src1);
             else
                carryout = !!(old_src1 & (1 << (old_src2 - 1)));
          }
@@ -437,7 +437,7 @@ int handle_special_instruction(decoded_instr *instr)
 static int perform_add(int a, int b, int *carry, int *overflow)
 {
    int result = a + b;
-   if (SIGN(result) != SIGN(a) && SIGN(a) == SIGN(b))
+   if (POSITIVE(result) != POSITIVE(a) && POSITIVE(a) == POSITIVE(b))
       *overflow = 1;
    if (MSB(result) < MSB(a) + MSB(b)) {
       *carry = 1;
@@ -448,7 +448,7 @@ static int perform_add(int a, int b, int *carry, int *overflow)
 static int perform_sub(int a, int b, int *carry, int *overflow)
 {
    int result = a - b;
-   if (SIGN(result) != SIGN(a) && SIGN(a) != SIGN(b))
+   if (POSITIVE(result) != POSITIVE(a) && POSITIVE(a) != POSITIVE(b))
       *overflow = 1;
    if (MSB(result) > MSB(a) - MSB(b)) {
       *carry = 1;
