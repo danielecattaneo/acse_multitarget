@@ -12,6 +12,7 @@
 #include "fetch.h"
 #include "machine.h"
 
+#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
 #define POSITIVE(X) ((X) >= 0 ? 1 : 0)
 #define MSB(X) (((X) >> 31) & 1)
@@ -22,8 +23,10 @@ static int executeBIN(decoded_instr *instr);
 static int executeUNR(decoded_instr *instr);
 static int executeJMP(decoded_instr *instr);
 static int handle_special_instruction(decoded_instr *instr);
-static int perform_add(int a, int b, int *carry, int *overflow);
-static int perform_sub(int a, int b, int *carry, int *overflow);
+static int perform_add(int value, int amount, int *carry, int *overflow);
+static int perform_sub(int value, int amount, int *carry, int *overflow);
+static int perform_shl(int value, int amount, int *carry);
+static int perform_shr(int is_unsigned, int value, int amount, int *carry);
 static int perform_rotl(int value, int amount, int *carry);
 static int perform_rotr(int value, int amount, int *carry);
 
@@ -116,31 +119,12 @@ int executeTER(decoded_instr *instr)
             *dest = perform_sub(*dest, 1, &carryout, &overflow);
          break;
       case SHL:
-         if (old_src2 > 32) {
-            *dest = 0;
-         } else {
-            *dest = *src1 << *src2;
-            carryout = !!((unsigned long long)((unsigned)old_src1) &
-                  (1ULL << (32 - old_src2)));
-         }
+         *dest = perform_shl(old_src1, old_src2, &carryout);
          if (func_carry(instr) && getflag(CARRY))
             *dest = perform_add(*dest, 1, &carryout, &overflow);
          break;
       case SHR:
-         *dest = *src1 >> *src2;
-         if (!func_is_unsigned(instr) && !POSITIVE(old_src1)) {
-            /* Arithmetic shift */
-            *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
-         } else if (func_is_unsigned(instr)) {
-            /* Logic shift */
-            *dest &= (1 << MAX(32 - old_src2, 0)) - 1;
-         }
-         if (old_src2) {
-            if (old_src2 > 32)
-               carryout = (!func_is_unsigned(instr) && !POSITIVE(old_src1));
-            else
-               carryout = !!(old_src1 & (1 << (old_src2 - 1)));
-         }
+         *dest = perform_shr(func_is_unsigned(instr), old_src1, old_src2, &carryout);
          if (func_carry(instr) && getflag(CARRY))
             *dest = perform_add(*dest, 1, &carryout, &overflow);
          break;
@@ -177,7 +161,6 @@ int executeBIN(decoded_instr *instr)
    src1 = &(reg[instr->src1]);
    src2 = &(instr->imm);
 
-
    old_src1 = *src1;
    old_src2 = *src2;
 
@@ -204,28 +187,8 @@ int executeBIN(decoded_instr *instr)
             *dest = *src1 / *src2;
          }
          break;
-      case SHLI:
-         if (old_src2 > 32) {
-            *dest = 0;
-         } else {
-            *dest = *src1 << *src2;
-            carryout = !!((unsigned long long)((unsigned)old_src1) &
-                  (1ULL << (32 - old_src2)));
-         }
-         break;
-      case SHRI:
-         *dest = *src1 >> *src2;
-         if (!POSITIVE(old_src1)) {
-            /* Arithmetic shift */
-            *dest |= ((1 << old_src2) - 1) << MAX(32 - old_src2, 0);
-         }
-         if (old_src2) {
-            if (old_src2 > 32)
-               carryout = !POSITIVE(old_src1);
-            else
-               carryout = !!(old_src1 & (1 << (old_src2 - 1)));
-         }
-         break;
+      case SHLI: *dest = perform_shl(old_src1, old_src2, &carryout); break;
+      case SHRI: *dest = perform_shr(0, old_src1, old_src2, &carryout); break;
       case ROTLI: *dest = perform_rotl(*src1, *src2, &carryout); break;
       case ROTRI: *dest = perform_rotr(*src1, *src2, &carryout); break;
       case NOTL: *dest = !*src1; break;
@@ -454,6 +417,43 @@ static int perform_sub(int a, int b, int *carry, int *overflow)
       *carry = 1;
    }
    return result;
+}
+
+static int perform_shl(int value, int amount, int *carry)
+{
+   int dest;
+   if (amount > 31) {
+      dest = 0;
+      if (amount == 32)
+         *carry = value & 1;
+   } else if (amount > 0) {
+      dest = value << amount;
+      *carry = !!((unsigned long long)((unsigned)value) & (1ULL << (32 - amount)));
+   } else {
+      dest = value;
+   }
+   return dest;
+}
+
+static int perform_shr(int is_unsigned, int value, int amount, int *carry)
+{
+   int dest;
+   amount = MAX(0, MIN(amount, 31));
+   dest = value >> amount;
+   if (!is_unsigned && !POSITIVE(value)) {
+      /* Arithmetic shift */
+      dest |= ((1 << amount) - 1) << MAX(32 - amount, 0);
+   } else if (is_unsigned) {
+      /* Logic shift */
+      dest &= (1 << MAX(32 - amount, 0)) - 1;
+   }
+   if (amount) {
+      if (amount > 31)
+         *carry = (!is_unsigned && !POSITIVE(value));
+      else
+         *carry = !!(value & (1 << (amount - 1)));
+   }
+   return dest;
 }
 
 static int perform_rotl(int value, int amount, int *carry)
