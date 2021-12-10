@@ -1,5 +1,13 @@
 # Release Notes
 
+## ACSE 1.2.2
+
+Released on 2021-12-13
+
+- Made shifts with amount greater than 31 and less than zero deterministic in
+  both ACSE and MACE.
+- Minor fixes to the makefiles.
+
 ## ACSE 1.2.1
 
 Released on 2021-09-13
@@ -103,7 +111,8 @@ Released on 2020-09-14
 - Fixed `gen_move_immediate` and `gen_load_immediate` to properly handle
   positive numbers larger than 32767 with bit 15 set.
 - Fix a bug where an initialized variable was not properly loaded if it was
-  used and defined exactly once by the same instruction in the first basic block.
+  used and defined exactly once by the same instruction in the first basic
+  block.
 - Fix a bug where invalid tokens after a valid statement caused parsing to stop
   mid-program without an error.
 - Fix a bug where line numbers were incorrectly counted on lines with C++ style
@@ -236,8 +245,8 @@ Released on 2008-12-27
 
 **Changes to mace:**
 
-- Fix PSW updating behavior of unary instructions to conform to the specification.
-
+- Fix PSW updating behavior of unary instructions to conform to the
+  specification.
 
 **Other changes:**
 
