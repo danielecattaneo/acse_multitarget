@@ -207,7 +207,7 @@ TestTernOrBinData:
       .WORD         0x0        0x20 /* input 7 */
       .WORD         0x0        0x21 /* input 8 */
       .WORD         0x0  0x7fffffff /* input 9 */
-      .WORD         0x0   0x8000000 /* input 10 */
+      .WORD         0x0 -0x80000000 /* input 10 */
       .WORD  0x55555555        -0x1 /* input 11 */
       .WORD  0x55555555         0x0 /* input 12 */
       .WORD  0x55555555         0x1 /* input 13 */
@@ -218,7 +218,7 @@ TestTernOrBinData:
       .WORD  0x55555555        0x20 /* input 18 */
       .WORD  0x55555555        0x21 /* input 19 */
       .WORD  0x55555555  0x7fffffff /* input 20 */
-      .WORD  0x55555555   0x8000000 /* input 21 */
+      .WORD  0x55555555 -0x80000000 /* input 21 */
       .WORD  0x79fedcba        -0x1 /* input 22 */
       .WORD  0x79fedcba         0x0 /* input 23 */
       .WORD  0x79fedcba         0x1 /* input 24 */
@@ -229,7 +229,7 @@ TestTernOrBinData:
       .WORD  0x79fedcba        0x20 /* input 29 */
       .WORD  0x79fedcba        0x21 /* input 30 */
       .WORD  0x79fedcba  0x7fffffff /* input 31 */
-      .WORD  0x79fedcba   0x8000000 /* input 32 */
+      .WORD  0x79fedcba -0x80000000 /* input 32 */
       .WORD -0x54321069        -0x1 /* input 33 */
       .WORD -0x54321069         0x0 /* input 34 */
       .WORD -0x54321069         0x1 /* input 35 */
@@ -240,7 +240,7 @@ TestTernOrBinData:
       .WORD -0x54321069        0x20 /* input 40 */
       .WORD -0x54321069        0x21 /* input 41 */
       .WORD -0x54321069  0x7fffffff /* input 42 */
-      .WORD -0x54321069   0x8000000 /* input 43 */
+      .WORD -0x54321069 -0x80000000 /* input 43 */
       .WORD        -0x1        -0x1 /* input 44 */
       .WORD        -0x1         0x0 /* input 45 */
       .WORD        -0x1         0x1 /* input 46 */
@@ -251,19 +251,19 @@ TestTernOrBinData:
       .WORD        -0x1        0x20 /* input 51 */
       .WORD        -0x1        0x21 /* input 52 */
       .WORD        -0x1  0x7fffffff /* input 53 */
-      .WORD        -0x1   0x8000000 /* input 54 */
+      .WORD        -0x1 -0x80000000 /* input 54 */
       /* outputs of shr */
       .WORD         0x0         0x0         0x0         0x0
       .WORD         0x0         0x0         0x0         0x0
       .WORD         0x0         0x0         0x0  0x55555555
       .WORD  0x55555555  0x2aaaaaaa  0x15555555      0x5555
       .WORD         0x1         0x0         0x0         0x0
-      .WORD         0x0         0x0  0x79fedcba  0x79fedcba
+      .WORD         0x0  0x55555555  0x79fedcba  0x79fedcba
       .WORD  0x3cff6e5d  0x1e7fb72e      0x79fe         0x1
       .WORD         0x0         0x0         0x0         0x0
-      .WORD         0x0 -0x54321069 -0x54321069 -0x2a190835
+      .WORD  0x79fedcba -0x54321069 -0x54321069 -0x2a190835
       .WORD -0x150c841b     -0x5433        -0x2        -0x1
-      .WORD        -0x1        -0x1        -0x1        -0x1
+      .WORD        -0x1        -0x1        -0x1 -0x54321069
       .WORD        -0x1        -0x1        -0x1        -0x1
       .WORD        -0x1        -0x1        -0x1        -0x1
       .WORD        -0x1        -0x1        -0x1
@@ -273,15 +273,15 @@ TestTernOrBinData:
       .WORD         0x0         0x0         0x0  0x55555555
       .WORD  0x55555555 -0x55555556  0x55555554  0x55550000
       .WORD  0x40000000 -0x80000000         0x0         0x0
-      .WORD         0x0         0x0  0x79fedcba  0x79fedcba
+      .WORD         0x0  0x55555555  0x79fedcba  0x79fedcba
       .WORD  -0xc02468c -0x18048d18 -0x23460000 -0x80000000
       .WORD         0x0         0x0         0x0         0x0
-      .WORD         0x0 -0x54321069 -0x54321069  0x579bdf2e
+      .WORD  0x79fedcba -0x54321069 -0x54321069  0x579bdf2e
       .WORD -0x50c841a4 -0x10690000 -0x40000000 -0x80000000
-      .WORD         0x0         0x0         0x0         0x0
+      .WORD         0x0         0x0         0x0 -0x54321069
       .WORD        -0x1        -0x1        -0x2        -0x4
       .WORD    -0x10000 -0x40000000 -0x80000000         0x0
-      .WORD         0x0         0x0         0x0
+      .WORD         0x0         0x0        -0x1
       /* outputs of rotl */
       .WORD         0x0         0x0         0x0         0x0
       .WORD         0x0         0x0         0x0         0x0
@@ -313,10 +313,10 @@ TestTernOrBinData:
       .WORD        -0x1        -0x1        -0x1        -0x1
       .WORD        -0x1        -0x1        -0x1
       /* expected flags */
-      .WORD  0x44444444    0x100444    0x555550  0x55551110
-      .WORD -0x7666677b -0x66777778  0x49999999  0x44444444
-      .WORD  0x11180044 -0x7ffbbba8  0x44445889  0x59998188
-      .WORD -0x66677bbc  0x44444599  0x44444444 -0x7eee7f7c
+      .WORD  0x44444444    0x100444     0x44450  0x44451110
+      .WORD -0x76666780 -0x66777667  0x48999999  0x44444444
+      .WORD  0x11180044 -0x7fffbba8   0x4445889  0x59998188
+      .WORD -0x666777bc  0x44844599  0x44444444 -0x7eee7f7c
       .WORD -0x67fef780 -0x6fe7fe78  0x18999818 -0x66667677
       .WORD  0x44489989  0x44444444   0x9000909 -0x66ff6f67
       .WORD -0x7ff6ff67   0x9809999 -0x66666768      0x8998
@@ -475,7 +475,7 @@ TestTernOrBinData:
        *      shr         0x0        0x20  - - - -          0x0  0 1 0 0
        *      shr         0x0        0x21  - - - -          0x0  0 1 0 0
        *      shr         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shr         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *      shr         0x0 -0x80000000  - - - -          0x0  0 1 0 0
        *      shr  0x55555555        -0x1  - - - -   0x55555555  0 0 0 0
        *      shr  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
        *      shr  0x55555555         0x1  - - - -   0x2aaaaaaa  0 0 0 1
@@ -483,10 +483,10 @@ TestTernOrBinData:
        *      shr  0x55555555        0x10  - - - -       0x5555  0 0 0 0
        *      shr  0x55555555        0x1e  - - - -          0x1  0 0 0 0
        *      shr  0x55555555        0x1f  - - - -          0x0  0 1 0 1
-       *      shr  0x55555555        0x20  - - - -          0x0  0 1 0 1
-       *      shr  0x55555555        0x21  - - - -          0x0  0 1 0 1
-       *      shr  0x55555555  0x7fffffff  - - - -          0x0  0 1 0 1
-       *      shr  0x55555555   0x8000000  - - - -          0x0  0 1 0 1
+       *      shr  0x55555555        0x20  - - - -          0x0  0 1 0 0
+       *      shr  0x55555555        0x21  - - - -          0x0  0 1 0 0
+       *      shr  0x55555555  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shr  0x55555555 -0x80000000  - - - -   0x55555555  0 0 0 0
        *      shr  0x79fedcba        -0x1  - - - -   0x79fedcba  0 0 0 0
        *      shr  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
        *      shr  0x79fedcba         0x1  - - - -   0x3cff6e5d  0 0 0 0
@@ -494,10 +494,10 @@ TestTernOrBinData:
        *      shr  0x79fedcba        0x10  - - - -       0x79fe  0 0 0 1
        *      shr  0x79fedcba        0x1e  - - - -          0x1  0 0 0 1
        *      shr  0x79fedcba        0x1f  - - - -          0x0  0 1 0 1
-       *      shr  0x79fedcba        0x20  - - - -          0x0  0 1 0 1
-       *      shr  0x79fedcba        0x21  - - - -          0x0  0 1 0 1
-       *      shr  0x79fedcba  0x7fffffff  - - - -          0x0  0 1 0 1
-       *      shr  0x79fedcba   0x8000000  - - - -          0x0  0 1 0 1
+       *      shr  0x79fedcba        0x20  - - - -          0x0  0 1 0 0
+       *      shr  0x79fedcba        0x21  - - - -          0x0  0 1 0 0
+       *      shr  0x79fedcba  0x7fffffff  - - - -          0x0  0 1 0 0
+       *      shr  0x79fedcba -0x80000000  - - - -   0x79fedcba  0 0 0 0
        *      shr  0xabcdef97        -0x1  - - - -  -0x54321069  1 0 0 0
        *      shr  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
        *      shr  0xabcdef97         0x1  - - - -  -0x2a190835  1 0 0 1
@@ -505,10 +505,10 @@ TestTernOrBinData:
        *      shr  0xabcdef97        0x10  - - - -      -0x5433  1 0 0 1
        *      shr  0xabcdef97        0x1e  - - - -         -0x2  1 0 0 1
        *      shr  0xabcdef97        0x1f  - - - -         -0x1  1 0 0 0
-       *      shr  0xabcdef97        0x20  - - - -         -0x1  1 0 0 0
-       *      shr  0xabcdef97        0x21  - - - -         -0x1  1 0 0 0
-       *      shr  0xabcdef97  0x7fffffff  - - - -         -0x1  1 0 0 0
-       *      shr  0xabcdef97   0x8000000  - - - -         -0x1  1 0 0 0
+       *      shr  0xabcdef97        0x20  - - - -         -0x1  1 0 0 1
+       *      shr  0xabcdef97        0x21  - - - -         -0x1  1 0 0 1
+       *      shr  0xabcdef97  0x7fffffff  - - - -         -0x1  1 0 0 1
+       *      shr  0xabcdef97 -0x80000000  - - - -  -0x54321069  1 0 0 0
        *      shr        -0x1        -0x1  - - - -         -0x1  1 0 0 0
        *      shr        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *      shr        -0x1         0x1  - - - -         -0x1  1 0 0 1
@@ -519,7 +519,7 @@ TestTernOrBinData:
        *      shr        -0x1        0x20  - - - -         -0x1  1 0 0 1
        *      shr        -0x1        0x21  - - - -         -0x1  1 0 0 1
        *      shr        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
-       *      shr        -0x1   0x8000000  - - - -         -0x1  1 0 0 1
+       *      shr        -0x1 -0x80000000  - - - -         -0x1  1 0 0 0
        *      shl         0x0        -0x1  - - - -          0x0  0 1 0 0
        *      shl         0x0         0x0  - - - -          0x0  0 1 0 0
        *      shl         0x0         0x1  - - - -          0x0  0 1 0 0
@@ -530,7 +530,7 @@ TestTernOrBinData:
        *      shl         0x0        0x20  - - - -          0x0  0 1 0 0
        *      shl         0x0        0x21  - - - -          0x0  0 1 0 0
        *      shl         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shl         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl         0x0 -0x80000000  - - - -          0x0  0 1 0 0
        *      shl  0x55555555        -0x1  - - - -   0x55555555  0 0 0 0
        *      shl  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
        *      shl  0x55555555         0x1  - - - -  -0x55555556  1 0 0 0
@@ -541,7 +541,7 @@ TestTernOrBinData:
        *      shl  0x55555555        0x20  - - - -          0x0  0 1 0 1
        *      shl  0x55555555        0x21  - - - -          0x0  0 1 0 0
        *      shl  0x55555555  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shl  0x55555555   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0x55555555 -0x80000000  - - - -   0x55555555  0 0 0 0
        *      shl  0x79fedcba        -0x1  - - - -   0x79fedcba  0 0 0 0
        *      shl  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
        *      shl  0x79fedcba         0x1  - - - -   -0xc02468c  1 0 0 0
@@ -552,7 +552,7 @@ TestTernOrBinData:
        *      shl  0x79fedcba        0x20  - - - -          0x0  0 1 0 0
        *      shl  0x79fedcba        0x21  - - - -          0x0  0 1 0 0
        *      shl  0x79fedcba  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shl  0x79fedcba   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0x79fedcba -0x80000000  - - - -   0x79fedcba  0 0 0 0
        *      shl  0xabcdef97        -0x1  - - - -  -0x54321069  1 0 0 0
        *      shl  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
        *      shl  0xabcdef97         0x1  - - - -   0x579bdf2e  0 0 0 1
@@ -563,7 +563,7 @@ TestTernOrBinData:
        *      shl  0xabcdef97        0x20  - - - -          0x0  0 1 0 1
        *      shl  0xabcdef97        0x21  - - - -          0x0  0 1 0 0
        *      shl  0xabcdef97  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shl  0xabcdef97   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl  0xabcdef97 -0x80000000  - - - -  -0x54321069  1 0 0 0
        *      shl        -0x1        -0x1  - - - -         -0x1  1 0 0 0
        *      shl        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *      shl        -0x1         0x1  - - - -         -0x2  1 0 0 1
@@ -574,7 +574,7 @@ TestTernOrBinData:
        *      shl        -0x1        0x20  - - - -          0x0  0 1 0 1
        *      shl        -0x1        0x21  - - - -          0x0  0 1 0 0
        *      shl        -0x1  0x7fffffff  - - - -          0x0  0 1 0 0
-       *      shl        -0x1   0x8000000  - - - -          0x0  0 1 0 0
+       *      shl        -0x1 -0x80000000  - - - -         -0x1  1 0 0 0
        *     rotl         0x0        -0x1  - - - -          0x0  0 1 0 0
        *     rotl         0x0         0x0  - - - -          0x0  0 1 0 0
        *     rotl         0x0         0x1  - - - -          0x0  0 1 0 0
@@ -585,7 +585,7 @@ TestTernOrBinData:
        *     rotl         0x0        0x20  - - - -          0x0  0 1 0 0
        *     rotl         0x0        0x21  - - - -          0x0  0 1 0 0
        *     rotl         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
-       *     rotl         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *     rotl         0x0 -0x80000000  - - - -          0x0  0 1 0 0
        *     rotl  0x55555555        -0x1  - - - -  -0x55555556  1 0 0 0
        *     rotl  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
        *     rotl  0x55555555         0x1  - - - -  -0x55555556  1 0 0 0
@@ -596,7 +596,7 @@ TestTernOrBinData:
        *     rotl  0x55555555        0x20  - - - -   0x55555555  0 0 0 0
        *     rotl  0x55555555        0x21  - - - -  -0x55555556  1 0 0 0
        *     rotl  0x55555555  0x7fffffff  - - - -  -0x55555556  1 0 0 0
-       *     rotl  0x55555555   0x8000000  - - - -   0x55555555  0 0 0 0
+       *     rotl  0x55555555 -0x80000000  - - - -   0x55555555  0 0 0 0
        *     rotl  0x79fedcba        -0x1  - - - -   0x3cff6e5d  0 0 0 1
        *     rotl  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
        *     rotl  0x79fedcba         0x1  - - - -   -0xc02468c  1 0 0 0
@@ -607,7 +607,7 @@ TestTernOrBinData:
        *     rotl  0x79fedcba        0x20  - - - -   0x79fedcba  0 0 0 0
        *     rotl  0x79fedcba        0x21  - - - -   -0xc02468c  1 0 0 0
        *     rotl  0x79fedcba  0x7fffffff  - - - -   0x3cff6e5d  0 0 0 1
-       *     rotl  0x79fedcba   0x8000000  - - - -   0x79fedcba  0 0 0 0
+       *     rotl  0x79fedcba -0x80000000  - - - -   0x79fedcba  0 0 0 0
        *     rotl  0xabcdef97        -0x1  - - - -  -0x2a190835  1 0 0 1
        *     rotl  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
        *     rotl  0xabcdef97         0x1  - - - -   0x579bdf2f  0 0 0 1
@@ -618,7 +618,7 @@ TestTernOrBinData:
        *     rotl  0xabcdef97        0x20  - - - -  -0x54321069  1 0 0 0
        *     rotl  0xabcdef97        0x21  - - - -   0x579bdf2f  0 0 0 1
        *     rotl  0xabcdef97  0x7fffffff  - - - -  -0x2a190835  1 0 0 1
-       *     rotl  0xabcdef97   0x8000000  - - - -  -0x54321069  1 0 0 0
+       *     rotl  0xabcdef97 -0x80000000  - - - -  -0x54321069  1 0 0 0
        *     rotl        -0x1        -0x1  - - - -         -0x1  1 0 0 1
        *     rotl        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *     rotl        -0x1         0x1  - - - -         -0x1  1 0 0 1
@@ -629,7 +629,7 @@ TestTernOrBinData:
        *     rotl        -0x1        0x20  - - - -         -0x1  1 0 0 0
        *     rotl        -0x1        0x21  - - - -         -0x1  1 0 0 1
        *     rotl        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
-       *     rotl        -0x1   0x8000000  - - - -         -0x1  1 0 0 0
+       *     rotl        -0x1 -0x80000000  - - - -         -0x1  1 0 0 0
        *     rotr         0x0        -0x1  - - - -          0x0  0 1 0 0
        *     rotr         0x0         0x0  - - - -          0x0  0 1 0 0
        *     rotr         0x0         0x1  - - - -          0x0  0 1 0 0
@@ -640,7 +640,7 @@ TestTernOrBinData:
        *     rotr         0x0        0x20  - - - -          0x0  0 1 0 0
        *     rotr         0x0        0x21  - - - -          0x0  0 1 0 0
        *     rotr         0x0  0x7fffffff  - - - -          0x0  0 1 0 0
-       *     rotr         0x0   0x8000000  - - - -          0x0  0 1 0 0
+       *     rotr         0x0 -0x80000000  - - - -          0x0  0 1 0 0
        *     rotr  0x55555555        -0x1  - - - -  -0x55555556  1 0 0 1
        *     rotr  0x55555555         0x0  - - - -   0x55555555  0 0 0 0
        *     rotr  0x55555555         0x1  - - - -  -0x55555556  1 0 0 1
@@ -651,7 +651,7 @@ TestTernOrBinData:
        *     rotr  0x55555555        0x20  - - - -   0x55555555  0 0 0 0
        *     rotr  0x55555555        0x21  - - - -  -0x55555556  1 0 0 1
        *     rotr  0x55555555  0x7fffffff  - - - -  -0x55555556  1 0 0 1
-       *     rotr  0x55555555   0x8000000  - - - -   0x55555555  0 0 0 0
+       *     rotr  0x55555555 -0x80000000  - - - -   0x55555555  0 0 0 0
        *     rotr  0x79fedcba        -0x1  - - - -   -0xc02468c  1 0 0 1
        *     rotr  0x79fedcba         0x0  - - - -   0x79fedcba  0 0 0 0
        *     rotr  0x79fedcba         0x1  - - - -   0x3cff6e5d  0 0 0 0
@@ -662,7 +662,7 @@ TestTernOrBinData:
        *     rotr  0x79fedcba        0x20  - - - -   0x79fedcba  0 0 0 0
        *     rotr  0x79fedcba        0x21  - - - -   0x3cff6e5d  0 0 0 0
        *     rotr  0x79fedcba  0x7fffffff  - - - -   -0xc02468c  1 0 0 1
-       *     rotr  0x79fedcba   0x8000000  - - - -   0x79fedcba  0 0 0 0
+       *     rotr  0x79fedcba -0x80000000  - - - -   0x79fedcba  0 0 0 0
        *     rotr  0xabcdef97        -0x1  - - - -   0x579bdf2f  0 0 0 0
        *     rotr  0xabcdef97         0x0  - - - -  -0x54321069  1 0 0 0
        *     rotr  0xabcdef97         0x1  - - - -  -0x2a190835  1 0 0 1
@@ -673,7 +673,7 @@ TestTernOrBinData:
        *     rotr  0xabcdef97        0x20  - - - -  -0x54321069  1 0 0 0
        *     rotr  0xabcdef97        0x21  - - - -  -0x2a190835  1 0 0 1
        *     rotr  0xabcdef97  0x7fffffff  - - - -   0x579bdf2f  0 0 0 0
-       *     rotr  0xabcdef97   0x8000000  - - - -  -0x54321069  1 0 0 0
+       *     rotr  0xabcdef97 -0x80000000  - - - -  -0x54321069  1 0 0 0
        *     rotr        -0x1        -0x1  - - - -         -0x1  1 0 0 1
        *     rotr        -0x1         0x0  - - - -         -0x1  1 0 0 0
        *     rotr        -0x1         0x1  - - - -         -0x1  1 0 0 1
@@ -684,7 +684,7 @@ TestTernOrBinData:
        *     rotr        -0x1        0x20  - - - -         -0x1  1 0 0 0
        *     rotr        -0x1        0x21  - - - -         -0x1  1 0 0 1
        *     rotr        -0x1  0x7fffffff  - - - -         -0x1  1 0 0 1
-       *     rotr        -0x1   0x8000000  - - - -         -0x1  1 0 0 0
+       *     rotr        -0x1 -0x80000000  - - - -         -0x1  1 0 0 0
        *      neg         0x0         0x0  - - - -          0x0  0 1 0 0
        *      neg         0x0         0x1  - - - -         -0x1  1 0 0 1
        *      neg         0x0  0x7fffffff  - - - -  -0x7fffffff  1 0 0 1

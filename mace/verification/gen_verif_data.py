@@ -144,7 +144,7 @@ def gen_bin_ter_tests():
                     32, 
                     33,
                     0x7fffffff, 
-                    0x8000000
+                    -0x80000000
                 ]
             )),
             [
@@ -371,9 +371,13 @@ def fun_div(rs1, rs2):
 
 
 def fun_shr(rs1, rs2):
-    rs2 = max(0, min(rs2, 31))
-    dest = int32(int32(rs1) >> int32(rs2))
-    return dest, dest < 0, dest == 0, 0, (int32(rs1) & (1 << rs2-1) != 0) if rs2 > 0 else 0
+    amount = max(0, min(int32(rs2), 31))
+    dest = int32(int32(rs1) >> amount)
+    if int32(rs2) > 31:
+        c = int32(rs1) < 0
+    else:
+        c = (int32(rs1) & (1 << amount-1) != 0) if amount > 0 else 0
+    return dest, dest < 0, dest == 0, 0, c
 
 
 def fun_shl(rs1, rs2):

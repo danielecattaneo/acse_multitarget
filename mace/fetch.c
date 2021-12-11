@@ -437,7 +437,7 @@ static int perform_shl(int value, int amount, int *carry)
 
 static int perform_shr(int is_unsigned, int value, int amount, int *carry)
 {
-   int dest;
+   int dest, orig_amount = amount;
    amount = MAX(0, MIN(amount, 31));
    dest = value >> amount;
    if (!is_unsigned && !POSITIVE(value)) {
@@ -448,7 +448,7 @@ static int perform_shr(int is_unsigned, int value, int amount, int *carry)
       dest &= (1 << MAX(32 - amount, 0)) - 1;
    }
    if (amount) {
-      if (amount > 31)
+      if (orig_amount > 31)
          *carry = (!is_unsigned && !POSITIVE(value));
       else
          *carry = !!(value & (1 << (amount - 1)));
