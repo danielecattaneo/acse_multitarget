@@ -325,6 +325,12 @@ t_axe_label * assignLabel(t_program_infos *program, t_axe_label *label)
 
    if (program->lmanager == NULL)
       notifyError(AXE_INVALID_LABEL_MANAGER);
+   
+   for (t_list *li = program->instructions; li != NULL; li = LNEXT(li)) {
+      t_axe_instruction *instr = LDATA(li);
+      if (instr->labelID && instr->labelID->labelID == label->labelID)
+         notifyError(AXE_LABEL_ALREADY_ASSIGNED);
+   }
 
    /* fix the label */
    return assignLabelID(program->lmanager, label);
