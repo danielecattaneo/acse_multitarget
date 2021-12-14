@@ -16,7 +16,7 @@
 struct t_axe_label_manager
 {
    t_list *labels;
-   int current_label_ID;
+   unsigned int current_label_ID;
    t_axe_label *label_to_assign;
 };
 

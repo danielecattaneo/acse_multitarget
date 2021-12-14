@@ -18,9 +18,9 @@
 
 typedef struct t_axe_label
 {
-   int labelID;      /* label identifier */
-   char *name;       /* Name of the label. If NULL, the name will be 
-                      * automatically generated in the form L<ID>. */
+   unsigned int labelID; /* label identifier */
+   char *name;           /* Name of the label. If NULL, the name will be 
+                          * automatically generated in the form L<ID>. */
 } t_axe_label;
 
 typedef struct t_axe_register

@@ -425,7 +425,7 @@ void printLabel(t_axe_label *label, FILE *fp)
    if (label->name) {
       fputs(label->name, fp);
    } else {
-      fprintf(fp, "L%d", label->labelID);
+      fprintf(fp, "L%u", label->labelID);
    }
 }
 
