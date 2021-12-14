@@ -57,11 +57,11 @@ extern t_list *popInstrInsertionPoint(t_program_infos *p);
 extern t_axe_label *newLabel(t_program_infos *program);
 
 /* assign the given label identifier to the next instruction. Returns
- * the label assigned; otherwise (an error occurred) LABEL_UNSPECIFIED */
+ * the label assigned; otherwise (an error occurred) NULL */
 extern t_axe_label *assignLabel(t_program_infos *program, t_axe_label *label);
 
-/* reserve and fix a new label. It returns either the label assigned or the
- * value LABEL_UNSPECIFIED if an error occurred */
+/* reserve and fix a new label. It returns either the label assigned or
+ * NULL if an error occurred */
 extern t_axe_label *assignNewLabel(t_program_infos *program);
 
 /* Like the above functions, but with the ability to give a name to the label.
