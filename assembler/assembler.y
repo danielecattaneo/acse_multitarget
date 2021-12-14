@@ -520,6 +520,9 @@ int main (int argc, char **argv)
    char *filename;
    FILE *input_file;
    extern FILE *yyin;
+   int retval;
+
+   retval = 0;
 
    argc--;
    argv++;
@@ -588,6 +591,7 @@ int main (int argc, char **argv)
       {
          fprintf( stdout, "An error occurred while writing the object file.\n"
                   "%s. \n", AsmErrorToString(errorcode));
+         retval = 2;
       }
 #ifndef NDEBUG
       else
@@ -597,6 +601,7 @@ int main (int argc, char **argv)
    else {
       fprintf(stdout, "\nInput file contains some error(s). No object file written\n");
       fprintf(stdout, "**%d errors found \n\n", num_error);
+      retval = 1;
    }
 
 #ifndef NDEBUG
@@ -618,7 +623,7 @@ int main (int argc, char **argv)
    fprintf(stdout, "Done. \n");
 #endif
    
-   return 0;
+   return retval;
 }
 
 char * AsmErrorToString(int errorcode)
