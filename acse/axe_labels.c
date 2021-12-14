@@ -24,7 +24,7 @@ struct t_axe_label_manager
 void setRawLabelName(t_axe_label_manager *lmanager, t_axe_label *label,
       const char *finalName);
 
-int isAssignedLabel(t_axe_label_manager *lmanager)
+int isAssigningLabel(t_axe_label_manager *lmanager)
 {
    /* preconditions: lmanager must be different from NULL */
    if (lmanager == NULL)

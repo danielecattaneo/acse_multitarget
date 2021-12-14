@@ -266,7 +266,7 @@ void set_end_Program(t_program_infos *program)
    if (program == NULL)
       notifyError(AXE_PROGRAM_NOT_INITIALIZED);
 
-   if (isAssignedLabel(program->lmanager))
+   if (isAssigningLabel(program->lmanager))
    {
       gen_halt_instruction(program);
       return;
