@@ -30,8 +30,7 @@ int isAssigningLabel(t_axe_label_manager *lmanager)
    if (lmanager == NULL)
       notifyError(AXE_INVALID_LABEL_MANAGER);
 
-   if (  (lmanager->label_to_assign != NULL)
-         && ((lmanager->label_to_assign)->labelID != LABEL_UNSPECIFIED) )
+   if (lmanager->label_to_assign != NULL)
    {
       return 1;
    }
@@ -84,15 +83,13 @@ t_axe_label * assignLabelID(t_axe_label_manager *lmanager, t_axe_label *label)
    /* precondition: label must be different from NULL and
     * must always carry a valid identifier */
    if (  (label == NULL)
-         || (label->labelID == LABEL_UNSPECIFIED)
          || (label->labelID >= lmanager->current_label_ID))
    {
       notifyError(AXE_INVALID_LABEL);
    }
 
    /* test if the next instruction has already a label */
-   if (  (lmanager->label_to_assign != NULL)
-         && ((lmanager->label_to_assign)->labelID != LABEL_UNSPECIFIED) )
+   if (lmanager->label_to_assign != NULL)
    {
       /* It does: transform the label being assigned into an alias of the
        * label of the next instruction's label

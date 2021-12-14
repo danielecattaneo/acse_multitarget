@@ -84,9 +84,6 @@
 #define INTEGER_TYPE 0
 #define UNKNOWN_TYPE -1
 
-/* label special values */
-#define LABEL_UNSPECIFIED -1
-
 /* WARNINGS */
 #define WARN_DIVISION_BY_ZERO 1
 #define WARN_INVALID_SHIFT_AMOUNT 2

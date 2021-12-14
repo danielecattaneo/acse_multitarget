@@ -439,11 +439,6 @@ t_axe_instruction * gen_unary_instruction (t_program_infos *program
    /* test if value is correctly initialized */
    if (label != NULL)
    {
-      if (label->labelID == LABEL_UNSPECIFIED)
-      {
-         notifyError(AXE_INVALID_LABEL);
-      }
-
       /* address type is a label type */
       addressType = LABEL_TYPE;
    }
@@ -632,9 +627,6 @@ t_axe_instruction * gen_jump_instruction (t_program_infos *program
    /* test if value is correctly initialized */
    if (label != NULL)
    {
-      if (label->labelID == LABEL_UNSPECIFIED)
-         notifyError(AXE_INVALID_LABEL);
-
       addressType = LABEL_TYPE;
    }
    else

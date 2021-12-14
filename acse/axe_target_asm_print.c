@@ -271,8 +271,7 @@ void translateDataSegment(t_program_infos *program, FILE *fp)
       assert (current_data->directiveType != DIR_INVALID);
 
       /* create a string identifier for the label */
-      if ( (current_data->labelID != NULL)
-            && ((current_data->labelID)->labelID != LABEL_UNSPECIFIED) )
+      if (current_data->labelID != NULL)
       {
          printLabel(current_data->labelID, fp);
          fprintf_error = fprintf(fp, ":");
@@ -420,7 +419,7 @@ void printOpcode(int opcode, FILE *fp)
 
 void printLabel(t_axe_label *label, FILE *fp)
 {
-   if (!label || label->labelID == LABEL_UNSPECIFIED)
+   if (!label)
       return;
    
    if (label->name) {

@@ -567,12 +567,6 @@ int isStartingNode(t_axe_instruction *instr)
    /* test if the instruction holds a label identifier */
    if (instr->labelID != NULL)
    {
-      if ((instr->labelID)->labelID == LABEL_UNSPECIFIED)
-      {
-         cflow_errorcode = CFLOW_INVALID_INSTRUCTION;
-         return 0;
-      }
-
       return 1;
    }
    

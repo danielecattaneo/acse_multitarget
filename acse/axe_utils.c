@@ -148,8 +148,7 @@ int get_symbol_location(t_program_infos *program, char *ID, int genLoad)
 
       /* assertions */
       assert(location != REG_INVALID);
-      assert(  (label != NULL)
-               && (label->labelID != LABEL_UNSPECIFIED) );
+      assert(label != NULL);
       
       /* load the value of IDENTIFIER from the
        * given label to a register */
