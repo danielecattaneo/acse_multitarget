@@ -83,6 +83,8 @@ instruction_segm :   instruction_segm instruction   { }
 
 instruction : instr            { /* DOES NOTHING */}
             | label_decl instr {
+               if ($1->data != NULL)
+                  yyerror(AsmErrorToString(ASM_LABEL_ALREADY_PRESENT));
                /* assign the label to the current instruction */
                $1->data = (void *) $2;
             }
@@ -283,6 +285,8 @@ data_segm : data_segm data_def   { }
 ;
 
 data_def : label_decl data_value {
+                  if ($1->data != NULL)
+                     yyerror(AsmErrorToString(ASM_LABEL_ALREADY_PRESENT));
                   /* assign the label to the current block of data */
                   $1->data = (void *) $2;
          }
