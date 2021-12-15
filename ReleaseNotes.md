@@ -1,5 +1,17 @@
 # Release Notes
 
+## ACSE 1.2.3
+
+Released on 2021-12-15
+
+- Fixed a bug in ACSE where multiple assignments of the same label did not
+  generate an error.
+- Fixed a bug in the assembler where multiple definitions of the same label did
+  not generate an error.
+- In the assembler, return a non-zero code from `main()` in case of error.
+- Minor corrections to the comments in ACSE.
+- Minor cleanup of the code related to labels.
+
 ## ACSE 1.2.2
 
 Released on 2021-12-13
