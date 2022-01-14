@@ -460,15 +460,15 @@ write_statement : WRITE LPAR exp RPAR
 
 exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
    | IDENTIFIER  {
-                     int location;
-   
+                     int variableReg, expValReg;
                      /* get the location of the symbol with the given ID */
-                     location = get_symbol_location(program, $1, 0);
-                     
-                     /* return the register location of IDENTIFIER as
-                      * a value for `exp' */
-                     $$ = create_expression (location, REGISTER);
-
+                     variableReg = get_symbol_location(program, $1, 0);
+                     /* generate code that copies the value of the variable in
+                      * a new register to freeze the expression's value */
+                     expValReg = getNewRegister(program);
+                     gen_addi_instruction(program, expValReg, variableReg, 0);
+                     /* return that register as the expression value */
+                     $$ = create_expression(expValReg, REGISTER);
                      /* free the memory associated with the IDENTIFIER */
                      free($1);
    }
